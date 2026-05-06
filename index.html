@@ -2,1678 +2,927 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FULLTIME — Football Match Centre</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FULLTIME — Live Football</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --green: #00ff7f;
-    --green-dim: #00cc63;
-    --red: #ff3b3b;
-    --gold: #ffd700;
-    --bg: #080c0a;
-    --surface: #0f1510;
-    --card: #141c16;
-    --card2: #1a2320;
-    --border: #1e2d26;
-    --text: #e8f0ea;
-    --muted: #5a7060;
-    --live: #ff3b3b;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Barlow', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* NOISE OVERLAY */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
-  }
-
-  /* NAV */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(8,12,10,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    height: 60px;
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: var(--green);
-    text-decoration: none;
-    flex-shrink: 0;
-  }
-
-  .logo span { color: var(--text); }
-
-  .nav-links {
-    display: flex;
-    gap: 0;
-    list-style: none;
-    flex: 1;
-  }
-
-  .nav-links a {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 0.85rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-decoration: none;
-    padding: 0 1rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
-  }
-
-  .nav-links a:hover, .nav-links a.active {
-    color: var(--text);
-    border-bottom-color: var(--green);
-  }
-
-  .nav-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .live-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--live);
-  }
-
-  .live-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--live);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
-
-  .search-bar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.4rem 0.8rem;
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 0.85rem;
-    outline: none;
-    width: 180px;
-    transition: border-color 0.2s;
-  }
-
-  .search-bar:focus { border-color: var(--green); }
-  .search-bar::placeholder { color: var(--muted); }
-
-  /* HERO BANNER */
-  .hero {
-    position: relative;
-    background: linear-gradient(135deg, #0a1a0e 0%, #0f1a10 40%, #081208 100%);
-    border-bottom: 1px solid var(--border);
-    overflow: hidden;
-    padding: 3rem 2rem 2rem;
-  }
-
-  .hero::after {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0,255,127,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero-tag {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 0.5rem;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 6vw, 5rem);
-    letter-spacing: 4px;
-    line-height: 0.9;
-    color: var(--text);
-    margin-bottom: 1.5rem;
-  }
-
-  .hero-title em {
-    color: var(--green);
-    font-style: normal;
-  }
-
-  /* FEATURED MATCH */
-  .featured-match {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--green);
-    border-radius: 8px;
-    padding: 1.5rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    max-width: 700px;
-    margin-bottom: 0;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-
-  .featured-match:hover {
-    background: var(--card2);
-    border-left-color: var(--green-dim);
-  }
-
-  .feat-teams {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex: 1;
-  }
-
-  .feat-team {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .feat-badge {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-  }
-
-  .feat-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .feat-score {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 3rem;
-    letter-spacing: 4px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .feat-divider { color: var(--muted); }
-
-  .feat-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    align-items: flex-end;
-  }
-
-  .feat-competition {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .feat-time {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--live);
-    letter-spacing: 1px;
-  }
-
-  .play-btn {
-    background: var(--green);
-    color: var(--bg);
-    border: none;
-    border-radius: 4px;
-    padding: 0.6rem 1.2rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-
-  .play-btn:hover { background: var(--green-dim); transform: scale(1.03); }
-
-  /* MAIN LAYOUT */
-  .main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 2rem;
-  }
-
-  /* SECTION HEADERS */
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.75rem;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 3px;
-    color: var(--text);
-  }
-
-  .section-count {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .section-action {
-    margin-left: auto;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--green);
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .section-action:hover { color: var(--text); }
-
-  /* FILTERS */
-  .filters {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 0.35rem 0.8rem;
-    border-radius: 3px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .filter-btn:hover { border-color: var(--green); color: var(--green); }
-  .filter-btn.active { background: var(--green); border-color: var(--green); color: var(--bg); }
-
-  /* MATCH LIST */
-  .matches-list { display: flex; flex-direction: column; gap: 0.5rem; }
-
-  .match-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
-    display: grid;
-    grid-template-columns: 120px 1fr auto;
-    align-items: center;
-    gap: 1.5rem;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .match-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: transparent;
-    transition: background 0.2s;
-  }
-
-  .match-card:hover { background: var(--card2); border-color: #2a3f34; transform: translateX(2px); }
-  .match-card:hover::before { background: var(--green); }
-  .match-card.is-live::before { background: var(--live); }
-
-  .match-league {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .league-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .match-status {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  .status-live { color: var(--live); }
-  .status-ft { color: var(--muted); }
-  .status-upcoming { color: var(--gold); }
-
-  .match-teams {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .team-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .team-emoji { font-size: 1.1rem; width: 22px; text-align: center; }
-
-  .team-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    flex: 1;
-  }
-
-  .team-score {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 2px;
-    min-width: 20px;
-    text-align: right;
-  }
-
-  .team-row.winner .team-name,
-  .team-row.winner .team-score { color: var(--text); }
-
-  .team-row:not(.winner) .team-name,
-  .team-row:not(.winner) .team-score { color: var(--muted); }
-
-  .match-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
-  }
-
-  .btn-watch {
-    background: var(--green);
-    color: var(--bg);
-    border: none;
-    border-radius: 3px;
-    padding: 0.4rem 0.75rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-watch:hover { background: var(--green-dim); }
-
-  .btn-highlight {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 0.35rem 0.7rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-highlight:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* VIDEO PLAYER MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    backdrop-filter: blur(6px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    width: 100%;
-    max-width: 900px;
-    overflow: hidden;
-    transform: scale(0.95);
-    transition: transform 0.3s;
-  }
-
-  .modal-overlay.open .modal { transform: scale(1); }
-
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .modal-match-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .modal-teams {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 3px;
-  }
-
-  .modal-meta {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.25rem;
-    transition: color 0.15s;
-  }
-
-  .modal-close:hover { color: var(--text); }
-
-  /* VIDEO PLAYER */
-  .video-container {
-    position: relative;
-    background: #000;
-    aspect-ratio: 16/9;
-  }
-
-  .video-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    background: linear-gradient(135deg, #050a06 0%, #0a1508 100%);
-  }
-
-  .pitch-graphic {
-    width: 200px;
-    height: 140px;
-    border: 2px solid rgba(0,255,127,0.3);
-    border-radius: 4px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .pitch-graphic::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: rgba(0,255,127,0.2);
-  }
-
-  .pitch-graphic::after {
-    content: '';
-    width: 50px;
-    height: 50px;
-    border: 1.5px solid rgba(0,255,127,0.25);
-    border-radius: 50%;
-  }
-
-  .play-circle {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border: 2px solid var(--green);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .play-circle:hover { background: rgba(0,255,127,0.1); }
-
-  .play-circle::after {
-    content: '';
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 10px 20px;
-    border-color: transparent transparent transparent var(--green);
-    margin-left: 4px;
-  }
-
-  .player-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  /* PLAYER CONTROLS */
-  .player-controls {
-    background: var(--card);
-    padding: 0.75rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .ctrl-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0.25rem;
-    transition: color 0.15s;
-  }
-
-  .ctrl-btn:hover { color: var(--text); }
-
-  .progress-bar {
-    flex: 1;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--green);
-    border-radius: 2px;
-    width: 42%;
-    transition: width 0.1s;
-  }
-
-  .time-display {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  /* TABS IN MODAL */
-  .modal-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    padding: 0 1.5rem;
-  }
-
-  .modal-tab {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0.75rem 1rem;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .modal-tab:hover { color: var(--text); }
-  .modal-tab.active { color: var(--green); border-bottom-color: var(--green); }
-
-  .modal-content {
-    padding: 1.25rem 1.5rem;
-    max-height: 280px;
-    overflow-y: auto;
-  }
-
-  .modal-content::-webkit-scrollbar { width: 4px; }
-  .modal-content::-webkit-scrollbar-track { background: var(--surface); }
-  .modal-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* EVENTS */
-  .event-list { display: flex; flex-direction: column; gap: 0.5rem; }
-
-  .event-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.9rem;
-  }
-
-  .event-min {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    color: var(--green);
-    min-width: 36px;
-  }
-
-  .event-icon { font-size: 1rem; }
-
-  .event-text { flex: 1; }
-  .event-player { font-weight: 500; }
-  .event-detail { font-size: 0.8rem; color: var(--muted); }
-
-  /* SIDEBAR */
-  .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
-
-  .sidebar-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .sidebar-card-header {
-    background: var(--card2);
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 2.5px;
-    color: var(--text);
-  }
-
-  /* STANDINGS */
-  .standings-table { width: 100%; }
-
-  .standings-table th {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .standings-table td {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .standings-table tr:last-child td { border-bottom: none; }
-
-  .standings-table tr:hover td { background: var(--card2); }
-
-  .pos-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    color: var(--muted);
-    width: 20px;
-  }
-
-  .pos-num.top3 { color: var(--gold); }
-
-  .team-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
-  }
-
-  .pts-cell {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-    text-align: right;
-  }
-
-  /* TOP SCORERS */
-  .scorer-list { padding: 0.5rem 0; }
-
-  .scorer-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0.75rem;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-    cursor: default;
-  }
-
-  .scorer-item:last-child { border-bottom: none; }
-  .scorer-item:hover { background: var(--card2); }
-
-  .scorer-rank {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-    color: var(--muted);
-    min-width: 22px;
-  }
-
-  .scorer-info { flex: 1; }
-
-  .scorer-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-  }
-
-  .scorer-team {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.5px;
-  }
-
-  .scorer-goals {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-    color: var(--green);
-  }
-
-  /* UPCOMING */
-  .upcoming-list { padding: 0.5rem 0; }
-
-  .upcoming-item {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .upcoming-item:last-child { border-bottom: none; }
-  .upcoming-item:hover { background: var(--card2); }
-
-  .upcoming-date {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.35rem;
-  }
-
-  .upcoming-teams {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-    color: var(--text);
-    margin-bottom: 0.2rem;
-  }
-
-  .upcoming-comp {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: 'Barlow', sans-serif;
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .match-card { grid-template-columns: 90px 1fr auto; gap: 0.75rem; }
-  }
-
-  @media (max-width: 600px) {
-    nav { padding: 0 1rem; }
-    .hero { padding: 2rem 1rem 1.5rem; }
-    .main { padding: 1rem; }
-    .featured-match { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  }
-
-  /* ANIMATIONS */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .match-card {
-    animation: fadeIn 0.4s ease both;
-  }
-
-  .match-card:nth-child(1) { animation-delay: 0.05s; }
-  .match-card:nth-child(2) { animation-delay: 0.10s; }
-  .match-card:nth-child(3) { animation-delay: 0.15s; }
-  .match-card:nth-child(4) { animation-delay: 0.20s; }
-  .match-card:nth-child(5) { animation-delay: 0.25s; }
-  .match-card:nth-child(6) { animation-delay: 0.30s; }
-  .match-card:nth-child(7) { animation-delay: 0.35s; }
-  .match-card:nth-child(8) { animation-delay: 0.40s; }
-
-  /* TICKER */
-  .ticker-wrap {
-    background: var(--green);
-    color: var(--bg);
-    overflow: hidden;
-    white-space: nowrap;
-    height: 32px;
-    display: flex;
-    align-items: center;
-  }
-
-  .ticker-label {
-    background: #00a854;
-    padding: 0 1rem;
-    font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 2px;
-    font-size: 0.9rem;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    z-index: 1;
-  }
-
-  .ticker-content {
-    display: inline-block;
-    animation: ticker 30s linear infinite;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding-left: 2rem;
-  }
-
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  .ticker-sep { margin: 0 1.5rem; opacity: 0.5; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00e96b;--gd:#00b854;--red:#ff3535;--gold:#ffc107;
+  --bg:#07090a;--s1:#0d1117;--s2:#131920;--s3:#1a2330;
+  --bd:#1e2d3d;--bd2:#243447;
+  --t1:#e8edf2;--t2:#8a9ab0;--t3:#4a5a6a;
+  --live:#ff3535;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+
+/* TICKER */
+.ticker{height:30px;background:var(--g);display:flex;align-items:center;overflow:hidden;position:relative}
+.ticker-lbl{background:#00b854;height:100%;display:flex;align-items:center;padding:0 12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.7rem;letter-spacing:2px;color:#07090a;flex-shrink:0;z-index:1}
+.ticker-scroll{display:flex;animation:scroll 35s linear infinite;white-space:nowrap}
+.ticker-scroll span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;color:#07090a;padding:0 8px}
+.ticker-scroll .sep{opacity:.4}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;padding:0 16px;gap:12px}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--g);text-decoration:none;flex-shrink:0}
+.nav-logo span{color:var(--t1)}
+.nav-center{display:flex;gap:0;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-center::-webkit-scrollbar{display:none}
+.nav-center a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);text-decoration:none;padding:0 10px;height:56px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
+.nav-center a.active,.nav-center a:hover{color:var(--t1);border-bottom-color:var(--g)}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(255,53,53,.12);border:1px solid rgba(255,53,53,.3);border-radius:20px;padding:3px 8px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--live);animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-pill span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;color:var(--live)}
+.sub-btn{background:var(--g);color:var(--bg);border:none;border-radius:4px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .2s;white-space:nowrap}
+.sub-btn:hover{background:var(--gd)}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#0a1a0e,#0d1a14,#08120a);padding:20px 16px 16px;border-bottom:1px solid var(--bd);position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(0,233,107,.06) 0%,transparent 70%);pointer-events:none}
+.hero-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--g);margin-bottom:6px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.4rem,8vw,4.5rem);letter-spacing:3px;line-height:.9;margin-bottom:14px}
+.hero-title em{color:var(--g);font-style:normal}
+/* FEATURED CARD */
+.feat-card{background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--g);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .2s;position:relative;z-index:1}
+.feat-card:hover{background:var(--s3)}
+.feat-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.feat-comp{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
+.feat-live{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;color:var(--live)}
+.feat-teams{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.feat-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.feat-badge{width:44px;height:44px;border-radius:50%;background:var(--s3);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center}
+.feat-badge svg{width:28px;height:28px}
+.feat-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.5px;text-transform:uppercase;text-align:center}
+.feat-score{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:4px;display:flex;align-items:center;gap:6px}
+.feat-score-div{color:var(--t3);font-size:1.8rem}
+.feat-play{width:100%;margin-top:12px;background:var(--g);color:var(--bg);border:none;border-radius:6px;padding:11px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.feat-play:hover{background:var(--gd)}
+
+/* AD BANNER */
+.ad-banner{margin:12px 16px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative}
+.ad-banner.hidden{display:none}
+.ad-label{position:absolute;top:4px;right:6px;font-size:.55rem;font-family:'Barlow Condensed',sans-serif;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.ad-content{flex:1}
+.ad-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.5px;color:var(--t1);margin-bottom:2px}
+.ad-sub{font-size:.75rem;color:var(--t2)}
+.ad-cta{background:var(--gold);color:#07090a;border:none;border-radius:4px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;cursor:pointer;white-space:nowrap}
+.ad-close{position:absolute;top:6px;right:24px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:.9rem;padding:2px}
+
+/* FILTERS */
+.filters-wrap{padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.filters-wrap::-webkit-scrollbar{display:none}
+.filters{display:flex;gap:6px;width:max-content}
+.f-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;white-space:nowrap}
+.f-btn:hover{border-color:var(--g);color:var(--g)}
+.f-btn.active{background:var(--g);border-color:var(--g);color:var(--bg)}
+
+/* SECTION */
+.section{padding:12px 16px}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2.5px}
+.sec-count{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+.sec-more{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--g);cursor:pointer;text-decoration:none}
+
+/* MATCH CARDS */
+.match-list{display:flex;flex-direction:column;gap:6px}
+.match-card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:10px;cursor:pointer;transition:background .15s,border-color .15s;position:relative;overflow:hidden}
+.match-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
+.match-card:hover{background:var(--s2);border-color:var(--bd2)}
+.match-card:hover::before,.match-card.is-live::before{background:var(--live)}
+.match-card.is-ft::before{background:var(--t3)}
+.match-left{display:flex;flex-direction:column;gap:3px}
+.m-league{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-status{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.5px}
+.s-live{color:var(--live)}
+.s-ft{color:var(--t3)}
+.s-up{color:var(--gold)}
+.match-teams{display:flex;flex-direction:column;gap:5px}
+.team-row{display:flex;align-items:center;gap:6px}
+.t-logo{width:18px;height:18px;flex-shrink:0}
+.t-logo svg{width:18px;height:18px}
+.t-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.3px;flex:1}
+.t-score{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1.5px;min-width:16px;text-align:right}
+.team-row.winner .t-name,.team-row.winner .t-score{color:var(--t1)}
+.team-row:not(.winner) .t-name,.team-row:not(.winner) .t-score{color:var(--t3)}
+.match-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.btn-w{background:var(--g);color:var(--bg);border:none;border-radius:4px;padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-w:hover{background:var(--gd)}
+.btn-h{background:transparent;color:var(--t3);border:1px solid var(--bd);border-radius:4px;padding:4px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-h:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SUBSCRIPTION MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px)}
+.overlay.open{opacity:1;pointer-events:all}
+@media(min-width:600px){.overlay{align-items:center}}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:16px 16px 0 0;width:100%;max-width:480px;overflow:hidden;transform:translateY(40px);transition:transform .3s}
+@media(min-width:600px){.modal{border-radius:14px;transform:scale(.95)}}
+.overlay.open .modal{transform:translateY(0)}
+@media(min-width:600px){.overlay.open .modal{transform:scale(1)}}
+.modal-drag{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:10px auto 0}
+.modal-hdr{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px}
+.modal-close{background:none;border:none;color:var(--t2);font-size:1.1rem;cursor:pointer;padding:4px}
+.modal-body{padding:16px 20px 24px}
+
+/* PLANS */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.plan{background:var(--s2);border:2px solid var(--bd);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative}
+.plan:hover,.plan.sel{border-color:var(--g)}
+.plan.sel{background:rgba(0,233,107,.06)}
+.plan-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--g);color:var(--bg);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.plan-period{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:4px}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;color:var(--t1)}
+.plan-price sub{font-size:.8rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;color:var(--t2)}
+.plan-save{font-size:.7rem;color:var(--g);font-family:'Barlow Condensed',sans-serif;font-weight:600;margin-top:2px}
+.plan-features{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.plan-features li{font-size:.78rem;color:var(--t2);list-style:none;display:flex;align-items:center;gap:5px;font-family:'Barlow Condensed',sans-serif}
+.plan-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0}
+.sub-cta{width:100%;background:var(--g);color:var(--bg);border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.sub-cta:hover{background:var(--gd)}
+.sub-note{text-align:center;font-size:.72rem;color:var(--t3);margin-top:8px;font-family:'Barlow Condensed',sans-serif}
+
+/* WATCH MODAL */
+.watch-modal{background:var(--s1);border:1px solid var(--bd);border-radius:16px 16px 0 0;width:100%;max-width:680px;overflow:hidden;transform:translateY(40px);transition:transform .3s;max-height:90vh;overflow-y:auto}
+@media(min-width:600px){.watch-modal{border-radius:14px;transform:scale(.95);max-height:85vh}}
+.overlay.open .watch-modal{transform:translateY(0)}
+@media(min-width:600px){.overlay.open .watch-modal{transform:scale(1)}}
+.w-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--s1);z-index:10}
+.w-teams{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px}
+.w-meta{font-size:.7rem;color:var(--t2);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;margin-top:1px}
+.w-close{background:none;border:none;color:var(--t2);font-size:1.1rem;cursor:pointer}
+/* VIDEO */
+.vid-wrap{position:relative;background:#000;aspect-ratio:16/9}
+.vid-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(160deg,#040a06,#0a1508)}
+.pitch-svg{width:160px;opacity:.3}
+.play-ring{width:56px;height:56px;border-radius:50%;border:2px solid var(--g);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+.play-ring:hover{background:rgba(0,233,107,.1)}
+.play-ring::after{content:'';width:0;height:0;border-style:solid;border-width:9px 0 9px 18px;border-color:transparent transparent transparent var(--g);margin-left:3px}
+.stream-embed{width:100%;aspect-ratio:16/9;border:none;display:none}
+.vid-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase}
+/* CONTROLS */
+.controls{background:var(--s2);padding:8px 14px;display:flex;align-items:center;gap:8px}
+.ctrl{background:none;border:none;color:var(--t2);cursor:pointer;font-size:.95rem;padding:4px;transition:color .15s}
+.ctrl:hover{color:var(--t1)}
+.progress{flex:1;height:4px;background:var(--bd);border-radius:2px;cursor:pointer}
+.prog-fill{height:100%;background:var(--g);border-radius:2px;width:44%}
+.time-txt{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:var(--t3);white-space:nowrap;letter-spacing:.5px}
+/* TABS */
+.w-tabs{display:flex;padding:0 16px;border-bottom:1px solid var(--bd)}
+.w-tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:10px 12px;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s}
+.w-tab:hover{color:var(--t1)}
+.w-tab.active{color:var(--g);border-bottom-color:var(--g)}
+.w-content{padding:14px 16px}
+/* EVENTS */
+.ev-list{display:flex;flex-direction:column;gap:0}
+.ev-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.82rem}
+.ev-item:last-child{border-bottom:none}
+.ev-min{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1px;color:var(--g);min-width:30px}
+.ev-ico{font-size:.9rem;min-width:20px;text-align:center}
+.ev-player{font-weight:500;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.3px}
+.ev-detail{font-size:.72rem;color:var(--t2);font-family:'Barlow',sans-serif}
+/* STATS */
+.stat-row{margin-bottom:10px}
+.stat-labels{display:flex;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;margin-bottom:3px}
+.stat-home{color:var(--g);font-weight:700}
+.stat-name{color:var(--t3);font-size:.7rem;letter-spacing:1px;text-transform:uppercase}
+.stat-away{color:var(--t2)}
+.stat-bar{height:3px;background:var(--bd);border-radius:2px;overflow:hidden}
+.stat-prog{height:100%;background:var(--g);border-radius:2px}
+/* LINEUPS */
+.lineup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lineup-team-name{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;margin-bottom:6px}
+.lineup-player{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--bd);display:flex;gap:6px}
+.lineup-num{color:var(--t3);min-width:20px}
+
+/* AD MID */
+.ad-mid{margin:0 16px 12px;background:linear-gradient(135deg,#0d1825,#1a1230);border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;position:relative}
+.ad-mid.hidden{display:none}
+.ad-mid-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.55rem;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
+.ad-mid-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;margin-bottom:4px}
+.ad-mid-sub{font-size:.75rem;color:var(--t2);margin-bottom:10px}
+.ad-mid-btn{background:var(--gold);color:#07090a;border:none;border-radius:4px;padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;cursor:pointer}
+
+/* BOTTOM NAV */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,.97);border-top:1px solid var(--bd);z-index:150;padding:0 0 env(safe-area-inset-bottom)}
+@media(max-width:600px){.bottom-nav{display:flex}}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;cursor:pointer;transition:color .2s}
+.bnav-item svg{width:20px;height:20px;fill:var(--t3);transition:fill .2s}
+.bnav-item span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--t3);transition:color .2s}
+.bnav-item.active svg,.bnav-item:hover svg{fill:var(--g)}
+.bnav-item.active span,.bnav-item:hover span{color:var(--g)}
+body{padding-bottom:60px}
+@media(min-width:601px){body{padding-bottom:0}}
+
+/* DESKTOP SIDEBAR LAYOUT */
+@media(min-width:900px){
+  .page-layout{display:grid;grid-template-columns:1fr 300px;gap:0;max-width:1200px;margin:0 auto}
+  .main-col{border-right:1px solid var(--bd)}
+  .sidebar{display:block !important}
+  body{padding-bottom:0}
+  .bottom-nav{display:none !important}
+}
+.sidebar{display:none;padding:16px}
+.sb-card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.sb-hdr{background:var(--s2);padding:10px 12px;border-bottom:1px solid var(--bd);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px}
+/* STANDINGS */
+.std-table{width:100%;border-collapse:collapse}
+.std-table th{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left}
+.std-table td{padding:6px 8px;font-size:.8rem;border-bottom:1px solid var(--bd)}
+.std-table tr:last-child td{border-bottom:none}
+.std-table tr:hover td{background:var(--s2)}
+.pos{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--t3);width:18px}
+.pos.top{color:var(--gold)}
+.tm-cell{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem}
+.tm-cell svg{width:14px;height:14px}
+.pts{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;text-align:right}
+/* SCORERS */
+.scorer-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--bd);cursor:default}
+.scorer-item:last-child{border-bottom:none}
+.sc-rank{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--t3);min-width:18px}
+.sc-info{flex:1}
+.sc-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem;letter-spacing:.3px}
+.sc-team{font-size:.68rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif}
+.sc-goals{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--g);letter-spacing:1px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.match-card{animation:fadeUp .35s ease both}
+.match-card:nth-child(1){animation-delay:.04s}
+.match-card:nth-child(2){animation-delay:.08s}
+.match-card:nth-child(3){animation-delay:.12s}
+.match-card:nth-child(4){animation-delay:.16s}
+.match-card:nth-child(5){animation-delay:.20s}
+.match-card:nth-child(6){animation-delay:.24s}
+.match-card:nth-child(7){animation-delay:.28s}
+.match-card:nth-child(8){animation-delay:.32s}
+
+/* SUB BANNER */
+.sub-banner{margin:0 16px 12px;background:linear-gradient(135deg,#0a1e0e,#071a0a);border:1px solid rgba(0,233,107,.2);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sub-banner.hidden{display:none}
+.sb-icon{width:36px;height:36px;background:rgba(0,233,107,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-text{flex:1}
+.sb-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.5px;color:var(--g);margin-bottom:1px}
+.sb-sub{font-size:.72rem;color:var(--t2)}
+.sb-btn{background:var(--g);color:var(--bg);border:none;border-radius:4px;padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0}
 </style>
 </head>
 <body>
 
-<!-- TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker-label">⚡ LIVE</div>
-  <div class="ticker-content">
-    Arsenal 2–1 Chelsea · 67' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Man City 0–0 Liverpool · 45+2' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Real Madrid 3–0 Atlético · FT &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    PSG 1–2 Lyon · 81' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Juventus 0–1 AC Milan · 23' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Bayern 4–1 Dortmund · FT &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Arsenal 2–1 Chelsea · 67' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Man City 0–0 Liverpool · 45+2' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Real Madrid 3–0 Atlético · FT &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    PSG 1–2 Lyon · 81' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Juventus 0–1 AC Milan · 23' &nbsp;<span class="ticker-sep">|</span>&nbsp;
-    Bayern 4–1 Dortmund · FT
+<!-- LIVE TICKER -->
+<div class="ticker">
+  <div class="ticker-lbl">LIVE</div>
+  <div style="overflow:hidden;flex:1;position:relative">
+    <div class="ticker-scroll">
+      <span>Arsenal 2–1 Chelsea</span><span class="sep">·</span>
+      <span>67'</span><span class="sep">|</span>
+      <span>Man City 0–0 Liverpool</span><span class="sep">·</span>
+      <span>45+2'</span><span class="sep">|</span>
+      <span>Real Madrid 3–0 Atlético · FT</span><span class="sep">|</span>
+      <span>PSG 1–2 Lyon</span><span class="sep">·</span>
+      <span>81'</span><span class="sep">|</span>
+      <span>Bayern 4–1 Dortmund · FT</span><span class="sep">|</span>
+      <!-- duplicate for seamless loop -->
+      <span>Arsenal 2–1 Chelsea</span><span class="sep">·</span>
+      <span>67'</span><span class="sep">|</span>
+      <span>Man City 0–0 Liverpool</span><span class="sep">·</span>
+      <span>45+2'</span><span class="sep">|</span>
+      <span>Real Madrid 3–0 Atlético · FT</span><span class="sep">|</span>
+      <span>PSG 1–2 Lyon</span><span class="sep">·</span>
+      <span>81'</span><span class="sep">|</span>
+      <span>Bayern 4–1 Dortmund · FT</span>
+    </div>
   </div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#">FULL<span>TIME</span></a>
-  <ul class="nav-links">
-    <li><a href="#" class="active">Matches</a></li>
-    <li><a href="#">Highlights</a></li>
-    <li><a href="#">Standings</a></li>
-    <li><a href="#">Stats</a></li>
-    <li><a href="#">Transfers</a></li>
-  </ul>
+  <a class="nav-logo" href="#">FULL<span>TIME</span></a>
+  <div class="nav-center">
+    <a href="#" class="active">Matches</a>
+    <a href="#">Highlights</a>
+    <a href="#">Standings</a>
+    <a href="#">Stats</a>
+  </div>
   <div class="nav-right">
-    <div class="live-badge"><div class="live-dot"></div>5 Live</div>
-    <input class="search-bar" type="text" placeholder="Search team or player…">
+    <div class="live-pill"><div class="live-dot"></div><span>5 Live</span></div>
+    <button class="sub-btn" onclick="openSubModal()">Subscribe</button>
   </div>
 </nav>
 
+<div class="page-layout">
+<div class="main-col">
+
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-inner">
-    <div class="hero-tag">🔴 Match of the Day — Premier League</div>
-    <h1 class="hero-title">ARSENAL<br><em>vs</em> CHELSEA</h1>
-    <div class="featured-match" onclick="openModal('Arsenal', 'Chelsea', '2', '1', '67\'', 'Premier League')">
-      <div class="feat-teams">
-        <div class="feat-team">
-          <div class="feat-badge">🔴</div>
-          <div class="feat-name">Arsenal</div>
-        </div>
-        <div class="feat-score">
-          <span>2</span>
-          <span class="feat-divider">–</span>
-          <span>1</span>
-        </div>
-        <div class="feat-team">
-          <div class="feat-badge">🔵</div>
-          <div class="feat-name">Chelsea</div>
-        </div>
-      </div>
-      <div class="feat-meta">
-        <div class="feat-competition">Premier League · GW36</div>
-        <div class="feat-time">🔴 67'</div>
-      </div>
-      <button class="play-btn">▶ Watch Live</button>
+  <div class="hero-tag">Match of the Day — Premier League GW36</div>
+  <h1 class="hero-title">ARSENAL <em>vs</em> CHELSEA</h1>
+  <div class="feat-card" onclick="openWatch('Arsenal','Chelsea','2','1','67\'','Premier League','pl-ars-che')">
+    <div class="feat-row1">
+      <div class="feat-comp">Premier League · Matchday 36</div>
+      <div class="feat-live"><div class="live-dot"></div> 67'</div>
     </div>
+    <div class="feat-teams">
+      <div class="feat-team">
+        <div class="feat-badge" id="feat-badge-home">
+          <!-- Arsenal SVG -->
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="19" fill="#DC143C" stroke="#8B0000" stroke-width="1"/>
+            <path d="M20 8L24 16H32L26 22L28 30L20 26L12 30L14 22L8 16H16L20 8Z" fill="#fff" opacity=".9"/>
+            <text x="20" y="33" text-anchor="middle" font-size="5" fill="#fff" font-family="sans-serif" font-weight="bold">AFC</text>
+          </svg>
+        </div>
+        <div class="feat-name">Arsenal</div>
+      </div>
+      <div class="feat-score"><span>2</span><span class="feat-score-div">—</span><span>1</span></div>
+      <div class="feat-team">
+        <div class="feat-badge">
+          <!-- Chelsea SVG -->
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="19" fill="#034694" stroke="#021e5c" stroke-width="1"/>
+            <path d="M20 10 C13 10 8 15 8 20 C8 25 13 30 20 30 C27 30 32 25 32 20 C32 15 27 10 20 10Z" fill="none" stroke="#fff" stroke-width="1.5" opacity=".6"/>
+            <path d="M15 17 L20 12 L25 17 L23 24 L17 24Z" fill="#fff" opacity=".9"/>
+            <text x="20" y="33" text-anchor="middle" font-size="5" fill="#fff" font-family="sans-serif" font-weight="bold">CFC</text>
+          </svg>
+        </div>
+        <div class="feat-name">Chelsea</div>
+      </div>
+    </div>
+    <button class="feat-play">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Watch Live
+    </button>
   </div>
 </section>
 
-<!-- MAIN CONTENT -->
-<div class="main">
-  <div class="content-area">
-
-    <!-- FILTERS -->
-    <div class="filters">
-      <button class="filter-btn active" onclick="filterMatches('all', this)">All</button>
-      <button class="filter-btn" onclick="filterMatches('live', this)">🔴 Live</button>
-      <button class="filter-btn" onclick="filterMatches('finished', this)">Finished</button>
-      <button class="filter-btn" onclick="filterMatches('upcoming', this)">Upcoming</button>
-      <button class="filter-btn" onclick="filterMatches('pl', this)">Premier League</button>
-      <button class="filter-btn" onclick="filterMatches('laliga', this)">La Liga</button>
-      <button class="filter-btn" onclick="filterMatches('ucl', this)">Champions League</button>
-    </div>
-
-    <!-- MATCHES -->
-    <div class="section-header">
-      <div class="section-title">Today's Matches</div>
-      <div class="section-count" id="match-count">12 matches</div>
-      <a href="#" class="section-action">View All →</a>
-    </div>
-
-    <div class="matches-list" id="matches-list">
-      <!-- LIVE -->
-      <div class="match-card is-live" data-status="live" data-comp="pl">
-        <div class="match-league">
-          <div class="league-name">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
-          <div class="match-status status-live">🔴 67'</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row winner">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Arsenal</span>
-            <span class="team-score">2</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Chelsea</span>
-            <span class="team-score">1</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Arsenal', 'Chelsea', '2', '1', '67\'', 'Premier League')">▶ Watch</button>
-          <button class="btn-highlight">Stats</button>
-        </div>
-      </div>
-
-      <div class="match-card is-live" data-status="live" data-comp="pl">
-        <div class="match-league">
-          <div class="league-name">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
-          <div class="match-status status-live">🔴 45+2'</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Man City</span>
-            <span class="team-score">0</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Liverpool</span>
-            <span class="team-score">0</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Man City', 'Liverpool', '0', '0', '45+2\'', 'Premier League')">▶ Watch</button>
-          <button class="btn-highlight">Stats</button>
-        </div>
-      </div>
-
-      <div class="match-card is-live" data-status="live" data-comp="laliga">
-        <div class="match-league">
-          <div class="league-name">🇪🇸 La Liga</div>
-          <div class="match-status status-live">🔴 81'</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">PSG</span>
-            <span class="team-score">1</span>
-          </div>
-          <div class="team-row winner">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Lyon</span>
-            <span class="team-score">2</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('PSG', 'Lyon', '1', '2', '81\'', 'Ligue 1')">▶ Watch</button>
-          <button class="btn-highlight">Stats</button>
-        </div>
-      </div>
-
-      <!-- FINISHED -->
-      <div class="match-card" data-status="finished" data-comp="laliga">
-        <div class="match-league">
-          <div class="league-name">🇪🇸 La Liga</div>
-          <div class="match-status status-ft">FT</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row winner">
-            <span class="team-emoji">⚪</span>
-            <span class="team-name">Real Madrid</span>
-            <span class="team-score">3</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Atlético Madrid</span>
-            <span class="team-score">0</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Real Madrid', 'Atlético', '3', '0', 'FT', 'La Liga')">▶ Replay</button>
-          <button class="btn-highlight">Highlights</button>
-        </div>
-      </div>
-
-      <div class="match-card" data-status="finished" data-comp="ucl">
-        <div class="match-league">
-          <div class="league-name">🏆 Champions League</div>
-          <div class="match-status status-ft">FT</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row winner">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Bayern Munich</span>
-            <span class="team-score">4</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🟡</span>
-            <span class="team-name">Borussia Dortmund</span>
-            <span class="team-score">1</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Bayern', 'Dortmund', '4', '1', 'FT', 'Champions League')">▶ Replay</button>
-          <button class="btn-highlight">Highlights</button>
-        </div>
-      </div>
-
-      <div class="match-card" data-status="finished" data-comp="ucl">
-        <div class="match-league">
-          <div class="league-name">🏆 Champions League</div>
-          <div class="match-status status-ft">FT</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row">
-            <span class="team-emoji">⚫</span>
-            <span class="team-name">Juventus</span>
-            <span class="team-score">0</span>
-          </div>
-          <div class="team-row winner">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">AC Milan</span>
-            <span class="team-score">1</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Juventus', 'AC Milan', '0', '1', 'FT', 'Champions League')">▶ Replay</button>
-          <button class="btn-highlight">Highlights</button>
-        </div>
-      </div>
-
-      <div class="match-card" data-status="finished" data-comp="pl">
-        <div class="match-league">
-          <div class="league-name">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
-          <div class="match-status status-ft">FT</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row winner">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Tottenham</span>
-            <span class="team-score">2</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Everton</span>
-            <span class="team-score">2</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" onclick="openModal('Tottenham', 'Everton', '2', '2', 'FT', 'Premier League')">▶ Replay</button>
-          <button class="btn-highlight">Highlights</button>
-        </div>
-      </div>
-
-      <!-- UPCOMING -->
-      <div class="match-card" data-status="upcoming" data-comp="pl">
-        <div class="match-league">
-          <div class="league-name">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
-          <div class="match-status status-upcoming">20:00</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row">
-            <span class="team-emoji">🔴</span>
-            <span class="team-name">Man United</span>
-            <span class="team-score" style="color: var(--muted)">–</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Newcastle</span>
-            <span class="team-score" style="color: var(--muted)">–</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" style="background: var(--card2); color: var(--muted); border: 1px solid var(--border);">Remind Me</button>
-          <button class="btn-highlight">Preview</button>
-        </div>
-      </div>
-
-      <div class="match-card" data-status="upcoming" data-comp="laliga">
-        <div class="match-league">
-          <div class="league-name">🇪🇸 La Liga</div>
-          <div class="match-status status-upcoming">21:30</div>
-        </div>
-        <div class="match-teams">
-          <div class="team-row">
-            <span class="team-emoji">🔵</span>
-            <span class="team-name">Barcelona</span>
-            <span class="team-score" style="color: var(--muted)">–</span>
-          </div>
-          <div class="team-row">
-            <span class="team-emoji">⚪</span>
-            <span class="team-name">Sevilla</span>
-            <span class="team-score" style="color: var(--muted)">–</span>
-          </div>
-        </div>
-        <div class="match-actions">
-          <button class="btn-watch" style="background: var(--card2); color: var(--muted); border: 1px solid var(--border);">Remind Me</button>
-          <button class="btn-highlight">Preview</button>
-        </div>
-      </div>
-    </div>
+<!-- AD BANNER (shown to free users) -->
+<div class="ad-banner" id="ad-banner-top">
+  <div class="ad-label">AD</div>
+  <div class="ad-content">
+    <div class="ad-title">Bet365 — Best Football Odds</div>
+    <div class="ad-sub">Get 50% bonus on your first deposit. 18+ only.</div>
   </div>
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-
-    <!-- STANDINGS -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">PL Standings</div>
-      <table class="standings-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Team</th>
-            <th>P</th>
-            <th>GD</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="pos-num top3">1</td>
-            <td><div class="team-cell">🔴 Arsenal</div></td>
-            <td>35</td><td>+42</td><td class="pts-cell">82</td>
-          </tr>
-          <tr>
-            <td class="pos-num top3">2</td>
-            <td><div class="team-cell">🔵 Man City</div></td>
-            <td>35</td><td>+38</td><td class="pts-cell">79</td>
-          </tr>
-          <tr>
-            <td class="pos-num top3">3</td>
-            <td><div class="team-cell">🔴 Liverpool</div></td>
-            <td>35</td><td>+35</td><td class="pts-cell">76</td>
-          </tr>
-          <tr>
-            <td class="pos-num">4</td>
-            <td><div class="team-cell">🔵 Chelsea</div></td>
-            <td>35</td><td>+18</td><td class="pts-cell">63</td>
-          </tr>
-          <tr>
-            <td class="pos-num">5</td>
-            <td><div class="team-cell">🔵 Tottenham</div></td>
-            <td>35</td><td>+12</td><td class="pts-cell">61</td>
-          </tr>
-          <tr>
-            <td class="pos-num">6</td>
-            <td><div class="team-cell">🔴 Man United</div></td>
-            <td>35</td><td>+5</td><td class="pts-cell">54</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- TOP SCORERS -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">Top Scorers</div>
-      <div class="scorer-list">
-        <div class="scorer-item">
-          <div class="scorer-rank">1</div>
-          <div class="scorer-info">
-            <div class="scorer-name">Erling Haaland</div>
-            <div class="scorer-team">Man City</div>
-          </div>
-          <div class="scorer-goals">27 ⚽</div>
-        </div>
-        <div class="scorer-item">
-          <div class="scorer-rank">2</div>
-          <div class="scorer-info">
-            <div class="scorer-name">Mohamed Salah</div>
-            <div class="scorer-team">Liverpool</div>
-          </div>
-          <div class="scorer-goals">24 ⚽</div>
-        </div>
-        <div class="scorer-item">
-          <div class="scorer-rank">3</div>
-          <div class="scorer-info">
-            <div class="scorer-name">Bukayo Saka</div>
-            <div class="scorer-team">Arsenal</div>
-          </div>
-          <div class="scorer-goals">19 ⚽</div>
-        </div>
-        <div class="scorer-item">
-          <div class="scorer-rank">4</div>
-          <div class="scorer-info">
-            <div class="scorer-name">Cole Palmer</div>
-            <div class="scorer-team">Chelsea</div>
-          </div>
-          <div class="scorer-goals">18 ⚽</div>
-        </div>
-        <div class="scorer-item">
-          <div class="scorer-rank">5</div>
-          <div class="scorer-info">
-            <div class="scorer-name">Son Heung-min</div>
-            <div class="scorer-team">Tottenham</div>
-          </div>
-          <div class="scorer-goals">16 ⚽</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- UPCOMING FIXTURES -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">This Week's Fixtures</div>
-      <div class="upcoming-list">
-        <div class="upcoming-item">
-          <div class="upcoming-date">Thu 08 May · 19:45</div>
-          <div class="upcoming-teams">Barcelona vs PSG</div>
-          <div class="upcoming-comp">Champions League Semi-Final</div>
-        </div>
-        <div class="upcoming-item">
-          <div class="upcoming-date">Sat 10 May · 12:30</div>
-          <div class="upcoming-teams">Arsenal vs Man City</div>
-          <div class="upcoming-comp">Premier League GW37</div>
-        </div>
-        <div class="upcoming-item">
-          <div class="upcoming-date">Sat 10 May · 15:00</div>
-          <div class="upcoming-teams">Real Madrid vs Villarreal</div>
-          <div class="upcoming-comp">La Liga GW35</div>
-        </div>
-        <div class="upcoming-item">
-          <div class="upcoming-date">Sun 11 May · 16:30</div>
-          <div class="upcoming-teams">Liverpool vs Tottenham</div>
-          <div class="upcoming-comp">Premier League GW37</div>
-        </div>
-      </div>
-    </div>
-
-  </aside>
+  <button class="ad-cta">Claim Offer</button>
 </div>
 
-<!-- VIDEO MODAL -->
-<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
-  <div class="modal" id="modal-box">
-    <div class="modal-header">
-      <div class="modal-match-info">
-        <div>
-          <div class="modal-teams" id="modal-teams">Arsenal 2–1 Chelsea</div>
-          <div class="modal-meta" id="modal-meta">Premier League · 67' Live</div>
+<!-- SUB NUDGE -->
+<div class="sub-banner" id="sub-nudge">
+  <div class="sb-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00e96b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </div>
+  <div class="sb-text">
+    <div class="sb-title">Go Ad-Free from ₦1,000/mo</div>
+    <div class="sb-sub">Watch without ads. Cancel anytime.</div>
+  </div>
+  <button class="sb-btn" onclick="openSubModal()">Subscribe</button>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-wrap">
+  <div class="filters">
+    <button class="f-btn active" onclick="filterM('all',this)">All</button>
+    <button class="f-btn" onclick="filterM('live',this)">Live</button>
+    <button class="f-btn" onclick="filterM('finished',this)">Finished</button>
+    <button class="f-btn" onclick="filterM('upcoming',this)">Upcoming</button>
+    <button class="f-btn" onclick="filterM('pl',this)">Premier League</button>
+    <button class="f-btn" onclick="filterM('laliga',this)">La Liga</button>
+    <button class="f-btn" onclick="filterM('ucl',this)">UCL</button>
+  </div>
+</div>
+
+<!-- MATCHES -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-title">Today's Matches</div>
+    <div class="sec-count" id="mc">9 matches</div>
+    <a href="#" class="sec-more">View All</a>
+  </div>
+  <div class="match-list" id="match-list">
+
+    <!-- LIVE -->
+    <div class="match-card is-live" data-s="live" data-c="pl">
+      <div class="match-left">
+        <div class="m-league">Premier League</div>
+        <div class="m-status s-live">LIVE 67'</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row winner">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#DC143C"/><path d="M10 4L12 8H16L13 11L14 15L10 13L6 15L7 11L4 8H8Z" fill="#fff"/></svg></div>
+          <span class="t-name">Arsenal</span><span class="t-score">2</span>
+        </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#034694"/><path d="M7.5 8.5L10 6L12.5 8.5L11.5 12H8.5Z" fill="#fff"/></svg></div>
+          <span class="t-name">Chelsea</span><span class="t-score">1</span>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-
-    <div class="video-container">
-      <div class="video-placeholder">
-        <div class="pitch-graphic">
-          <div class="play-circle"></div>
-        </div>
-        <div class="player-label">Stream loading… click ▶ to play</div>
-      </div>
-    </div>
-
-    <div class="player-controls">
-      <button class="ctrl-btn" title="Rewind">⏮</button>
-      <button class="ctrl-btn" title="Play/Pause">⏸</button>
-      <button class="ctrl-btn" title="Forward">⏭</button>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="time-display" id="time-display">67:14 / 90:00</div>
-      <button class="ctrl-btn" title="Volume">🔊</button>
-      <button class="ctrl-btn" title="Fullscreen">⛶</button>
-    </div>
-
-    <div class="modal-tabs">
-      <div class="modal-tab active" onclick="switchTab(this, 'events')">Match Events</div>
-      <div class="modal-tab" onclick="switchTab(this, 'lineups')">Lineups</div>
-      <div class="modal-tab" onclick="switchTab(this, 'stats')">Stats</div>
-    </div>
-
-    <div class="modal-content" id="tab-events">
-      <div class="event-list">
-        <div class="event-item">
-          <div class="event-min">12'</div>
-          <div class="event-icon">⚽</div>
-          <div class="event-text">
-            <div class="event-player">Bukayo Saka</div>
-            <div class="event-detail">Arsenal · Right-footed shot from the box</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-min">34'</div>
-          <div class="event-icon">🟨</div>
-          <div class="event-text">
-            <div class="event-player">Malo Gusto</div>
-            <div class="event-detail">Chelsea · Foul on Martinelli</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-min">41'</div>
-          <div class="event-icon">⚽</div>
-          <div class="event-text">
-            <div class="event-player">Cole Palmer</div>
-            <div class="event-detail">Chelsea · Penalty kick</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-min">58'</div>
-          <div class="event-icon">⚽</div>
-          <div class="event-text">
-            <div class="event-player">Leandro Trossard</div>
-            <div class="event-detail">Arsenal · Header from corner kick</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-min">63'</div>
-          <div class="event-icon">🔄</div>
-          <div class="event-text">
-            <div class="event-player">Gabriel Martinelli ↔ Raheem Sterling</div>
-            <div class="event-detail">Arsenal · Substitution</div>
-          </div>
-        </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('Arsenal','Chelsea','2','1','67\'','Premier League','pl-ars-che')">Watch</button>
+        <button class="btn-h">Stats</button>
       </div>
     </div>
 
-    <div class="modal-content" id="tab-lineups" style="display:none">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <div>
-          <div style="font-family: 'Bebas Neue'; letter-spacing: 2px; margin-bottom: 0.75rem; color: var(--green);">🔴 Arsenal</div>
-          <div style="font-family: 'Barlow Condensed'; font-size: 0.9rem; line-height: 2; color: var(--text);">
-            1. Raya (GK)<br>
-            4. White<br>
-            6. Gabriel<br>
-            12. Saliba<br>
-            35. Zinchenko<br>
-            8. Ødegaard (C)<br>
-            29. Havertz<br>
-            41. Rice<br>
-            7. Saka<br>
-            19. Trossard<br>
-            11. Martinelli
-          </div>
+    <div class="match-card is-live" data-s="live" data-c="pl">
+      <div class="match-left">
+        <div class="m-league">Premier League</div>
+        <div class="m-status s-live">LIVE 45+2'</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#6CABDD"/><path d="M10 4L12.5 9H17L13 12L14.5 17L10 14L5.5 17L7 12L3 9H7.5Z" fill="#fff" opacity=".9"/></svg></div>
+          <span class="t-name">Man City</span><span class="t-score">0</span>
         </div>
-        <div>
-          <div style="font-family: 'Bebas Neue'; letter-spacing: 2px; margin-bottom: 0.75rem; color: #4fc3f7;">🔵 Chelsea</div>
-          <div style="font-family: 'Barlow Condensed'; font-size: 0.9rem; line-height: 2; color: var(--text);">
-            13. Sánchez (GK)<br>
-            24. James (C)<br>
-            5. Chalobah<br>
-            27. Disasi<br>
-            2. Gusto<br>
-            14. Caicedo<br>
-            17. Fernández<br>
-            20. Palmer<br>
-            7. Sterling<br>
-            22. Mudryk<br>
-            9. Jackson
-          </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#C8102E"/><path d="M10 5C8 5 6 7 6 10C6 13 8 15 10 15C12 15 14 13 14 10C14 7 12 5 10 5Z" fill="none" stroke="#fff" stroke-width="1.2"/><circle cx="10" cy="10" r="2" fill="#fff"/></svg></div>
+          <span class="t-name">Liverpool</span><span class="t-score">0</span>
         </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('Man City','Liverpool','0','0','45+2\'','Premier League','pl-mci-liv')">Watch</button>
+        <button class="btn-h">Stats</button>
       </div>
     </div>
 
-    <div class="modal-content" id="tab-stats" style="display:none">
-      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <div id="stats-rows"></div>
+    <div class="match-card is-live" data-s="live" data-c="ligue1">
+      <div class="match-left">
+        <div class="m-league">Ligue 1</div>
+        <div class="m-status s-live">LIVE 81'</div>
       </div>
+      <div class="match-teams">
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#003D84"/><path d="M10 5L12 9H16L13 12L14 16L10 14L6 16L7 12L4 9H8Z" fill="#DA291C"/></svg></div>
+          <span class="t-name">PSG</span><span class="t-score">1</span>
+        </div>
+        <div class="team-row winner">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#CC0000"/><path d="M6 8H14V12H6Z" fill="#fff"/></svg></div>
+          <span class="t-name">Lyon</span><span class="t-score">2</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('PSG','Lyon','1','2','81\'','Ligue 1','l1-psg-lyo')">Watch</button>
+        <button class="btn-h">Stats</button>
+      </div>
+    </div>
+
+    <!-- MID AD -->
+    <div class="ad-mid" id="ad-mid">
+      <div class="ad-mid-lbl">Advertisement</div>
+      <div class="ad-mid-title">SuperSport — Stream All Leagues</div>
+      <div class="ad-mid-sub">Premier League, La Liga, Serie A and more in HD</div>
+      <button class="ad-mid-btn">Learn More</button>
+    </div>
+
+    <!-- FINISHED -->
+    <div class="match-card is-ft" data-s="finished" data-c="laliga">
+      <div class="match-left">
+        <div class="m-league">La Liga</div>
+        <div class="m-status s-ft">FT</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row winner">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#FEBE10"/><path d="M10 4L11.5 8.5H16L12.5 11L13.5 16L10 13.5L6.5 16L7.5 11L4 8.5H8.5Z" fill="#fff"/></svg></div>
+          <span class="t-name">Real Madrid</span><span class="t-score">3</span>
+        </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#CB3524"/><path d="M8 7H12V10L10 13L8 10Z" fill="#fff"/></svg></div>
+          <span class="t-name">Atlético</span><span class="t-score">0</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('Real Madrid','Atlético','3','0','FT','La Liga','ll-rma-atm')">Replay</button>
+        <button class="btn-h">Highlights</button>
+      </div>
+    </div>
+
+    <div class="match-card is-ft" data-s="finished" data-c="ucl">
+      <div class="match-left">
+        <div class="m-league">UCL</div>
+        <div class="m-status s-ft">FT</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row winner">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#DC052D"/><path d="M10 5C7.2 5 5 7.2 5 10C5 12.8 7.2 15 10 15C12.8 15 15 12.8 15 10C15 7.2 12.8 5 10 5Z" fill="none" stroke="#fff" stroke-width="1"/><text x="10" y="13" text-anchor="middle" font-size="5" fill="#fff" font-weight="bold">FCB</text></svg></div>
+          <span class="t-name">Bayern</span><span class="t-score">4</span>
+        </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#FDE100"/><path d="M10 5L12 9H16L13 11.5L14 16L10 13.5L6 16L7 11.5L4 9H8Z" fill="#000"/></svg></div>
+          <span class="t-name">Dortmund</span><span class="t-score">1</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('Bayern','Dortmund','4','1','FT','UCL','ucl-bay-bvb')">Replay</button>
+        <button class="btn-h">Highlights</button>
+      </div>
+    </div>
+
+    <div class="match-card is-ft" data-s="finished" data-c="ucl">
+      <div class="match-left">
+        <div class="m-league">UCL</div>
+        <div class="m-status s-ft">FT</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#000"/><path d="M7 7H13V13H7Z" fill="#fff" opacity=".9"/></svg></div>
+          <span class="t-name">Juventus</span><span class="t-score">0</span>
+        </div>
+        <div class="team-row winner">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#FB090B"/><path d="M10 5L12 9H16L13 12L14 16L10 13.5L6 16L7 12L4 9H8Z" fill="#000"/></svg></div>
+          <span class="t-name">AC Milan</span><span class="t-score">1</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-w" onclick="openWatch('Juventus','AC Milan','0','1','FT','UCL','ucl-juv-acm')">Replay</button>
+        <button class="btn-h">Highlights</button>
+      </div>
+    </div>
+
+    <!-- UPCOMING -->
+    <div class="match-card" data-s="upcoming" data-c="pl">
+      <div class="match-left">
+        <div class="m-league">Premier League</div>
+        <div class="m-status s-up">20:00</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#DA291C"/><path d="M10 5C7 5 4 7 4 10C4 14 7 16 10 16C13 16 16 14 16 10C16 7 13 5 10 5Z" fill="none" stroke="#FBE122" stroke-width="1.2"/></svg></div>
+          <span class="t-name">Man United</span><span class="t-score" style="color:var(--t3)">–</span>
+        </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#241F20"/><path d="M10 5L12 9L16 10L12 11L10 15L8 11L4 10L8 9Z" fill="#fff" opacity=".8"/></svg></div>
+          <span class="t-name">Newcastle</span><span class="t-score" style="color:var(--t3)">–</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-h" style="border-color:var(--gold);color:var(--gold)">Reminder</button>
+        <button class="btn-h">Preview</button>
+      </div>
+    </div>
+
+    <div class="match-card" data-s="upcoming" data-c="laliga">
+      <div class="match-left">
+        <div class="m-league">La Liga</div>
+        <div class="m-status s-up">21:30</div>
+      </div>
+      <div class="match-teams">
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#004D98"/><path d="M10 5L12.5 9H17L13 12L14.5 17L10 14L5.5 17L7 12L3 9H7.5Z" fill="#A50044" opacity=".8"/></svg></div>
+          <span class="t-name">Barcelona</span><span class="t-score" style="color:var(--t3)">–</span>
+        </div>
+        <div class="team-row">
+          <div class="t-logo"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.5" fill="#D2122E"/><path d="M8 7H12V13H8Z" fill="#fff" opacity=".8"/></svg></div>
+          <span class="t-name">Sevilla</span><span class="t-score" style="color:var(--t3)">–</span>
+        </div>
+      </div>
+      <div class="match-right">
+        <button class="btn-h" style="border-color:var(--gold);color:var(--gold)">Reminder</button>
+        <button class="btn-h">Preview</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div><!-- end main-col -->
+
+<!-- SIDEBAR (desktop only) -->
+<aside class="sidebar">
+  <!-- PL Standings -->
+  <div class="sb-card">
+    <div class="sb-hdr">PL Standings</div>
+    <table class="std-table">
+      <thead><tr><th>#</th><th>Club</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
+      <tbody>
+        <tr><td class="pos top">1</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#DC143C"/><path d="M7 2.5L8.5 6H12L9.5 8L10.5 11.5L7 9.5L3.5 11.5L4.5 8L2 6H5.5Z" fill="#fff"/></svg>Arsenal</div></td><td>35</td><td>+42</td><td class="pts">82</td></tr>
+        <tr><td class="pos top">2</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#6CABDD"/><path d="M7 2L8.8 6.2H13L9.6 8.5L10.8 13L7 10.5L3.2 13L4.4 8.5L1 6.2H5.2Z" fill="#fff" opacity=".9"/></svg>Man City</div></td><td>35</td><td>+38</td><td class="pts">79</td></tr>
+        <tr><td class="pos top">3</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#C8102E"/><circle cx="7" cy="7" r="3" fill="none" stroke="#fff" stroke-width="1"/></svg>Liverpool</div></td><td>35</td><td>+35</td><td class="pts">76</td></tr>
+        <tr><td class="pos">4</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#034694"/><path d="M5 5.5L7 3.5L9 5.5L8.2 9H5.8Z" fill="#fff" opacity=".9"/></svg>Chelsea</div></td><td>35</td><td>+18</td><td class="pts">63</td></tr>
+        <tr><td class="pos">5</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#132257"/><path d="M7 3L8.5 6.5H12L9.5 8.5L10.5 12L7 10L3.5 12L4.5 8.5L2 6.5H5.5Z" fill="#fff" opacity=".8"/></svg>Spurs</div></td><td>35</td><td>+12</td><td class="pts">61</td></tr>
+        <tr><td class="pos">6</td><td><div class="tm-cell"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6.5" fill="#DA291C"/><circle cx="7" cy="7" r="3" fill="none" stroke="#FBE122" stroke-width="1"/></svg>Man Utd</div></td><td>35</td><td>+5</td><td class="pts">54</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- Top Scorers -->
+  <div class="sb-card">
+    <div class="sb-hdr">Top Scorers</div>
+    <div class="scorer-item"><span class="sc-rank">1</span><div class="sc-info"><div class="sc-name">Erling Haaland</div><div class="sc-team">Man City</div></div><span class="sc-goals">27</span></div>
+    <div class="scorer-item"><span class="sc-rank">2</span><div class="sc-info"><div class="sc-name">Mohamed Salah</div><div class="sc-team">Liverpool</div></div><span class="sc-goals">24</span></div>
+    <div class="scorer-item"><span class="sc-rank">3</span><div class="sc-info"><div class="sc-name">Bukayo Saka</div><div class="sc-team">Arsenal</div></div><span class="sc-goals">19</span></div>
+    <div class="scorer-item"><span class="sc-rank">4</span><div class="sc-info"><div class="sc-name">Cole Palmer</div><div class="sc-team">Chelsea</div></div><span class="sc-goals">18</span></div>
+    <div class="scorer-item"><span class="sc-rank">5</span><div class="sc-info"><div class="sc-name">Son Heung-min</div><div class="sc-team">Spurs</div></div><span class="sc-goals">16</span></div>
+  </div>
+</aside>
+</div><!-- end layout -->
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <div class="bnav-item active">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </div>
+  <div class="bnav-item">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Search</span>
+  </div>
+  <div class="bnav-item" onclick="openSubModal()">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Subscribe</span>
+  </div>
+  <div class="bnav-item">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Account</span>
+  </div>
+</nav>
+
+<!-- ===== SUBSCRIBE MODAL ===== -->
+<div class="overlay" id="sub-modal" onclick="handleSubBg(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-hdr">
+      <div class="modal-title">Choose Your Plan</div>
+      <button class="modal-close" onclick="closeSubModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="plans">
+        <div class="plan" id="plan-monthly" onclick="selPlan('monthly')">
+          <div class="plan-period">Monthly</div>
+          <div class="plan-price">₦1,000<sub>/mo</sub></div>
+          <ul class="plan-features">
+            <li>No ads</li>
+            <li>HD streams</li>
+            <li>All leagues</li>
+            <li>Cancel anytime</li>
+          </ul>
+        </div>
+        <div class="plan sel" id="plan-yearly" onclick="selPlan('yearly')">
+          <div class="plan-badge">Best Value</div>
+          <div class="plan-period">Yearly</div>
+          <div class="plan-price">₦10,000<sub>/yr</sub></div>
+          <div class="plan-save">Save ₦2,000</div>
+          <ul class="plan-features">
+            <li>No ads</li>
+            <li>4K streams</li>
+            <li>All leagues</li>
+            <li>Offline mode</li>
+          </ul>
+        </div>
+      </div>
+      <button class="sub-cta" onclick="subscribe()">Continue to Payment</button>
+      <div class="sub-note">Secure payment · Cancel anytime · Naira billing</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WATCH MODAL ===== -->
+<div class="overlay" id="watch-modal" onclick="handleWatchBg(event)">
+  <div class="watch-modal">
+    <div class="modal-drag"></div>
+    <div class="w-hdr">
+      <div>
+        <div class="w-teams" id="w-teams">Arsenal 2–1 Chelsea</div>
+        <div class="w-meta" id="w-meta">Premier League · 67' Live</div>
+      </div>
+      <button class="w-close" onclick="closeWatch()">✕</button>
+    </div>
+    <!-- VIDEO -->
+    <div class="vid-wrap">
+      <div class="vid-placeholder" id="vid-placeholder">
+        <svg class="pitch-svg" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/>
+          <line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/>
+          <circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/>
+          <rect x="1" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+          <rect x="177" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+          <rect x="1" y="52" width="10" height="26" fill="none" stroke="#00e96b" stroke-width=".8"/>
+          <rect x="189" y="52" width="10" height="26" fill="none" stroke="#00e96b" stroke-width=".8"/>
+          <circle cx="100" cy="65" r="2" fill="#00e96b"/>
+        </svg>
+        <div class="play-ring" id="play-ring"></div>
+        <div class="vid-lbl">Tap to play stream</div>
+      </div>
+      <iframe id="stream-iframe" class="stream-embed" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    </div>
+    <div class="controls">
+      <button class="ctrl">⏮</button>
+      <button class="ctrl" id="play-pause-btn" onclick="togglePlay()">⏸</button>
+      <button class="ctrl">⏭</button>
+      <div class="progress"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="time-txt" id="prog-time">67:14 / 90:00</div>
+      <button class="ctrl">🔊</button>
+      <button class="ctrl">⛶</button>
+    </div>
+    <div class="w-tabs">
+      <div class="w-tab active" onclick="wTab(this,'events')">Events</div>
+      <div class="w-tab" onclick="wTab(this,'lineups')">Lineups</div>
+      <div class="w-tab" onclick="wTab(this,'stats')">Stats</div>
+    </div>
+    <div class="w-content">
+      <div id="wt-events">
+        <div class="ev-list">
+          <div class="ev-item"><div class="ev-min">12'</div><div class="ev-ico">⚽</div><div><div class="ev-player">Bukayo Saka</div><div class="ev-detail">Arsenal · Right-foot from box</div></div></div>
+          <div class="ev-item"><div class="ev-min">34'</div><div class="ev-ico">🟨</div><div><div class="ev-player">Malo Gusto</div><div class="ev-detail">Chelsea · Foul on Martinelli</div></div></div>
+          <div class="ev-item"><div class="ev-min">41'</div><div class="ev-ico">⚽</div><div><div class="ev-player">Cole Palmer</div><div class="ev-detail">Chelsea · Penalty kick</div></div></div>
+          <div class="ev-item"><div class="ev-min">58'</div><div class="ev-ico">⚽</div><div><div class="ev-player">Trossard</div><div class="ev-detail">Arsenal · Header from corner</div></div></div>
+          <div class="ev-item"><div class="ev-min">63'</div><div class="ev-ico">🔄</div><div><div class="ev-player">Martinelli ↔ Sterling</div><div class="ev-detail">Arsenal · Substitution</div></div></div>
+        </div>
+      </div>
+      <div id="wt-lineups" style="display:none">
+        <div class="lineup-grid">
+          <div>
+            <div class="lineup-team-name" style="color:var(--g)">Arsenal</div>
+            <div class="lineup-player"><span class="lineup-num">1</span>Raya</div>
+            <div class="lineup-player"><span class="lineup-num">4</span>White</div>
+            <div class="lineup-player"><span class="lineup-num">6</span>Gabriel</div>
+            <div class="lineup-player"><span class="lineup-num">12</span>Saliba</div>
+            <div class="lineup-player"><span class="lineup-num">35</span>Zinchenko</div>
+            <div class="lineup-player"><span class="lineup-num">8</span>Ødegaard ©</div>
+            <div class="lineup-player"><span class="lineup-num">29</span>Havertz</div>
+            <div class="lineup-player"><span class="lineup-num">41</span>Rice</div>
+            <div class="lineup-player"><span class="lineup-num">7</span>Saka</div>
+            <div class="lineup-player"><span class="lineup-num">19</span>Trossard</div>
+            <div class="lineup-player"><span class="lineup-num">11</span>Martinelli</div>
+          </div>
+          <div>
+            <div class="lineup-team-name" style="color:#4fc3f7">Chelsea</div>
+            <div class="lineup-player"><span class="lineup-num">13</span>Sánchez</div>
+            <div class="lineup-player"><span class="lineup-num">24</span>James ©</div>
+            <div class="lineup-player"><span class="lineup-num">5</span>Chalobah</div>
+            <div class="lineup-player"><span class="lineup-num">27</span>Disasi</div>
+            <div class="lineup-player"><span class="lineup-num">2</span>Gusto</div>
+            <div class="lineup-player"><span class="lineup-num">14</span>Caicedo</div>
+            <div class="lineup-player"><span class="lineup-num">17</span>Fernández</div>
+            <div class="lineup-player"><span class="lineup-num">20</span>Palmer</div>
+            <div class="lineup-player"><span class="lineup-num">7</span>Sterling</div>
+            <div class="lineup-player"><span class="lineup-num">22</span>Mudryk</div>
+            <div class="lineup-player"><span class="lineup-num">9</span>Jackson</div>
+          </div>
+        </div>
+      </div>
+      <div id="wt-stats" style="display:none" id="wt-stats"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // Filter functionality
-  function filterMatches(type, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const cards = document.querySelectorAll('.match-card');
-    let shown = 0;
-    cards.forEach(card => {
-      const status = card.dataset.status;
-      const comp = card.dataset.comp;
-      let visible = false;
-      if (type === 'all') visible = true;
-      else if (type === 'live' && status === 'live') visible = true;
-      else if (type === 'finished' && status === 'finished') visible = true;
-      else if (type === 'upcoming' && status === 'upcoming') visible = true;
-      else if (type === comp) visible = true;
-      card.style.display = visible ? '' : 'none';
-      if (visible) shown++;
-    });
-    document.getElementById('match-count').textContent = shown + ' matches';
+// ---- STATE ----
+let isSubscribed = false;
+let selectedPlan = 'yearly';
+let isPlaying = false;
+
+// Load from localStorage
+try {
+  isSubscribed = localStorage.getItem('ft_subscribed') === 'true';
+} catch(e){}
+
+function applySubState() {
+  const ads = document.querySelectorAll('#ad-banner-top, #ad-mid, .ad-mid');
+  const nudge = document.getElementById('sub-nudge');
+  if (isSubscribed) {
+    ads.forEach(el => el && el.classList.add('hidden'));
+    if (nudge) nudge.classList.add('hidden');
   }
+}
+applySubState();
 
-  // Modal
-  function openModal(home, away, sh, sa, time, comp) {
-    document.getElementById('modal-teams').textContent = home + ' ' + sh + '–' + sa + ' ' + away;
-    const isLive = time.includes("'");
-    document.getElementById('modal-meta').textContent = comp + ' · ' + time + (isLive ? ' Live' : '');
-    document.getElementById('time-display').textContent = isLive ? (time.replace("'","") + ':00 / 90:00') : 'FT · Full Match';
-    document.getElementById('progress-fill').style.width = isLive ? '74%' : '100%';
-    buildStats();
-    document.getElementById('modal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+// ---- FILTER ----
+function filterM(type, btn) {
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('#match-list .match-card');
+  let n = 0;
+  cards.forEach(c => {
+    const show = type === 'all' || c.dataset.s === type || c.dataset.c === type;
+    c.style.display = show ? '' : 'none';
+    if (show) n++;
+  });
+  document.getElementById('mc').textContent = n + ' matches';
+}
+
+// ---- SUBSCRIBE ----
+function openSubModal() {
+  document.getElementById('sub-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSubModal() {
+  document.getElementById('sub-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleSubBg(e) { if(e.target === document.getElementById('sub-modal')) closeSubModal(); }
+function selPlan(p) {
+  selectedPlan = p;
+  document.querySelectorAll('.plan').forEach(el => el.classList.remove('sel'));
+  document.getElementById('plan-' + p).classList.add('sel');
+}
+function subscribe() {
+  isSubscribed = true;
+  try { localStorage.setItem('ft_subscribed','true'); } catch(e){}
+  closeSubModal();
+  applySubState();
+  showToast('Subscribed! Enjoy ad-free football.');
+}
+
+// ---- WATCH ----
+let currentMatchId = '';
+const matchData = {
+  'pl-ars-che': { embed: '', prog: 74, time: '67:14 / 90:00' },
+  'pl-mci-liv': { embed: '', prog: 50, time: '45:02 / 90:00' },
+  'l1-psg-lyo': { embed: '', prog: 90, time: '81:00 / 90:00' },
+  'll-rma-atm': { embed: '', prog: 100, time: 'FT · 90:00' },
+  'ucl-bay-bvb': { embed: '', prog: 100, time: 'FT · 90:00' },
+  'ucl-juv-acm': { embed: '', prog: 100, time: 'FT · 90:00' },
+};
+
+function openWatch(h, a, sh, sa, time, comp, id) {
+  currentMatchId = id;
+  document.getElementById('w-teams').textContent = h + ' ' + sh + '–' + sa + ' ' + a;
+  const live = time.includes("'");
+  document.getElementById('w-meta').textContent = comp + ' · ' + time + (live ? ' · Live' : '');
+  const md = matchData[id] || { prog: 50, time: time };
+  document.getElementById('prog-fill').style.width = md.prog + '%';
+  document.getElementById('prog-time').textContent = md.time;
+  buildStats();
+  // Check for embed
+  if (md.embed) {
+    document.getElementById('vid-placeholder').style.display = 'none';
+    const iframe = document.getElementById('stream-iframe');
+    iframe.src = md.embed;
+    iframe.style.display = 'block';
+  } else {
+    document.getElementById('vid-placeholder').style.display = 'flex';
+    document.getElementById('stream-iframe').style.display = 'none';
+    document.getElementById('stream-iframe').src = '';
   }
+  document.getElementById('watch-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeWatch() {
+  document.getElementById('watch-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('stream-iframe').src = '';
+}
+function handleWatchBg(e) { if(e.target === document.getElementById('watch-modal')) closeWatch(); }
+function togglePlay() {
+  isPlaying = !isPlaying;
+  document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸' : '▶';
+}
+document.getElementById('play-ring').addEventListener('click', () => {
+  isPlaying = true;
+  document.getElementById('play-pause-btn').textContent = '⏸';
+  showToast('Stream starting...');
+});
 
-  function closeModal() {
-    document.getElementById('modal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+// ---- TABS ----
+function wTab(tab, id) {
+  document.querySelectorAll('.w-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  ['events','lineups','stats'].forEach(t => {
+    document.getElementById('wt-' + t).style.display = t === id ? '' : 'none';
+  });
+}
 
-  function handleOverlayClick(e) {
-    if (e.target === document.getElementById('modal')) closeModal();
-  }
+// ---- STATS ----
+function buildStats() {
+  const stats = [
+    ['Possession','58%','42%',58],
+    ['Shots','14','8',64],
+    ['On Target','6','3',67],
+    ['Corners','7','4',64],
+    ['Fouls','9','13',41],
+    ['Pass Acc.','88%','79%',53],
+  ];
+  let h = '';
+  stats.forEach(([label,hv,av,pct]) => {
+    h += `<div class="stat-row">
+      <div class="stat-labels">
+        <span class="stat-home">${hv}</span>
+        <span class="stat-name">${label}</span>
+        <span class="stat-away">${av}</span>
+      </div>
+      <div class="stat-bar"><div class="stat-prog" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('wt-stats').innerHTML = h;
+}
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+// ---- TOAST ----
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a2330;border:1px solid #00e96b;color:#e8edf2;font-family:Barlow Condensed,sans-serif;font-size:.82rem;font-weight:600;letter-spacing:1px;padding:10px 18px;border-radius:6px;z-index:9999;white-space:nowrap;animation:fadeUp .3s ease;pointer-events:none';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
 
-  // Tabs
-  function switchTab(tab, id) {
-    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    ['events','lineups','stats'].forEach(t => {
-      document.getElementById('tab-' + t).style.display = t === id ? '' : 'none';
-    });
-  }
-
-  // Stats
-  function buildStats() {
-    const stats = [
-      ['Possession', '58%', '42%'],
-      ['Shots', '14', '8'],
-      ['Shots on Target', '6', '3'],
-      ['Corners', '7', '4'],
-      ['Fouls', '9', '13'],
-      ['Yellow Cards', '0', '1'],
-      ['Pass Accuracy', '88%', '79%'],
-    ];
-    let html = '';
-    stats.forEach(([label, home, away]) => {
-      const hv = parseFloat(home);
-      const av = parseFloat(away);
-      const total = hv + av || 1;
-      const pct = (hv / total * 100).toFixed(0);
-      html += `<div style="margin-bottom: 0.6rem;">
-        <div style="display:flex; justify-content:space-between; font-family:'Barlow Condensed'; font-size:0.85rem; letter-spacing:0.5px; margin-bottom:0.3rem;">
-          <span style="color:var(--green); font-weight:700;">${home}</span>
-          <span style="color:var(--muted); font-size:0.75rem; letter-spacing:1.5px; text-transform:uppercase;">${label}</span>
-          <span style="color:var(--muted);">${away}</span>
-        </div>
-        <div style="height:4px; background:var(--border); border-radius:2px; overflow:hidden;">
-          <div style="height:100%; width:${pct}%; background:var(--green); border-radius:2px;"></div>
-        </div>
-      </div>`;
-    });
-    document.getElementById('stats-rows').innerHTML = html;
-  }
-
-  // Live ticker simulation
-  setInterval(() => {
-    document.querySelectorAll('.status-live').forEach(el => {
-      const text = el.textContent;
-      const match = text.match(/(\d+)'/);
-      if (match) {
-        const min = parseInt(match[1]);
-        if (min < 90) el.textContent = '🔴 ' + (min + 1) + "'";
-      }
-    });
-  }, 60000);
+// ---- ESC ----
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeWatch(); closeSubModal(); }
+});
 </script>
-
 </body>
 </html>
