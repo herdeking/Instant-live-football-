@@ -837,19 +837,11 @@ try {
 
 // ===== SEED DATA =====
 function seedMatches() {
+  matches = [];
   try {
     const saved = localStorage.getItem('ft_matches');
-    if(saved) { matches = JSON.parse(saved); return; }
-  } catch(e){}
-  matches = [
-    { id:1, home:'Arsenal', away:'Chelsea', comp:'Premier League', round:'GW36', date:'2026-05-06', time:'17:00', hscore:2, ascore:1, status:'live', minute:"67'", stream:'', desc:'Top-of-the-table clash at the Emirates.', notes:'' },
-    { id:2, home:'Man City', away:'Liverpool', comp:'Premier League', round:'GW36', date:'2026-05-06', time:'17:00', hscore:0, ascore:0, status:'live', minute:"45+2'", stream:'', desc:'', notes:'' },
-    { id:3, home:'PSG', away:'Lyon', comp:'Ligue 1', round:'GW34', date:'2026-05-06', time:'19:00', hscore:1, ascore:2, status:'live', minute:"81'", stream:'', desc:'', notes:'' },
-    { id:4, home:'Real Madrid', away:'Atlético', comp:'La Liga', round:'GW35', date:'2026-05-06', time:'14:00', hscore:3, ascore:0, status:'finished', minute:'', stream:'', desc:'', notes:'' },
-    { id:5, home:'Bayern', away:'Dortmund', comp:'UCL', round:'Semi-Final', date:'2026-05-06', time:'20:00', hscore:4, ascore:1, status:'finished', minute:'', stream:'', desc:'', notes:'' },
-    { id:6, home:'Man United', away:'Newcastle', comp:'Premier League', round:'GW36', date:'2026-05-06', time:'20:00', hscore:0, ascore:0, status:'upcoming', minute:'', stream:'', desc:'', notes:'' },
-  ];
-  saveMatches();
+    if(saved) matches = JSON.parse(saved);
+  } catch(e){ matches = []; }
 }
 
 function saveMatches() {

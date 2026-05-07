@@ -284,24 +284,16 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 </div>
 <aside class="sidebar">
   <div class="sb-card">
-    <div class="sb-hdr">PL Standings</div>
-    <table class="std-table"><thead><tr><th>#</th><th>Club</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
-    <tbody>
-      <tr><td class="pos top">1</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/42.png" alt="">Arsenal</div></td><td>35</td><td>+42</td><td class="pts">82</td></tr>
-      <tr><td class="pos top">2</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/50.png" alt="">Man City</div></td><td>35</td><td>+38</td><td class="pts">79</td></tr>
-      <tr><td class="pos top">3</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/40.png" alt="">Liverpool</div></td><td>35</td><td>+35</td><td class="pts">76</td></tr>
-      <tr><td class="pos">4</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/49.png" alt="">Chelsea</div></td><td>35</td><td>+18</td><td class="pts">63</td></tr>
-      <tr><td class="pos">5</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/47.png" alt="">Spurs</div></td><td>35</td><td>+12</td><td class="pts">61</td></tr>
-      <tr><td class="pos">6</td><td><div class="tm-cell"><img src="https://media.api-sports.io/football/teams/33.png" alt="">Man Utd</div></td><td>35</td><td>+5</td><td class="pts">54</td></tr>
-    </tbody></table>
+    <div class="sb-hdr">Today's Schedule</div>
+    <div id="sb-schedule">
+      <div style="padding:14px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;text-align:center">No matches added yet</div>
+    </div>
   </div>
   <div class="sb-card">
-    <div class="sb-hdr">Top Scorers</div>
-    <div class="scorer-item"><span class="sc-rank">1</span><div class="sc-info"><div class="sc-name">Erling Haaland</div><div class="sc-team">Man City</div></div><span class="sc-goals">27</span></div>
-    <div class="scorer-item"><span class="sc-rank">2</span><div class="sc-info"><div class="sc-name">Mohamed Salah</div><div class="sc-team">Liverpool</div></div><span class="sc-goals">24</span></div>
-    <div class="scorer-item"><span class="sc-rank">3</span><div class="sc-info"><div class="sc-name">Bukayo Saka</div><div class="sc-team">Arsenal</div></div><span class="sc-goals">19</span></div>
-    <div class="scorer-item"><span class="sc-rank">4</span><div class="sc-info"><div class="sc-name">Cole Palmer</div><div class="sc-team">Chelsea</div></div><span class="sc-goals">18</span></div>
-    <div class="scorer-item"><span class="sc-rank">5</span><div class="sc-info"><div class="sc-name">Son Heung-min</div><div class="sc-team">Spurs</div></div><span class="sc-goals">16</span></div>
+    <div class="sb-hdr">Live Now</div>
+    <div id="sb-live">
+      <div style="padding:14px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;text-align:center">No live matches</div>
+    </div>
   </div>
 </aside>
 </div>
@@ -435,7 +427,63 @@ function loadMatches(){
   }catch(e){matches=[];}
   renderAll();
 }
-function renderAll(){applyAds();buildTicker();buildHero();buildFilters();buildMatchList('all');updateCount();}
+function renderAll(){applyAds();buildTicker();buildHero();buildFilters();buildMatchList('all');buildSidebar();updateCount();}
+
+function buildSidebar(){
+  // Today's Schedule
+  const schedEl = document.getElementById('sb-schedule');
+  const liveEl  = document.getElementById('sb-live');
+  if(!schedEl || !liveEl) return;
+
+  if(!matches.length){
+    schedEl.innerHTML = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No matches added yet</div>';
+    liveEl.innerHTML  = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No live matches</div>';
+    return;
+  }
+
+  // Schedule card — all matches compact
+  schedEl.innerHTML = matches.map(m=>{
+    const isLive = m.status==='live';
+    const isFt   = m.status==='finished';
+    const statusColor = isLive ? 'var(--live)' : isFt ? 'var(--t3)' : 'var(--gold)';
+    const statusTxt   = isLive ? (m.minute||'Live') : isFt ? 'FT' : (m.time||'Soon');
+    const hs = m.status!=='upcoming' ? m.hscore : '–';
+    const as_ = m.status!=='upcoming' ? m.ascore : '–';
+    return `<div onclick="openWatch(matches[${matches.indexOf(m)}])" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">
+      <div style="min-width:36px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;color:${statusColor};letter-spacing:.5px">${statusTxt}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.home} <span style="color:var(--t3)">vs</span> ${m.away}</div>
+        <div style="font-size:.62rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;margin-top:1px">${m.comp||''}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:1px;flex-shrink:0;color:${isLive?'var(--t1)':'var(--t3)'}">${hs}–${as_}</div>
+    </div>`;
+  }).join('');
+
+  // Live card — only live matches
+  const live = matches.filter(m=>m.status==='live');
+  if(!live.length){
+    liveEl.innerHTML = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No live matches right now</div>';
+  } else {
+    liveEl.innerHTML = live.map(m=>`
+      <div onclick="openWatch(matches[${matches.indexOf(m)}])" style="padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+          <div class="ldot" style="width:5px;height:5px;border-radius:50%;background:var(--live);display:inline-block;animation:blink 1.1s ease-in-out infinite;flex-shrink:0"></div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:var(--live);letter-spacing:1px">LIVE ${m.minute||''}</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:var(--t3);margin-left:auto">${m.comp||''}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="${getLogo(m.home)}" style="width:16px;height:16px;object-fit:contain">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.home}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--t1)">${m.hscore}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+          <img src="${getLogo(m.away)}" style="width:16px;height:16px;object-fit:contain">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.away}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--t1)">${m.ascore}</span>
+        </div>
+      </div>`).join('');
+  }
+}
 function applyAds(){
   const sub=isSubscribed;
   ['ad-top','sub-nudge'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=sub?'none':'';});
