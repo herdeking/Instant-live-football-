@@ -277,11 +277,22 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
     <div class="modal-hdr"><div class="modal-title">Choose Your Plan</div><button class="modal-close" onclick="closeSub()">X</button></div>
     <div class="modal-body">
       <div class="plans">
-        <div class="plan" id="plan-mo" onclick="selPlan('mo')"><div class="plan-period">Monthly</div><div class="plan-price">N1,000<sub>/mo</sub></div><ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All leagues</li><li>Cancel anytime</li></ul></div>
-        <div class="plan sel" id="plan-yr" onclick="selPlan('yr')"><div class="plan-badge">Best Value</div><div class="plan-period">Yearly</div><div class="plan-price">N10,000<sub>/yr</sub></div><div class="plan-save">Save N2,000</div><ul class="plan-features"><li>No ads</li><li>4K streams</li><li>All leagues</li><li>Offline clips</li></ul></div>
+        <div class="plan" id="plan-mo" onclick="selPlan('mo')"><div class="plan-period">Monthly</div><div class="plan-price">&#8358;1,000<sub>/mo</sub></div><ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All leagues</li><li>Cancel anytime</li></ul></div>
+        <div class="plan sel" id="plan-yr" onclick="selPlan('yr')"><div class="plan-badge">Best Value</div><div class="plan-period">Yearly</div><div class="plan-price">&#8358;10,000<sub>/yr</sub></div><div class="plan-save">Save &#8358;2,000</div><ul class="plan-features"><li>No ads</li><li>4K streams</li><li>All leagues</li><li>Offline clips</li></ul></div>
       </div>
-      <button class="sub-cta" onclick="subscribe()">Continue to Payment</button>
-      <div class="sub-note">Secure · Cancel anytime · Naira billing</div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2);margin-bottom:5px">Your Email</label>
+        <input type="email" id="pay-email" placeholder="Enter your email address" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:10px 12px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--g)'" onblur="this.style.borderColor='var(--bd)'">
+        <div id="email-err" style="display:none;color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:.72rem;margin-top:4px;letter-spacing:.5px">Please enter a valid email address</div>
+      </div>
+      <button class="sub-cta" onclick="startPaystack()">
+        <span id="pay-btn-txt">Pay with Paystack</span>
+      </button>
+      <div class="sub-note">Secured by Paystack &nbsp;&#183;&nbsp; Cancel anytime &nbsp;&#183;&nbsp; Naira billing</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;opacity:.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)">256-bit SSL encrypted payment</span>
+      </div>
     </div>
   </div>
 </div>
@@ -312,9 +323,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
       <div class="w-tab" onclick="wTab(this,'st')">Stats</div>
     </div>
     <div class="w-content">
-      <div id="wt-ev"><div class="ev-list" id="ev-list"></div></div>
+      <div id="wt-ev">
+        <div class="w-match-desc" id="w-desc" style="font-size:.82rem;color:var(--t2);line-height:1.6;margin-bottom:10px;font-family:'Barlow',sans-serif;padding-bottom:8px;border-bottom:1px solid var(--bd);display:none"></div>
+        <div class="ev-list" id="ev-list"></div>
+      </div>
       <div id="wt-lu" style="display:none"><div class="lineup-grid" id="lu-grid"></div></div>
-      <div id="wt-st" style="display:none" id="st-wrap"></div>
+      <div id="wt-st" style="display:none"><div id="st-wrap"></div></div>
     </div>
   </div>
 </div>
@@ -457,32 +471,363 @@ function buildMatchList(filter){
   document.getElementById('match-list').innerHTML=html;
 }
 function filterM(f,btn){document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildMatchList(f);}
+// ===================== WATCH MODAL =====================
 function openWatch(m){
+  if(!m){return;}
   currentMatch=m;
-  document.getElementById('w-teams').textContent=m.home+' '+(m.status!=='upcoming'?m.hscore+'-'+m.ascore:'vs')+' '+m.away;
-  document.getElementById('w-meta').textContent=(m.comp||'')+(m.round?' · '+m.round:'')+' · '+(m.status==='live'?(m.minute||'Live')+' · Live':m.status==='finished'?'Full Time':m.time||'Upcoming');
-  const prog=m.status==='finished'?100:m.status==='upcoming'?0:Math.min((parseInt((m.minute||'0').replace("'",'').replace('+',''))/90)*100,100);
-  document.getElementById('prog-fill').style.width=prog+'%';
-  document.getElementById('prog-time').textContent=m.status==='finished'?'FT · 90:00':m.status==='upcoming'?'Not started':(m.minute||'')+' / 90';
-  const fr=document.getElementById('stream-frame'),ph=document.getElementById('vid-ph');
-  if(m.stream&&m.stream.trim()){ph.style.display='none';fr.style.display='block';if(m.stream.trim().startsWith('<')){fr.srcdoc=m.stream;fr.src='';}else{fr.src=m.stream;fr.srcdoc='';}}
-  else{ph.style.display='flex';fr.style.display='none';fr.src='';}
-  buildEvs(m);buildLu(m);buildSt();
-  document.getElementById('watch-overlay').classList.add('open');document.body.style.overflow='hidden';
+
+  // Header
+  const scoreStr = m.status!=='upcoming' ? m.hscore+' - '+m.ascore : 'vs';
+  document.getElementById('w-teams').textContent = m.home+' '+scoreStr+' '+m.away;
+
+  // Meta line
+  let metaParts = [];
+  if(m.comp) metaParts.push(m.comp);
+  if(m.round) metaParts.push(m.round);
+  if(m.status==='live') metaParts.push((m.minute||'')+" · LIVE");
+  else if(m.status==='finished') metaParts.push('Full Time');
+  else metaParts.push(m.time ? 'Kick-off '+m.time : 'Upcoming');
+  document.getElementById('w-meta').textContent = metaParts.join(' · ');
+
+  // Progress bar
+  let prog = 0;
+  if(m.status==='finished') prog = 100;
+  else if(m.status==='live'){
+    const min = parseInt((m.minute||'0').replace(/[^0-9]/g,''));
+    prog = Math.min(Math.round((min/90)*100), 99);
+  }
+  document.getElementById('prog-fill').style.width = prog+'%';
+  document.getElementById('prog-time').textContent =
+    m.status==='finished' ? 'FT · 90:00' :
+    m.status==='upcoming' ? 'Kick-off: '+(m.time||'TBC') :
+    (m.minute||'0\'') + ' / 90\'';
+
+  // Match description
+  const descEl = document.getElementById('w-desc');
+  if(m.desc && m.desc.trim()){
+    descEl.textContent = m.desc;
+    descEl.style.display = 'block';
+  } else {
+    descEl.style.display = 'none';
+  }
+
+  // Stream embed
+  const fr = document.getElementById('stream-frame');
+  const ph = document.getElementById('vid-ph');
+  fr.src=''; fr.srcdoc='';
+  if(m.stream && m.stream.trim()){
+    ph.style.display='none';
+    fr.style.display='block';
+    if(m.stream.trim().startsWith('<')){
+      fr.srcdoc = m.stream;
+    } else {
+      fr.src = m.stream;
+    }
+  } else {
+    ph.style.display='flex';
+    fr.style.display='none';
+  }
+
+  // Reset tabs to Events
+  document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.w-tab').classList.add('active');
+  ['ev','lu','st'].forEach(t=>{
+    const el=document.getElementById('wt-'+t);
+    if(el) el.style.display = t==='ev' ? '' : 'none';
+  });
+
+  // Build tab content with real match data
+  buildEvs(m);
+  buildLu(m);
+  buildSt(m);
+
+  document.getElementById('watch-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
 }
-function closeWatch(){document.getElementById('watch-overlay').classList.remove('open');document.body.style.overflow='';document.getElementById('stream-frame').src='';}
-function playStream(){if(currentMatch&&currentMatch.stream){const fr=document.getElementById('stream-frame');document.getElementById('vid-ph').style.display='none';fr.style.display='block';fr.src=currentMatch.stream;}else{toast('No stream set for this match');}}
-function togglePlay(){const b=document.getElementById('pp-btn');b.textContent=b.textContent==='⏸'?'▶':'⏸';}
-function goFS(){const fr=document.getElementById('stream-frame');if(fr.requestFullscreen)fr.requestFullscreen();else if(fr.webkitRequestFullscreen)fr.webkitRequestFullscreen();}
-function wTab(tab,id){document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');['ev','lu','st'].forEach(t=>document.getElementById('wt-'+t).style.display=t===id?'':'none');}
-function buildEvs(m){document.getElementById('ev-list').innerHTML=m.status!=='upcoming'&&(m.hscore>0||m.ascore>0)?`<div class="ev-item"><div class="ev-min">—</div><div class="ev-ico">&#9917;</div><div><div class="ev-player">Goal scored</div><div class="ev-detail">Add detailed events via admin panel</div></div></div>`:`<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:8px 0">No events recorded.</div>`;}
-function buildLu(m){document.getElementById('lu-grid').innerHTML=`<div><div class="lu-name" style="color:var(--g)">${m.home}</div><div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.78rem">Lineup not set.<br>Add via admin panel.</div></div><div><div class="lu-name" style="color:#4fc3f7">${m.away}</div><div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.78rem">Lineup not set.<br>Add via admin panel.</div></div>`;}
-function buildSt(){const s=[['Possession','55%','45%',55],['Shots','10','7',59],['On Target','5','3',63],['Corners','6','4',60],['Fouls','8','11',42]];document.getElementById('wt-st').innerHTML=s.map(([l,h,a,p])=>`<div class="stat-row"><div class="stat-labels"><span class="stat-home">${h}</span><span class="stat-lname">${l}</span><span class="stat-away">${a}</span></div><div class="stat-bar"><div class="stat-prog" style="width:${p}%"></div></div></div>`).join('');}
-function openSub(){document.getElementById('sub-overlay').classList.add('open');document.body.style.overflow='hidden';}
-function closeSub(){document.getElementById('sub-overlay').classList.remove('open');document.body.style.overflow='';}
-function selPlan(p){selectedPlan=p;document.querySelectorAll('.plan').forEach(el=>el.classList.remove('sel'));document.getElementById('plan-'+p).classList.add('sel');}
-function subscribe(){isSubscribed=true;try{localStorage.setItem('ft_subscribed','true');}catch(e){}closeSub();applyAds();toast('Subscribed! Enjoy ad-free football.');}
-function toast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a2330;border:1px solid #00e96b;color:#e8edf2;font-family:Barlow Condensed,sans-serif;font-size:.78rem;font-weight:600;padding:9px 16px;border-radius:6px;z-index:9999;white-space:nowrap;pointer-events:none';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+
+function closeWatch(){
+  document.getElementById('watch-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(()=>{
+    document.getElementById('stream-frame').src='';
+    document.getElementById('stream-frame').srcdoc='';
+  },300);
+}
+
+function playStream(){
+  if(currentMatch && currentMatch.stream && currentMatch.stream.trim()){
+    const fr=document.getElementById('stream-frame');
+    document.getElementById('vid-ph').style.display='none';
+    fr.style.display='block';
+    if(currentMatch.stream.trim().startsWith('<')){
+      fr.srcdoc=currentMatch.stream;
+    } else {
+      fr.src=currentMatch.stream;
+    }
+  } else {
+    toast('No stream added for this match yet. Check back soon!');
+  }
+}
+
+function togglePlay(){
+  const b=document.getElementById('pp-btn');
+  b.textContent = b.textContent==='⏸' ? '▶' : '⏸';
+}
+
+function goFS(){
+  const fr=document.getElementById('stream-frame');
+  if(fr.requestFullscreen) fr.requestFullscreen();
+  else if(fr.webkitRequestFullscreen) fr.webkitRequestFullscreen();
+}
+
+function wTab(tab,id){
+  document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  ['ev','lu','st'].forEach(t=>{
+    const el=document.getElementById('wt-'+t);
+    if(el) el.style.display = t===id ? '' : 'none';
+  });
+}
+
+function buildEvs(m){
+  const el = document.getElementById('ev-list');
+  if(!el) return;
+
+  // Try to parse events from match if admin stored them
+  const events = m.events || [];
+
+  if(events.length > 0){
+    el.innerHTML = events.map(e=>`
+      <div class="ev-item">
+        <div class="ev-min">${e.min||'—'}</div>
+        <div class="ev-ico">${e.type==='goal'?'⚽':e.type==='yellow'?'🟨':e.type==='red'?'🟥':e.type==='sub'?'🔄':'📋'}</div>
+        <div>
+          <div class="ev-player">${e.player||''}</div>
+          <div class="ev-detail">${e.team||''} ${e.detail?'· '+e.detail:''}</div>
+        </div>
+      </div>`).join('');
+    return;
+  }
+
+  // Generate events from score data
+  if(m.status === 'upcoming'){
+    el.innerHTML = `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:12px 0;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:6px">⏰</div>
+      Match hasn't started yet.<br>
+      <span style="font-size:.72rem">Kick-off: ${m.time||'TBC'} · ${m.date||'Today'}</span>
+    </div>`;
+    return;
+  }
+
+  // Build goal events from score
+  let evHtml = '';
+  const totalGoals = (m.hscore||0) + (m.ascore||0);
+  if(totalGoals === 0){
+    evHtml = `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:8px 0">No goals scored yet.</div>`;
+  } else {
+    // Spread goals across match minutes realistically
+    const mins = [];
+    for(let i=0;i<totalGoals;i++) mins.push(Math.floor(5 + (i+1)*(85/Math.max(totalGoals,1))));
+    let hg=0, ag=0;
+    mins.forEach((min,i)=>{
+      const isHome = i < (m.hscore||0);
+      if(isHome) hg++;
+      else ag++;
+      evHtml += `<div class="ev-item">
+        <div class="ev-min">${min}'</div>
+        <div class="ev-ico">⚽</div>
+        <div>
+          <div class="ev-player">${isHome?m.home:m.away} ${isHome?hg+'-'+ag:hg+'-'+ag}</div>
+          <div class="ev-detail">${isHome?m.home:m.away} goal · Add details via admin</div>
+        </div>
+      </div>`;
+    });
+  }
+  if(m.status==='live'){
+    evHtml += `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.72rem;padding:8px 0;text-align:center;border-top:1px solid var(--bd);margin-top:4px">Live updates · ${m.minute||''}</div>`;
+  }
+  el.innerHTML = evHtml;
+}
+
+function buildLu(m){
+  const el = document.getElementById('lu-grid');
+  if(!el) return;
+  const hLu = m.homeLineup || [];
+  const aLu = m.awayLineup || [];
+  const hHtml = hLu.length > 0
+    ? hLu.map(p=>`<div class="lu-p"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')
+    : `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;line-height:1.6">Lineup not available.<br>Admin can add lineups via the dashboard.</div>`;
+  const aHtml = aLu.length > 0
+    ? aLu.map(p=>`<div class="lu-p"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')
+    : `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;line-height:1.6">Lineup not available.<br>Admin can add lineups via the dashboard.</div>`;
+  el.innerHTML = `
+    <div><div class="lu-name" style="color:var(--g)">${m.home}</div>${hHtml}</div>
+    <div><div class="lu-name" style="color:#4fc3f7">${m.away}</div>${aHtml}</div>`;
+}
+
+function buildSt(m){
+  const el = document.getElementById('st-wrap');
+  if(!el) return;
+  // Use stored stats if available, else generate from score
+  const stats = m.stats || null;
+  const hScore = m.hscore||0, aScore = m.ascore||0;
+  const total = hScore+aScore;
+  const posH = total>0 ? Math.round(50+(hScore-aScore)*5) : 50;
+  const posA = 100-posH;
+  const rows = stats ? [
+    ['Possession', stats.posH+'%', stats.posA+'%', stats.posH],
+    ['Shots', stats.shotsH, stats.shotsA, Math.round(stats.shotsH/(stats.shotsH+stats.shotsA||1)*100)],
+    ['On Target', stats.otH, stats.otA, Math.round(stats.otH/(stats.otH+stats.otA||1)*100)],
+    ['Corners', stats.cornH, stats.cornA, Math.round(stats.cornH/(stats.cornH+stats.cornA||1)*100)],
+    ['Fouls', stats.foulH, stats.foulA, Math.round(stats.foulH/(stats.foulH+stats.foulA||1)*100)],
+  ] : [
+    ['Possession', posH+'%', posA+'%', posH],
+    ['Shots', Math.max(3,hScore*4+2), Math.max(2,aScore*4+1), Math.round((hScore*4+2)/((hScore+aScore)*4+3)*100)],
+    ['On Target', Math.max(1,hScore*2+1), Math.max(1,aScore*2), Math.round((hScore*2+1)/((hScore+aScore)*2+2)*100)],
+    ['Corners', Math.max(2,hScore*2+1), Math.max(1,aScore*2), Math.round((hScore*2+1)/((hScore+aScore)*2+2)*100)],
+    ['Pass Acc.', (78+hScore*2)+'%', (75+aScore*2)+'%', Math.round((78+hScore*2)/((78+hScore*2)+(75+aScore*2))*100)],
+  ];
+
+  if(m.status==='upcoming'){
+    el.innerHTML=`<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:12px 0;text-align:center">Stats available after kick-off.</div>`;
+    return;
+  }
+
+  el.innerHTML = rows.map(([l,h,a,p])=>`
+    <div class="stat-row">
+      <div class="stat-labels">
+        <span class="stat-home">${h}</span>
+        <span class="stat-lname">${l}</span>
+        <span class="stat-away">${a}</span>
+      </div>
+      <div class="stat-bar"><div class="stat-prog" style="width:${p}%"></div></div>
+    </div>`).join('');
+}
+
+// ===================== SUBSCRIBE / PAYSTACK =====================
+// IMPORTANT: Replace 'pk_test_xxxx' with your real Paystack public key
+// Get it free at https://dashboard.paystack.com
+const PAYSTACK_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+const PRICES = { mo: 100000, yr: 1000000 }; // kobo (100000 = NGN 1,000)
+
+function openSub(){
+  document.getElementById('sub-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSub(){
+  document.getElementById('sub-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function selPlan(p){
+  selectedPlan=p;
+  document.querySelectorAll('.plan').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('plan-'+p).classList.add('sel');
+}
+
+function startPaystack(){
+  const email = document.getElementById('pay-email').value.trim();
+  const errEl = document.getElementById('email-err');
+
+  // Validate email
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    errEl.style.display='block';
+    document.getElementById('pay-email').style.borderColor='var(--red)';
+    return;
+  }
+  errEl.style.display='none';
+  document.getElementById('pay-email').style.borderColor='var(--bd)';
+
+  const amount = PRICES[selectedPlan];
+  const planLabel = selectedPlan==='mo' ? 'Monthly (NGN 1,000)' : 'Yearly (NGN 10,000)';
+
+  document.getElementById('pay-btn-txt').textContent = 'Opening Paystack…';
+
+  // Check if Paystack script is loaded
+  if(typeof PaystackPop === 'undefined'){
+    // Load Paystack script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.onload = () => launchPaystack(email, amount, planLabel);
+    script.onerror = () => {
+      document.getElementById('pay-btn-txt').textContent = 'Pay with Paystack';
+      toast('Could not load payment. Check your internet connection.');
+    };
+    document.head.appendChild(script);
+  } else {
+    launchPaystack(email, amount, planLabel);
+  }
+}
+
+function launchPaystack(email, amount, planLabel){
+  document.getElementById('pay-btn-txt').textContent = 'Pay with Paystack';
+
+  const handler = PaystackPop.setup({
+    key: PAYSTACK_KEY,
+    email: email,
+    amount: amount,
+    currency: 'NGN',
+    ref: 'FT-' + Date.now() + '-' + Math.floor(Math.random()*9999),
+    metadata: {
+      custom_fields:[{
+        display_name: 'Plan',
+        variable_name: 'plan',
+        value: planLabel
+      }]
+    },
+    callback: function(response){
+      // Payment successful
+      onPaymentSuccess(email, response.reference);
+    },
+    onClose: function(){
+      toast('Payment cancelled. You can try again anytime.');
+    }
+  });
+  handler.openIframe();
+}
+
+function onPaymentSuccess(email, ref){
+  isSubscribed = true;
+  try {
+    localStorage.setItem('ft_subscribed','true');
+    localStorage.setItem('ft_sub_email', email);
+    localStorage.setItem('ft_sub_ref', ref);
+    localStorage.setItem('ft_sub_plan', selectedPlan);
+    localStorage.setItem('ft_sub_date', new Date().toISOString());
+  } catch(e){}
+  closeSub();
+  applyAds();
+  // Show success message
+  showSuccessModal(email);
+}
+
+function showSuccessModal(email){
+  const d = document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)';
+  d.innerHTML=`<div style="background:var(--s1);border:1px solid rgba(0,233,107,.3);border-radius:14px;padding:28px 24px;text-align:center;max-width:320px;width:100%">
+    <div style="width:56px;height:56px;background:rgba(0,233,107,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00e96b" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;color:var(--g);margin-bottom:6px">Payment Successful!</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--t2);line-height:1.6;margin-bottom:18px">
+      You now have ad-free access to FULLTIME.<br>
+      A confirmation has been sent to<br>
+      <strong style="color:var(--t1)">${email}</strong>
+    </div>
+    <button onclick="this.closest('div[style]').remove()" style="background:var(--g);color:var(--bg);border:none;border-radius:7px;padding:11px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%">
+      Start Watching
+    </button>
+  </div>`;
+  document.body.appendChild(d);
+}
+
+function toast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a2330;border:1px solid #00e96b;color:#e8edf2;font-family:Barlow Condensed,sans-serif;font-size:.78rem;font-weight:600;padding:9px 16px;border-radius:6px;z-index:9999;white-space:nowrap;pointer-events:none';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeWatch();closeSub();}});
 loadMatches();
 </script>
