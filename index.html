@@ -207,6 +207,31 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 .lu-name{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:5px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .match-card{animation:fadeUp .35s ease both}
+/* LIVESCORES */
+.ls-loading{display:flex;align-items:center;gap:10px;padding:16px 0;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.5px}
+.ls-spinner{width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ls-league{margin-bottom:12px}
+.ls-league-hdr{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:4px;border-bottom:1px solid var(--bd)}
+.ls-league-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+.ls-card{background:var(--s1);border:1px solid var(--bd);border-radius:7px;padding:9px 12px;margin-bottom:5px;display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:8px;cursor:pointer;transition:background .15s}
+.ls-card:hover{background:var(--s2)}
+.ls-card::before{content:'';position:absolute;display:none}
+.ls-status{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;display:flex;flex-direction:column;gap:2px}
+.ls-live-txt{color:var(--live)}
+.ls-ft-txt{color:var(--t3)}
+.ls-up-txt{color:var(--gold)}
+.ls-teams{display:flex;flex-direction:column;gap:4px}
+.ls-team-row{display:flex;align-items:center;gap:6px}
+.ls-logo{width:16px;height:16px;object-fit:contain;flex-shrink:0}
+.ls-tname{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.84rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-score{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;min-width:12px;text-align:right}
+.ls-team-row.w .ls-tname,.ls-team-row.w .ls-score{color:var(--t1)}
+.ls-team-row:not(.w) .ls-tname,.ls-team-row:not(.w) .ls-score{color:var(--t3)}
+.ls-right{text-align:right}
+.ls-min{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;color:var(--live)}
+.ls-err{color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;padding:12px 0;text-align:center;line-height:1.6}
+.ls-err a{color:var(--g);text-decoration:none}
 </style>
 </head>
 <body>
@@ -221,7 +246,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 </nav>
 <div class="page-wrap">
 <div class="main-col">
-<section class="hero">
+<section class="hero" id="hero-section">
   <div class="hero-tag" id="hero-tag">Loading…</div>
   <h1 class="hero-title" id="hero-title">—</h1>
   <div class="feat-card" id="feat-card">
@@ -239,7 +264,22 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 <div class="filters-wrap"><div class="filters" id="filters"></div></div>
 <div class="section">
   <div class="sec-hdr"><div class="sec-title">Today's Matches</div><div class="sec-count" id="mc">0 matches</div><a href="#" class="sec-more">View All</a></div>
-  <div class="match-list" id="match-list"><div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>Loading matches…</p></div></div>
+  <div class="match-list" id="match-list"><div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>No matches added yet. Admin can add matches via the dashboard.</p></div></div>
+</div>
+
+<!-- LIVESCORES SECTION -->
+<div class="section" id="livescore-section">
+  <div class="sec-hdr">
+    <div class="sec-title">Live Scores</div>
+    <div class="sec-count" id="ls-count">Loading…</div>
+    <span class="sec-more" onclick="loadLiveScores()">Refresh</span>
+  </div>
+  <div id="ls-list">
+    <div class="ls-loading">
+      <div class="ls-spinner"></div>
+      <span>Fetching live scores…</span>
+    </div>
+  </div>
 </div>
 </div>
 <aside class="sidebar">
@@ -388,17 +428,11 @@ function getLogo(n){if(!n)return'';const k=n.toLowerCase().trim();return LOGOS[k
 let matches=[],isSubscribed=false,currentMatch=null,selectedPlan='yr';
 try{isSubscribed=localStorage.getItem('ft_subscribed')==='true';}catch(e){}
 function loadMatches(){
-  try{const s=localStorage.getItem('ft_matches');if(s)matches=JSON.parse(s);}catch(e){}
-  if(!matches||!matches.length){
-    matches=[
-      {id:1,home:'Arsenal',away:'Chelsea',comp:'Premier League',round:'GW36',date:'',time:'',hscore:2,ascore:1,status:'live',minute:"67'",stream:'',desc:''},
-      {id:2,home:'Man City',away:'Liverpool',comp:'Premier League',round:'GW36',date:'',time:'',hscore:0,ascore:0,status:'live',minute:"45+2'",stream:'',desc:''},
-      {id:3,home:'PSG',away:'Lyon',comp:'Ligue 1',round:'GW34',date:'',time:'',hscore:1,ascore:2,status:'live',minute:"81'",stream:'',desc:''},
-      {id:4,home:'Real Madrid',away:'Atletico',comp:'La Liga',round:'GW35',date:'',time:'',hscore:3,ascore:0,status:'finished',minute:'',stream:'',desc:''},
-      {id:5,home:'Bayern',away:'Dortmund',comp:'UCL',round:'Semi-Final',date:'',time:'',hscore:4,ascore:1,status:'finished',minute:'',stream:'',desc:''},
-      {id:6,home:'Man United',away:'Newcastle',comp:'Premier League',round:'GW36',date:'',time:'20:00',hscore:0,ascore:0,status:'upcoming',minute:'',stream:'',desc:''},
-    ];
-  }
+  matches=[];
+  try{
+    const s=localStorage.getItem('ft_matches');
+    if(s) matches=JSON.parse(s);
+  }catch(e){matches=[];}
   renderAll();
 }
 function renderAll(){applyAds();buildTicker();buildHero();buildFilters();buildMatchList('all');updateCount();}
@@ -414,8 +448,21 @@ function buildTicker(){
   document.getElementById('ticker-inner').innerHTML=s+s;
 }
 function buildHero(){
-  const f=matches.find(m=>m.status==='live')||matches[0];
-  if(!f)return;
+  // Admin-selected Match of the Day first, then first live, then first match
+  let motdId=null;
+  try{motdId=localStorage.getItem('ft_motd');}catch(e){}
+  let f=null;
+  if(motdId) f=matches.find(m=>String(m.id)===String(motdId));
+  if(!f) f=matches.find(m=>m.status==='live');
+  if(!f) f=matches[0];
+
+  const heroSec=document.getElementById('hero-section');
+  if(!f){
+    if(heroSec) heroSec.style.display='none';
+    return;
+  }
+  if(heroSec) heroSec.style.display='';
+
   document.getElementById('hero-tag').textContent=(f.comp||'Football')+(f.round?' · '+f.round:'')+(f.status==='live'?' · LIVE':'');
   document.getElementById('hero-title').innerHTML=f.home+' <em>vs</em> '+f.away;
   document.getElementById('feat-comp').textContent=(f.comp||'')+(f.round?' · '+f.round:'');
@@ -427,7 +474,7 @@ function buildHero(){
   const hi=document.getElementById('fh-img');hi.src=getLogo(f.home);hi.alt=f.home;
   const ai=document.getElementById('fa-img');ai.src=getLogo(f.away);ai.alt=f.away;
   document.getElementById('feat-card').onclick=()=>openWatch(f);
-  document.getElementById('feat-btn').textContent=f.status==='live'?'Watch Live':f.status==='upcoming'?'Set Reminder':'Watch Replay';
+  document.getElementById('feat-btn').textContent=f.status==='live'?'▶  Watch Live':f.status==='upcoming'?'⏰  Set Reminder':'▶  Watch Replay';
 }
 function buildFilters(){
   const comps=[...new Set(matches.map(m=>m.comp).filter(Boolean))];
@@ -828,8 +875,185 @@ function toast(msg){
   setTimeout(()=>t.remove(),3000);
 }
 
+// ===================== LIVESCORES =====================
+// Uses football-data.org free API (no CORS issues with this endpoint)
+// Free tier: 10 competitions, 10 req/min — sign up at football-data.org
+// Replace with your own key: https://www.football-data.org/client/register
+const LS_KEY = 'REPLACE_WITH_YOUR_FOOTBALL_DATA_KEY'; // e.g. 'abc123def456'
+
+// Fallback: TheSportsDB free API (no key needed)
+async function loadLiveScores(){
+  const el = document.getElementById('ls-list');
+  const cnt = document.getElementById('ls-count');
+  if(!el) return;
+
+  el.innerHTML = `<div class="ls-loading"><div class="ls-spinner"></div><span>Fetching live scores…</span></div>`;
+
+  try {
+    // TheSportsDB free livescores endpoint (no API key required)
+    // Uses livescore widget via free allsports API
+    const today = new Date().toISOString().split('T')[0];
+
+    // Try football-data.org if key is set
+    if(LS_KEY && LS_KEY !== 'REPLACE_WITH_YOUR_FOOTBALL_DATA_KEY'){
+      await loadFromFootballData(el, cnt);
+      return;
+    }
+
+    // Free fallback: use TheSportsDB v2 free endpoint
+    await loadFromSportsDB(el, cnt, today);
+
+  } catch(err){
+    el.innerHTML = `<div class="ls-err">
+      Could not load live scores.<br>
+      <span style="font-size:.72rem">For live scores, add a free API key from 
+      <a href="https://www.football-data.org/client/register" target="_blank">football-data.org</a><br>
+      then paste it in the code as <code style="background:var(--s2);padding:1px 5px;border-radius:3px">LS_KEY</code></span>
+      <br><br>
+      <span onclick="loadLiveScores()" style="color:var(--g);cursor:pointer;font-size:.78rem">↺ Try again</span>
+    </div>`;
+    if(cnt) cnt.textContent = 'Error';
+  }
+}
+
+async function loadFromFootballData(el, cnt){
+  const comps = ['PL','CL','PD','BL1','SA','FL1','EL'];
+  const results = [];
+  for(const comp of comps.slice(0,3)){
+    try {
+      const r = await fetch(`https://api.football-data.org/v4/competitions/${comp}/matches?status=LIVE,IN_PLAY,PAUSED,FINISHED&dateFrom=${new Date().toISOString().split('T')[0]}&dateTo=${new Date().toISOString().split('T')[0]}`,
+        {headers:{'X-Auth-Token': LS_KEY}});
+      const d = await r.json();
+      if(d.matches) results.push(...d.matches.slice(0,6));
+    } catch(e){}
+  }
+  renderLiveScores(el, cnt, results.map(m=>({
+    homeTeam: m.homeTeam?.shortName || m.homeTeam?.name || '—',
+    awayTeam: m.awayTeam?.shortName || m.awayTeam?.name || '—',
+    homeScore: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? null,
+    awayScore: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? null,
+    status: m.status,
+    minute: m.minute || '',
+    league: m.competition?.name || '',
+    homeLogo: getLogo(m.homeTeam?.shortName || m.homeTeam?.name || ''),
+    awayLogo: getLogo(m.awayTeam?.shortName || m.awayTeam?.name || ''),
+  })));
+}
+
+async function loadFromSportsDB(el, cnt, today){
+  try {
+    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${today}&s=Soccer`);
+    const d = await r.json();
+    if(!d.events || !d.events.length){
+      el.innerHTML = `<div class="ls-err">No matches found for today.<br><span style="font-size:.72rem">Scores update automatically. Add a <a href="https://www.football-data.org/client/register" target="_blank">football-data.org</a> key for richer live data.</span></div>`;
+      if(cnt) cnt.textContent = '0 matches';
+      return;
+    }
+    const mapped = d.events.slice(0,20).map(e=>({
+      homeTeam: e.strHomeTeam || '—',
+      awayTeam: e.strAwayTeam || '—',
+      homeScore: e.intHomeScore,
+      awayScore: e.intAwayScore,
+      status: e.strStatus === 'Match Finished' ? 'FINISHED' : e.strProgress ? 'IN_PLAY' : 'SCHEDULED',
+      minute: e.strProgress || '',
+      league: e.strLeague || '',
+      homeLogo: e.strHomeTeamBadge || getLogo(e.strHomeTeam||''),
+      awayLogo: e.strAwayTeamBadge || getLogo(e.strAwayTeam||''),
+      time: e.strTime || '',
+    }));
+    renderLiveScores(el, cnt, mapped);
+  } catch(e){
+    throw e;
+  }
+}
+
+function renderLiveScores(el, cnt, games){
+  if(!games || !games.length){
+    el.innerHTML=`<div class="ls-err">No matches found today.</div>`;
+    if(cnt) cnt.textContent='0 matches';
+    return;
+  }
+
+  // Group by league
+  const grouped={};
+  games.forEach(g=>{
+    const l=g.league||'Other';
+    if(!grouped[l]) grouped[l]=[];
+    grouped[l].push(g);
+  });
+
+  let html='';
+  Object.entries(grouped).forEach(([league,list])=>{
+    html+=`<div class="ls-league">
+      <div class="ls-league-hdr">
+        <div class="ls-league-name">${league}</div>
+      </div>`;
+    list.forEach(g=>{
+      const isLive = g.status==='IN_PLAY'||g.status==='PAUSED'||g.status==='LIVE';
+      const isFt = g.status==='FINISHED'||g.status==='FT';
+      const hasScore = g.homeScore!==null && g.homeScore!==undefined && g.homeScore!=='';
+      const hs = hasScore ? g.homeScore : '–';
+      const as_ = hasScore ? g.awayScore : '–';
+      const hW = hasScore && Number(g.homeScore)>Number(g.awayScore);
+      const aW = hasScore && Number(g.awayScore)>Number(g.homeScore);
+      const statusHtml = isLive
+        ? `<div class="ls-live-txt"><div class="ldot" style="display:inline-block;margin-right:3px"></div>LIVE</div><div class="ls-live-txt">${g.minute||''}</div>`
+        : isFt ? `<div class="ls-ft-txt">FT</div>`
+        : `<div class="ls-up-txt">${g.time||'Soon'}</div>`;
+
+      const hLogoSrc = (g.homeLogo && g.homeLogo.startsWith('http')) ? g.homeLogo : getLogo(g.homeTeam);
+      const aLogoSrc = (g.awayLogo && g.awayLogo.startsWith('http')) ? g.awayLogo : getLogo(g.awayTeam);
+
+      html+=`<div class="ls-card" style="position:relative" onclick="findAndWatch('${g.homeTeam}','${g.awayTeam}')">
+        <div class="ls-status">${statusHtml}</div>
+        <div class="ls-teams">
+          <div class="ls-team-row ${hW?'w':''}">
+            <img class="ls-logo" src="${hLogoSrc}" alt="${g.homeTeam}" onerror="this.src='${getLogo(g.homeTeam)}'">
+            <span class="ls-tname">${g.homeTeam}</span>
+            <span class="ls-score">${hs}</span>
+          </div>
+          <div class="ls-team-row ${aW?'w':''}">
+            <img class="ls-logo" src="${aLogoSrc}" alt="${g.awayTeam}" onerror="this.src='${getLogo(g.awayTeam)}'">
+            <span class="ls-tname">${g.awayTeam}</span>
+            <span class="ls-score">${as_}</span>
+          </div>
+        </div>
+        <div class="ls-right">
+          ${isLive?`<div class="ls-min">${g.minute||'Live'}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  const total = games.length;
+  const liveCount = games.filter(g=>g.status==='IN_PLAY'||g.status==='PAUSED'||g.status==='LIVE').length;
+  el.innerHTML = html;
+  if(cnt) cnt.textContent = total+' matches'+(liveCount>0?' · '+liveCount+' live':'');
+}
+
+function findAndWatch(home, away){
+  // Try to find in admin matches first
+  const m = matches.find(x=>
+    x.home.toLowerCase()===home.toLowerCase() ||
+    x.away.toLowerCase()===away.toLowerCase() ||
+    (x.home.toLowerCase().includes(home.toLowerCase().split(' ')[0]) &&
+     x.away.toLowerCase().includes(away.toLowerCase().split(' ')[0]))
+  );
+  if(m){ openWatch(m); return; }
+  toast('No stream for this match. Check admin matches above.');
+}
+
+// Auto refresh livescores every 60 seconds
+let lsInterval = null;
+function startLsRefresh(){
+  loadLiveScores();
+  lsInterval = setInterval(loadLiveScores, 60000);
+}
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeWatch();closeSub();}});
 loadMatches();
+startLsRefresh();
 </script>
 </body>
 </html>

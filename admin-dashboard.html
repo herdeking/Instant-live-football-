@@ -329,6 +329,26 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
         </button>
       </div>
 
+      <!-- MATCH OF THE DAY SELECTOR -->
+      <div class="form-card" style="margin-bottom:16px;border-left:3px solid var(--gold)">
+        <div class="form-card-title">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Match of the Day
+        </div>
+        <div style="font-size:.8rem;color:var(--t2);margin-bottom:12px;line-height:1.5">Select the featured match shown as the hero on the public site. If none is selected, the first live match is used automatically.</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <select id="motd-select" style="flex:1;min-width:180px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:9px 12px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234a5a6a%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center">
+            <option value="">-- Auto (first live match) --</option>
+          </select>
+          <button class="btn-primary" onclick="saveMotd()" style="flex-shrink:0">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Set as Featured
+          </button>
+          <button class="btn-secondary" onclick="clearMotd()" style="flex-shrink:0">Clear</button>
+        </div>
+        <div id="motd-current" style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--t3);letter-spacing:.5px"></div>
+      </div>
+
       <div class="table-wrap">
         <table>
           <thead>
@@ -905,6 +925,7 @@ function renderTables() {
   // Update stat cards
   document.getElementById('stat-live').textContent = matches.filter(m=>m.status==='live').length;
   document.getElementById('stat-total').textContent = matches.length;
+  populateMotdDropdown();
 }
 
 // ===== STREAMS PANEL =====
@@ -1166,10 +1187,52 @@ function logout() {
   window.location.href='admin-login.html';
 }
 
+// ===== MATCH OF THE DAY =====
+function populateMotdDropdown(){
+  const sel = document.getElementById('motd-select');
+  if(!sel) return;
+  const current = localStorage.getItem('ft_motd') || '';
+  sel.innerHTML = '<option value="">-- Auto (first live match) --</option>';
+  matches.forEach(m=>{
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.home + ' vs ' + m.away + ' · ' + (m.comp||'') + ' · ' + (m.status==='live'?'LIVE '+(m.minute||''):m.status==='finished'?'FT':m.time||'Upcoming');
+    if(String(m.id) === String(current)) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // Show current
+  const motdEl = document.getElementById('motd-current');
+  if(motdEl){
+    if(current){
+      const cm = matches.find(x=>String(x.id)===String(current));
+      motdEl.innerHTML = cm
+        ? `<span style="color:var(--gold)">★ Featured:</span> ${cm.home} vs ${cm.away}`
+        : 'No match selected — auto mode active';
+    } else {
+      motdEl.textContent = 'Auto mode — first live match will be featured';
+    }
+  }
+}
+function saveMotd(){
+  const sel = document.getElementById('motd-select');
+  const val = sel ? sel.value : '';
+  try{ localStorage.setItem('ft_motd', val); }catch(e){}
+  populateMotdDropdown();
+  showToast(val ? 'Match of the Day set!' : 'MOTD cleared — auto mode active');
+}
+function clearMotd(){
+  try{ localStorage.removeItem('ft_motd'); }catch(e){}
+  const sel = document.getElementById('motd-select');
+  if(sel) sel.value = '';
+  populateMotdDropdown();
+  showToast('Match of the Day cleared');
+}
+
 // ===== INIT =====
 seedMatches();
 setDate();
 renderTables();
+populateMotdDropdown();
 </script>
 </body>
 </html>
