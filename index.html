@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://quge5.com/88/tag.min.js" data-zone="237142" async data-cfasync="false"></script>
-  <script>(function(s){s.dataset.zone='10976709',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FULLTIME — Live Football</title>
@@ -432,59 +430,73 @@ function loadMatches(){
 function renderAll(){applyAds();buildTicker();buildHero();buildFilters();buildMatchList('all');buildSidebar();updateCount();}
 
 function buildSidebar(){
-  // Today's Schedule
-  const schedEl = document.getElementById('sb-schedule');
-  const liveEl  = document.getElementById('sb-live');
-  if(!schedEl || !liveEl) return;
+  const schedEl=document.getElementById('sb-schedule');
+  const liveEl=document.getElementById('sb-live');
+  if(!schedEl||!liveEl) return;
 
   if(!matches.length){
-    schedEl.innerHTML = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No matches added yet</div>';
-    liveEl.innerHTML  = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No live matches</div>';
+    schedEl.innerHTML='<div style="padding:12px;color:var(--t3);font-family:Barlow Condensed,sans-serif;font-size:.78rem;text-align:center">No matches added yet</div>';
+    liveEl.innerHTML='<div style="padding:12px;color:var(--t3);font-family:Barlow Condensed,sans-serif;font-size:.78rem;text-align:center">No live matches</div>';
     return;
   }
 
-  // Schedule card — all matches compact
-  schedEl.innerHTML = matches.map(m=>{
-    const isLive = m.status==='live';
-    const isFt   = m.status==='finished';
-    const statusColor = isLive ? 'var(--live)' : isFt ? 'var(--t3)' : 'var(--gold)';
-    const statusTxt   = isLive ? (m.minute||'Live') : isFt ? 'FT' : (m.time||'Soon');
-    const hs = m.status!=='upcoming' ? m.hscore : '–';
-    const as_ = m.status!=='upcoming' ? m.ascore : '–';
-    return `<div onclick="openWatch(matches[${matches.indexOf(m)}])" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">
-      <div style="min-width:36px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;color:${statusColor};letter-spacing:.5px">${statusTxt}</div>
+  schedEl.innerHTML=matches.map(m=>{
+    const isLive=m.status==="live", isFt=m.status==="finished";
+    const sc=isLive?"var(--live)":isFt?"var(--t3)":"var(--gold)";
+    const st=isLive?(m.minute||"Live"):isFt?"FT":(m.time||"Soon");
+    const hs=m.status!=="upcoming"?m.hscore:"–";
+    const as_=m.status!=="upcoming"?m.ascore:"–";
+    return `<div class="sb-match-row" data-mid="${m.id}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s">
+      <div style="min-width:36px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:.65rem;color:${sc};letter-spacing:.5px">${st}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.home} <span style="color:var(--t3)">vs</span> ${m.away}</div>
-        <div style="font-size:.62rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;margin-top:1px">${m.comp||''}</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.home} vs ${m.away}</div>
+        <div style="font-size:.62rem;color:var(--t3);font-family:Barlow Condensed,sans-serif;margin-top:1px">${m.comp||""}</div>
       </div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:1px;flex-shrink:0;color:${isLive?'var(--t1)':'var(--t3)'}">${hs}–${as_}</div>
+      <div style="font-family:Bebas Neue,sans-serif;font-size:.9rem;letter-spacing:1px;flex-shrink:0;color:${isLive?"var(--t1)":"var(--t3)"}">${hs}–${as_}</div>
     </div>`;
-  }).join('');
+  }).join("");
 
-  // Live card — only live matches
-  const live = matches.filter(m=>m.status==='live');
+  const live=matches.filter(m=>m.status==="live");
   if(!live.length){
-    liveEl.innerHTML = '<div style="padding:12px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;text-align:center">No live matches right now</div>';
+    liveEl.innerHTML='<div style="padding:12px;color:var(--t3);font-family:Barlow Condensed,sans-serif;font-size:.78rem;text-align:center">No live matches right now</div>';
   } else {
-    liveEl.innerHTML = live.map(m=>`
-      <div onclick="openWatch(matches[${matches.indexOf(m)}])" style="padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">
+    liveEl.innerHTML=live.map(m=>`
+      <div class="sb-live-row" data-mid="${m.id}" style="padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s">
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
-          <div class="ldot" style="width:5px;height:5px;border-radius:50%;background:var(--live);display:inline-block;animation:blink 1.1s ease-in-out infinite;flex-shrink:0"></div>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:var(--live);letter-spacing:1px">LIVE ${m.minute||''}</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:var(--t3);margin-left:auto">${m.comp||''}</span>
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--live);display:inline-block;animation:blink 1.1s ease-in-out infinite;flex-shrink:0"></div>
+          <span style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:.62rem;color:var(--live);letter-spacing:1px">LIVE ${m.minute||""}</span>
+          <span style="font-family:Barlow Condensed,sans-serif;font-size:.6rem;color:var(--t3);margin-left:auto">${m.comp||""}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          <img src="${getLogo(m.home)}" style="width:16px;height:16px;object-fit:contain">
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.home}</span>
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--t1)">${m.hscore}</span>
+          <img src="${getLogo(m.home)}" style="width:16px;height:16px;object-fit:contain" onerror="this.style.display='none'">
+          <span style="font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.home}</span>
+          <span style="font-family:Bebas Neue,sans-serif;font-size:1rem;color:var(--t1)">${m.hscore}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
-          <img src="${getLogo(m.away)}" style="width:16px;height:16px;object-fit:contain">
-          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.away}</span>
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--t1)">${m.ascore}</span>
+          <img src="${getLogo(m.away)}" style="width:16px;height:16px;object-fit:contain" onerror="this.style.display='none'">
+          <span style="font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:.82rem;flex:1">${m.away}</span>
+          <span style="font-family:Bebas Neue,sans-serif;font-size:1rem;color:var(--t1)">${m.ascore}</span>
         </div>
-      </div>`).join('');
+      </div>`).join("");
   }
+
+  // Attach click events after DOM insert
+  schedEl.querySelectorAll(".sb-match-row").forEach(row=>{
+    row.addEventListener("mouseenter",()=>row.style.background="var(--s2)");
+    row.addEventListener("mouseleave",()=>row.style.background="");
+    row.addEventListener("click",()=>{
+      const m=matches.find(x=>String(x.id)===String(row.dataset.mid));
+      if(m) openWatch(m);
+    });
+  });
+  liveEl.querySelectorAll(".sb-live-row").forEach(row=>{
+    row.addEventListener("mouseenter",()=>row.style.background="var(--s2)");
+    row.addEventListener("mouseleave",()=>row.style.background="");
+    row.addEventListener("click",()=>{
+      const m=matches.find(x=>String(x.id)===String(row.dataset.mid));
+      if(m) openWatch(m);
+    });
+  });
 }
 function applyAds(){
   const sub=isSubscribed;
@@ -540,32 +552,67 @@ function buildMatchList(filter){
   else if(filter==='upcoming')vis=matches.filter(m=>m.status==='upcoming');
   else if(filter!=='all')vis=matches.filter(m=>(m.comp||'').toLowerCase()===decodeURIComponent(filter).toLowerCase());
   document.getElementById('mc').textContent=vis.length+' match'+(vis.length!==1?'es':'');
-  if(!vis.length){document.getElementById('match-list').innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>No matches found</p></div>';return;}
+  const list=document.getElementById('match-list');
+  if(!vis.length){
+    list.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>No matches found</p></div>';
+    return;
+  }
   let html='';
   vis.forEach((m,i)=>{
-    if(i===3&&!isSubscribed){html+='<div class="ad-mid"><div class="ad-mid-lbl">Advertisement</div><div class="ad-mid-title">SuperSport — All Leagues in HD</div><div class="ad-mid-sub">Premier League, La Liga, UCL and more</div><button class="ad-mid-btn">Learn More</button></div>';}
+    if(i===3&&!isSubscribed){
+      html+='<div class="ad-mid"><div class="ad-mid-lbl">Advertisement</div><div class="ad-mid-title">SuperSport — All Leagues in HD</div><div class="ad-mid-sub">Premier League, La Liga, UCL and more</div><button class="ad-mid-btn">Learn More</button></div>';
+    }
     const isLive=m.status==='live',isFt=m.status==='finished',isUp=m.status==='upcoming';
     const cls=isLive?'is-live':isFt?'is-ft':'is-upcoming';
     const stTxt=isLive?`<span class="s-live">LIVE ${m.minute||''}</span>`:isFt?`<span class="s-ft">FT</span>`:`<span class="s-up">${m.time||'Soon'}</span>`;
-    const hs=isUp?'–':m.hscore,as_=isUp?'–':m.ascore;
-    const hW=!isUp&&m.hscore>m.ascore,aW=!isUp&&m.ascore>m.hscore;
+    const hs=isUp?'–':m.hscore, as_=isUp?'–':m.ascore;
+    const hW=!isUp&&Number(m.hscore)>Number(m.ascore);
+    const aW=!isUp&&Number(m.ascore)>Number(m.hscore);
     const wl=isLive?'Watch':isFt?'Replay':'Preview';
-    const idx=matches.indexOf(m);
+    const mid=m.id||i;
     const fallH='https://ui-avatars.com/api/?name='+encodeURIComponent(m.home)+'&background=1a2330&color=00e96b&size=40';
     const fallA='https://ui-avatars.com/api/?name='+encodeURIComponent(m.away)+'&background=1a2330&color=00e96b&size=40';
-    html+=`<div class="match-card ${cls}" style="animation-delay:${i*.05}s" onclick="openWatch(matches[${idx}])">
+    html+=`<div class="match-card ${cls}" style="animation-delay:${i*.05}s" data-mid="${mid}">
       <div class="m-left"><div class="m-league">${m.comp||'Football'}</div>${stTxt}</div>
       <div class="m-teams">
-        <div class="t-row ${hW?'winner':''}"><div class="t-crest"><img src="${getLogo(m.home)}" alt="${m.home}" onerror="this.src='${fallH}'"></div><span class="t-name">${m.home}</span><span class="t-score">${hs}</span></div>
-        <div class="t-row ${aW?'winner':''}"><div class="t-crest"><img src="${getLogo(m.away)}" alt="${m.away}" onerror="this.src='${fallA}'"></div><span class="t-name">${m.away}</span><span class="t-score">${as_}</span></div>
+        <div class="t-row ${hW?'winner':''}">
+          <div class="t-crest"><img src="${getLogo(m.home)}" alt="${m.home}" onerror="this.src='${fallH}'"></div>
+          <span class="t-name">${m.home}</span>
+          <span class="t-score">${hs}</span>
+        </div>
+        <div class="t-row ${aW?'winner':''}">
+          <div class="t-crest"><img src="${getLogo(m.away)}" alt="${m.away}" onerror="this.src='${fallA}'"></div>
+          <span class="t-name">${m.away}</span>
+          <span class="t-score">${as_}</span>
+        </div>
       </div>
       <div class="m-right">
-        <button class="btn-w" onclick="event.stopPropagation();openWatch(matches[${idx}])">${wl}</button>
-        <button class="btn-h" onclick="event.stopPropagation()">Stats</button>
+        <button class="btn-w" data-mid="${mid}">${wl}</button>
+        <button class="btn-h">Stats</button>
       </div>
     </div>`;
   });
-  document.getElementById('match-list').innerHTML=html;
+  list.innerHTML=html;
+
+  // Attach click events after DOM insert — fixes scope loss bug
+  list.querySelectorAll('.match-card').forEach(card=>{
+    const mid=card.dataset.mid;
+    card.addEventListener('click',()=>{
+      const match=matches.find(x=>String(x.id)===String(mid)||String(matches.indexOf(x))===String(mid));
+      if(match) openWatch(match);
+    });
+  });
+  list.querySelectorAll('.btn-w').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const mid=btn.dataset.mid;
+      const match=matches.find(x=>String(x.id)===String(mid)||String(matches.indexOf(x))===String(mid));
+      if(match) openWatch(match);
+    });
+  });
+  list.querySelectorAll('.btn-h').forEach(btn=>{
+    btn.addEventListener('click',e=>e.stopPropagation());
+  });
 }
 function filterM(f,btn){document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildMatchList(f);}
 // ===================== WATCH MODAL =====================
