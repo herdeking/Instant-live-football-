@@ -216,7 +216,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-brand">
-    <div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <!-- Football logo SVG -->
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="#00e96b"/>
+        <circle cx="16" cy="16" r="15" fill="none" stroke="#00b854" stroke-width="1"/>
+        <path d="M16 6.5L19.2 11.5H25.5L21 17L23 23.5L16 20L9 23.5L11 17L6.5 11.5H12.8Z" fill="#07090a"/>
+        <circle cx="16" cy="16" r="3" fill="#00e96b"/>
+      </svg>
       <div class="sb-logo">FULL<span>TIME</span></div>
     </div>
     <div class="sb-badge">Admin</div>
@@ -280,8 +287,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <button class="mob-menu" onclick="toggleSidebar()">
-      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <button class="mob-menu" onclick="toggleSidebar()" title="Menu" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(0,233,107,.1);border:1.5px solid rgba(0,233,107,.3);padding:0">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="#00e96b"/>
+        <path d="M16 6.5L19.2 11.5H25.5L21 17L23 23.5L16 20L9 23.5L11 17L6.5 11.5H12.8Z" fill="#07090a"/>
+        <circle cx="16" cy="16" r="3" fill="#00e96b"/>
+      </svg>
     </button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-right">
@@ -301,22 +312,22 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
       <div class="stats-strip">
         <div class="stat-card">
           <div class="stat-label">Live Matches</div>
-          <div class="stat-val" style="color:var(--live)" id="stat-live">3</div>
+          <div class="stat-val" style="color:var(--live)" id="stat-live">0</div>
           <div class="stat-sub">Currently streaming</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Total Matches</div>
-          <div class="stat-val" id="stat-total">9</div>
+          <div class="stat-val" id="stat-total">0</div>
           <div class="stat-sub">Across all competitions</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Subscribers</div>
-          <div class="stat-val" style="color:var(--gold)" id="stat-subs">142</div>
+          <div class="stat-val" style="color:var(--gold)" id="stat-subs">0</div>
           <div class="stat-sub">Active paying users</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Revenue</div>
-          <div class="stat-val" style="color:var(--g)" id="stat-rev">₦248k</div>
+          <div class="stat-val" style="color:var(--g)" id="stat-rev">₦0</div>
           <div class="stat-sub">This month</div>
         </div>
       </div>
@@ -664,22 +675,22 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
       <div class="subscribers-grid">
         <div class="sub-stat">
           <div class="sub-stat-label">Total Subscribers</div>
-          <div class="sub-stat-val" style="color:var(--g)">142</div>
-          <div class="sub-stat-sub">+12 this month</div>
+          <div class="sub-stat-val" style="color:var(--g)" id="ss-total">0</div>
+          <div class="sub-stat-sub">Active paying users</div>
         </div>
         <div class="sub-stat">
           <div class="sub-stat-label">Monthly Plan</div>
-          <div class="sub-stat-val">98</div>
-          <div class="sub-stat-sub">₦98,000 / month</div>
+          <div class="sub-stat-val" id="ss-mo">0</div>
+          <div class="sub-stat-sub">₦1,000/month</div>
         </div>
         <div class="sub-stat">
           <div class="sub-stat-label">Yearly Plan</div>
-          <div class="sub-stat-val">44</div>
-          <div class="sub-stat-sub">₦440,000 / year</div>
+          <div class="sub-stat-val" id="ss-yr">0</div>
+          <div class="sub-stat-sub">₦10,000/year</div>
         </div>
         <div class="sub-stat">
           <div class="sub-stat-label">Total Revenue</div>
-          <div class="sub-stat-val" style="color:var(--gold)">₦538k</div>
+          <div class="sub-stat-val" style="color:var(--gold)" id="ss-rev">₦0</div>
           <div class="sub-stat-sub">Lifetime earnings</div>
         </div>
       </div>
@@ -941,23 +952,66 @@ function renderStreams() {
 }
 
 // ===== SUBSCRIBERS TABLE =====
-const fakeSubs = [
-  {name:'Ade Johnson',email:'ade@gmail.com',plan:'Monthly',start:'2026-04-01',exp:'2026-06-01',active:true},
-  {name:'Bola Okafor',email:'bola@yahoo.com',plan:'Yearly',start:'2026-01-01',exp:'2027-01-01',active:true},
-  {name:'Tunde Musa',email:'tunde@hotmail.com',plan:'Monthly',start:'2026-03-15',exp:'2026-05-15',active:false},
-  {name:'Ngozi Eze',email:'ngozi@gmail.com',plan:'Yearly',start:'2026-02-10',exp:'2027-02-10',active:true},
-  {name:'Emeka Dike',email:'emeka@gmail.com',plan:'Monthly',start:'2026-04-20',exp:'2026-06-20',active:true},
-];
+function loadSubs(){
+  let subs = [];
+  try { subs = JSON.parse(localStorage.getItem('ft_subscribers')||'[]'); } catch(e){}
+  return subs;
+}
+function saveSubs(subs){
+  try { localStorage.setItem('ft_subscribers', JSON.stringify(subs)); } catch(e){}
+}
 function renderSubs() {
-  document.getElementById('subs-table').innerHTML = fakeSubs.map((s,i)=>`<tr>
+  const subs = loadSubs();
+  const mo = subs.filter(s=>s.plan==='Monthly'&&s.active);
+  const yr = subs.filter(s=>s.plan==='Yearly'&&s.active);
+  const total = mo.length + yr.length;
+  const rev = (mo.length * 1000) + (yr.length * 10000);
+
+  // Update stat cards
+  const ss = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  ss('ss-total', total);
+  ss('ss-mo', mo.length);
+  ss('ss-yr', yr.length);
+  ss('ss-rev', '₦'+(rev>=1000?(rev/1000).toFixed(0)+'k':rev));
+  ss('stat-subs', total);
+  ss('stat-rev', '₦'+(rev>=1000?(rev/1000).toFixed(0)+'k':rev));
+
+  const tbody = document.getElementById('subs-table');
+  if(!subs.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:20px">No subscribers yet. They will appear here after payment.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = subs.map((s,i)=>`<tr>
     <td style="color:var(--t3)">${i+1}</td>
-    <td><div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem">${s.name}</div><div style="font-size:.72rem;color:var(--t3)">${s.email}</div></td>
+    <td><div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem">${s.name||'—'}</div><div style="font-size:.72rem;color:var(--t3)">${s.email||''}</div></td>
     <td><span class="status-pill ${s.plan==='Yearly'?'pill-up':'pill-draft'}">${s.plan}</span></td>
-    <td style="font-size:.78rem;color:var(--t2)">${s.start}</td>
-    <td style="font-size:.78rem;color:var(--t2)">${s.exp}</td>
+    <td style="font-size:.78rem;color:var(--t2)">${s.start||'—'}</td>
+    <td style="font-size:.78rem;color:var(--t2)">${s.exp||'—'}</td>
     <td><span class="status-pill ${s.active?'pill-live':'pill-ft'}">${s.active?'Active':'Expired'}</span></td>
-    <td><button class="action-btn del">Remove</button></td>
+    <td><button class="action-btn del" onclick="removeSub(${i})">Remove</button></td>
   </tr>`).join('');
+}
+function removeSub(i){
+  const subs = loadSubs();
+  subs.splice(i,1);
+  saveSubs(subs);
+  renderSubs();
+  showToast('Subscriber removed');
+}
+function addSubscriberPrompt(){
+  const name = prompt('Subscriber name:');
+  if(!name) return;
+  const email = prompt('Subscriber email:');
+  if(!email) return;
+  const plan = confirm('Yearly plan? (OK=Yearly, Cancel=Monthly)') ? 'Yearly' : 'Monthly';
+  const today = new Date().toISOString().split('T')[0];
+  const expDate = new Date();
+  expDate.setMonth(expDate.getMonth() + (plan==='Yearly'?12:1));
+  const subs = loadSubs();
+  subs.push({name, email, plan, start:today, exp:expDate.toISOString().split('T')[0], active:true});
+  saveSubs(subs);
+  renderSubs();
+  showToast('Subscriber added: '+name);
 }
 
 // ===== ADD MATCH =====
