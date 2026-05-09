@@ -311,11 +311,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 </aside>
 </div>
 <nav class="bottom-nav">
-  <div class="bn-item active" id="bn-home" onclick="setTab('home')">
+  <div class="bn-item active" id="bn-home" onclick="setTab('home');filterM('all',document.querySelector('.f-btn'))">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
     <span>Home</span>
   </div>
-  <div class="bn-item" id="bn-live" onclick="setTab('live');filterM('live',document.querySelector('.f-btn:nth-child(2)'))">
+  <div class="bn-item" id="bn-live" onclick="setTab('live');applyLiveFilter()">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14M15.54 8.46a5 5 0 010 7.07M8.46 8.46a5 5 0 000 7.07"/></svg>
     <span>Live</span>
   </div>
@@ -602,7 +602,8 @@ function buildHero(){
   const hi=document.getElementById('fh-img');hi.src=getLogo(f.home);hi.alt=f.home;
   const ai=document.getElementById('fa-img');ai.src=getLogo(f.away);ai.alt=f.away;
   document.getElementById('feat-card').onclick=()=>openWatch(f);
-  document.getElementById('feat-btn').textContent=f.status==='live'?'▶  Watch Live':f.status==='upcoming'?'⏰  Set Reminder':'▶  Watch Replay';
+  const btnLabel = f.status==='live' ? '▶  Watch Live' : f.status==='finished' ? '▶  Watch Replay' : '▶  Watch Preview';
+  document.getElementById('feat-btn').textContent = btnLabel;
 }
 function buildFilters(){
   const comps=[...new Set(matches.map(m=>m.comp).filter(Boolean))];
@@ -634,7 +635,7 @@ function buildMatchList(filter){
     const hs=isUp?'–':m.hscore, as_=isUp?'–':m.ascore;
     const hW=!isUp&&Number(m.hscore)>Number(m.ascore);
     const aW=!isUp&&Number(m.ascore)>Number(m.hscore);
-    const wl=isLive?'Watch':isFt?'Replay':'Preview';
+    const wl=isLive?'Watch':isFt?'Replay':'Watch';
     const mid=m.id||i;
     const fallH='https://ui-avatars.com/api/?name='+encodeURIComponent(m.home)+'&background=1a2330&color=00e96b&size=40';
     const fallA='https://ui-avatars.com/api/?name='+encodeURIComponent(m.away)+'&background=1a2330&color=00e96b&size=40';
@@ -721,21 +722,62 @@ function openWatch(m){
     descEl.style.display = 'none';
   }
 
-  // Stream embed
+  // Stream embed — AUTO PLAY immediately
   const fr = document.getElementById('stream-frame');
   const ph = document.getElementById('vid-ph');
   fr.src=''; fr.srcdoc='';
+
   if(m.stream && m.stream.trim()){
+    // Has a stream — load it immediately
     ph.style.display='none';
     fr.style.display='block';
     if(m.stream.trim().startsWith('<')){
       fr.srcdoc = m.stream;
     } else {
-      fr.src = m.stream;
+      // Append autoplay param if YouTube
+      let streamUrl = m.stream.trim();
+      if(streamUrl.includes('youtube.com/embed') && !streamUrl.includes('autoplay')){
+        streamUrl += (streamUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+      }
+      fr.src = streamUrl;
     }
-  } else {
+  } else if(m.status === 'live'){
+    // Live but no stream set — show animated loading state
     ph.style.display='flex';
     fr.style.display='none';
+    ph.innerHTML = `
+      <svg class="pitch-svg" viewBox="0 0 200 130" fill="none">
+        <rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/>
+        <line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/>
+        <circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <rect x="1" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <rect x="177" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <circle cx="100" cy="65" r="2" fill="#00e96b"/>
+      </svg>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">LIVE — Stream Loading</span>
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);letter-spacing:.5px;text-align:center">Admin is setting up the stream.<br>Refresh in a moment.</div>
+      <button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh</button>
+    `;
+  } else {
+    // Upcoming/Finished with no stream
+    ph.style.display='flex';
+    fr.style.display='none';
+    ph.innerHTML = `
+      <svg class="pitch-svg" viewBox="0 0 200 130" fill="none">
+        <rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/>
+        <line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/>
+        <circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <rect x="1" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <rect x="177" y="40" width="22" height="50" fill="none" stroke="#00e96b" stroke-width="1"/>
+        <circle cx="100" cy="65" r="2" fill="#00e96b"/>
+      </svg>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--t3);text-transform:uppercase;text-align:center">
+        ${m.status==='upcoming'?'⏰ Stream starts at kick-off':'No stream available'}
+      </div>
+    `;
   }
 
   // Reset tabs to Events
@@ -1175,6 +1217,25 @@ let lsInterval = null;
 function startLsRefresh(){
   loadLiveScores();
   lsInterval = setInterval(loadLiveScores, 60000);
+}
+
+function applyLiveFilter(){
+  // Scroll to top of match list
+  window.scrollTo({top:0, behavior:'smooth'});
+  // Find the Live filter button and click it
+  const btns = document.querySelectorAll('.f-btn');
+  let liveBtn = null;
+  btns.forEach(b=>{ if(b.textContent.trim().toLowerCase()==='live') liveBtn=b; });
+  if(liveBtn){
+    filterM('live', liveBtn);
+  } else {
+    // Filters not built yet — build them first then apply
+    buildFilters();
+    setTimeout(()=>{
+      const btns2 = document.querySelectorAll('.f-btn');
+      btns2.forEach(b=>{ if(b.textContent.trim().toLowerCase()==='live') filterM('live',b); });
+    }, 100);
+  }
 }
 
 function setTab(id){
