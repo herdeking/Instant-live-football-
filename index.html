@@ -432,57 +432,124 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
   </div>
 </div>
 <script>
+const B='https://media.api-sports.io/football/teams/';
+const LB='https://media.api-sports.io/football/leagues/';
 const LOGOS={
-  'arsenal':'https://media.api-sports.io/football/teams/42.png',
-  'man city':'https://media.api-sports.io/football/teams/50.png',
-  'manchester city':'https://media.api-sports.io/football/teams/50.png',
-  'liverpool':'https://media.api-sports.io/football/teams/40.png',
-  'chelsea':'https://media.api-sports.io/football/teams/49.png',
-  'tottenham':'https://media.api-sports.io/football/teams/47.png',
-  'spurs':'https://media.api-sports.io/football/teams/47.png',
-  'man united':'https://media.api-sports.io/football/teams/33.png',
-  'manchester united':'https://media.api-sports.io/football/teams/33.png',
-  'newcastle':'https://media.api-sports.io/football/teams/34.png',
-  'aston villa':'https://media.api-sports.io/football/teams/66.png',
-  'west ham':'https://media.api-sports.io/football/teams/48.png',
-  'brighton':'https://media.api-sports.io/football/teams/51.png',
-  'brentford':'https://media.api-sports.io/football/teams/55.png',
-  'fulham':'https://media.api-sports.io/football/teams/36.png',
-  'wolves':'https://media.api-sports.io/football/teams/39.png',
-  'wolverhampton':'https://media.api-sports.io/football/teams/39.png',
-  'everton':'https://media.api-sports.io/football/teams/45.png',
-  'crystal palace':'https://media.api-sports.io/football/teams/52.png',
-  'nottingham forest':'https://media.api-sports.io/football/teams/65.png',
-  'leicester':'https://media.api-sports.io/football/teams/46.png',
-  'bournemouth':'https://media.api-sports.io/football/teams/35.png',
-  'real madrid':'https://media.api-sports.io/football/teams/541.png',
-  'barcelona':'https://media.api-sports.io/football/teams/529.png',
-  'atletico':'https://media.api-sports.io/football/teams/530.png',
-  'atletico madrid':'https://media.api-sports.io/football/teams/530.png',
-  'sevilla':'https://media.api-sports.io/football/teams/536.png',
-  'villarreal':'https://media.api-sports.io/football/teams/533.png',
-  'real sociedad':'https://media.api-sports.io/football/teams/548.png',
-  'juventus':'https://media.api-sports.io/football/teams/496.png',
-  'ac milan':'https://media.api-sports.io/football/teams/489.png',
-  'milan':'https://media.api-sports.io/football/teams/489.png',
-  'inter milan':'https://media.api-sports.io/football/teams/505.png',
-  'inter':'https://media.api-sports.io/football/teams/505.png',
-  'napoli':'https://media.api-sports.io/football/teams/492.png',
-  'roma':'https://media.api-sports.io/football/teams/497.png',
-  'lazio':'https://media.api-sports.io/football/teams/487.png',
-  'atalanta':'https://media.api-sports.io/football/teams/499.png',
-  'bayern':'https://media.api-sports.io/football/teams/157.png',
-  'bayern munich':'https://media.api-sports.io/football/teams/157.png',
-  'dortmund':'https://media.api-sports.io/football/teams/165.png',
-  'borussia dortmund':'https://media.api-sports.io/football/teams/165.png',
-  'rb leipzig':'https://media.api-sports.io/football/teams/173.png',
-  'bayer leverkusen':'https://media.api-sports.io/football/teams/168.png',
-  'psg':'https://media.api-sports.io/football/teams/85.png',
-  'paris saint-germain':'https://media.api-sports.io/football/teams/85.png',
-  'lyon':'https://media.api-sports.io/football/teams/80.png',
-  'marseille':'https://media.api-sports.io/football/teams/81.png',
-  'monaco':'https://media.api-sports.io/football/teams/91.png',
+  'arsenal':B+'42.png','man city':B+'50.png','manchester city':B+'50.png',
+  'liverpool':B+'40.png','chelsea':B+'49.png','tottenham':B+'47.png',
+  'spurs':B+'47.png','tottenham hotspur':B+'47.png',
+  'man united':B+'33.png','manchester united':B+'33.png','man utd':B+'33.png',
+  'newcastle':B+'34.png','newcastle united':B+'34.png',
+  'aston villa':B+'66.png','aston vill':B+'66.png',
+  'west ham':B+'48.png','west ham united':B+'48.png',
+  'brighton':B+'51.png','brentford':B+'55.png','fulham':B+'36.png',
+  'wolves':B+'39.png','wolverhampton':B+'39.png',
+  'everton':B+'45.png','crystal palace':B+'52.png',
+  'nottingham forest':B+'65.png','nottm forest':B+'65.png',
+  'leicester':B+'46.png','leicester city':B+'46.png',
+  'bournemouth':B+'35.png','southampton':B+'41.png',
+  'ipswich':B+'57.png','leeds':B+'63.png','leeds united':B+'63.png',
+  'burnley':B+'44.png','sheffield united':B+'62.png',
+  'watford':B+'38.png','norwich':B+'43.png','norwich city':B+'43.png',
+  'luton':B+'1359.png','luton town':B+'1359.png',
+  'real madrid':B+'541.png','barcelona':B+'529.png',
+  'atletico':B+'530.png','atletico madrid':B+'530.png',
+  'atl\u00e9tico madrid':B+'530.png','atl\u00e9tico':B+'530.png',
+  'sevilla':B+'536.png','villarreal':B+'533.png','real sociedad':B+'548.png',
+  'athletic bilbao':B+'531.png','athletic club':B+'531.png',
+  'real betis':B+'543.png','betis':B+'543.png',
+  'celta vigo':B+'538.png','celta':B+'538.png',
+  'getafe':B+'546.png','osasuna':B+'727.png','rayo vallecano':B+'728.png',
+  'mallorca':B+'728.png','girona':B+'547.png','alaves':B+'542.png',
+  'valencia':B+'532.png','espanyol':B+'532.png','las palmas':B+'546.png',
+  'juventus':B+'496.png','ac milan':B+'489.png','milan':B+'489.png',
+  'inter milan':B+'505.png','inter':B+'505.png','internazionale':B+'505.png',
+  'napoli':B+'492.png','roma':B+'497.png','as roma':B+'497.png',
+  'lazio':B+'487.png','atalanta':B+'499.png','fiorentina':B+'502.png',
+  'torino':B+'503.png','bologna':B+'500.png','udinese':B+'494.png',
+  'sassuolo':B+'498.png','empoli':B+'511.png','lecce':B+'867.png',
+  'cagliari':B+'488.png','genoa':B+'495.png','parma':B+'488.png',
+  'venezia':B+'517.png','monza':B+'2715.png',
+  'hellas verona':B+'504.png','verona':B+'504.png',
+  'salernitana':B+'514.png','frosinone':B+'501.png',
+  'bayern':B+'157.png','bayern munich':B+'157.png','fc bayern':B+'157.png',
+  'dortmund':B+'165.png','borussia dortmund':B+'165.png','bvb':B+'165.png',
+  'rb leipzig':B+'173.png','leipzig':B+'173.png',
+  'bayer leverkusen':B+'168.png','leverkusen':B+'168.png',
+  'eintracht frankfurt':B+'169.png','frankfurt':B+'169.png',
+  'wolfsburg':B+'161.png','stuttgart':B+'172.png','vfb stuttgart':B+'172.png',
+  'freiburg':B+'160.png','sc freiburg':B+'160.png',
+  'union berlin':B+'182.png','hertha berlin':B+'159.png',
+  'borussia monchengladbach':B+'163.png','gladbach':B+'163.png',
+  'mainz':B+'164.png','augsburg':B+'170.png','hoffenheim':B+'167.png',
+  'werder bremen':B+'162.png','bremen':B+'162.png',
+  'cologne':B+'175.png','bochum':B+'176.png','heidenheim':B+'180.png',
+  'psg':B+'85.png','paris saint-germain':B+'85.png','paris sg':B+'85.png',
+  'lyon':B+'80.png','olympique lyonnais':B+'80.png',
+  'marseille':B+'81.png','olympique de marseille':B+'81.png',
+  'monaco':B+'91.png','as monaco':B+'91.png',
+  'lille':B+'79.png','nice':B+'84.png','rennes':B+'94.png',
+  'lens':B+'116.png','strasbourg':B+'95.png','montpellier':B+'82.png',
+  'nantes':B+'83.png','toulouse':B+'96.png','reims':B+'93.png',
+  'lorient':B+'97.png','brest':B+'113.png','angers':B+'112.png',
+  'havre':B+'119.png','le havre':B+'119.png',
+  'porto':B+'212.png','fc porto':B+'212.png',
+  'benfica':B+'211.png','sl benfica':B+'211.png',
+  'sporting cp':B+'228.png','sporting':B+'228.png',
+  'ajax':B+'194.png','psv':B+'197.png','psv eindhoven':B+'197.png',
+  'feyenoord':B+'193.png',
+  'celtic':B+'232.png','rangers':B+'234.png',
+  'brugge':B+'245.png','club brugge':B+'245.png',
+  'shakhtar':B+'278.png','shakhtar donetsk':B+'278.png',
+  'galatasaray':B+'2627.png','galatasaray sk':B+'2627.png',
+  'besiktas':B+'2626.png','fenerbahce':B+'2628.png',
+  'trabzonspor':B+'2624.png','antalyaspor':B+'2629.png',
+  'red star belgrade':B+'289.png','crvena zvezda':B+'289.png',
+  'rb salzburg':B+'322.png','salzburg':B+'322.png',
+  'young boys':B+'327.png','bsc young boys':B+'327.png',
+  'panathinaikos':B+'354.png','olympiacos':B+'350.png','paok':B+'351.png',
+  'ferencvaros':B+'366.png',
+  'slavia prague':B+'338.png','sparta prague':B+'337.png',
+  'malmo':B+'385.png','malmo ff':B+'385.png',
+  'rosenborg':B+'391.png','bodo glimt':B+'394.png',
+  'midtjylland':B+'395.png','fc midtjylland':B+'395.png',
+  'brondby':B+'393.png','copenhagen':B+'392.png','fc copenhagen':B+'392.png',
+  'al ahly':B+'441.png','zamalek':B+'442.png',
+  'wydad':B+'453.png','raja casablanca':B+'454.png',
+  'sundowns':B+'406.png','mamelodi sundowns':B+'406.png',
+  'kaizer chiefs':B+'405.png','orlando pirates':B+'407.png',
+  'flamengo':B+'127.png','palmeiras':B+'121.png','fluminense':B+'124.png',
+  'corinthians':B+'126.png','sao paulo':B+'133.png',
+  'boca juniors':B+'136.png','river plate':B+'135.png',
+  'inter miami':B+'1616.png','la galaxy':B+'1602.png',
+  'al nassr':B+'2932.png','al hilal':B+'2931.png',
+  'al ittihad':B+'2933.png','al ahli':B+'2934.png',
 };
+const LEAGUE_LOGOS={
+  'premier league':LB+'39.png','la liga':LB+'140.png','laliga':LB+'140.png',
+  'serie a':LB+'135.png','bundesliga':LB+'78.png','ligue 1':LB+'61.png',
+  'champions league':LB+'2.png','ucl':LB+'2.png','uefa champions league':LB+'2.png',
+  'europa league':LB+'3.png','uel':LB+'3.png','uefa europa league':LB+'3.png',
+  'conference league':LB+'848.png','uecl':LB+'848.png',
+  'fa cup':LB+'45.png','carabao cup':LB+'48.png',
+  'world cup':LB+'1.png','euro 2024':LB+'4.png',
+  'copa del rey':LB+'143.png','dfb pokal':LB+'529.png','coppa italia':LB+'137.png',
+  'eredivisie':LB+'88.png','primeira liga':LB+'94.png','primeira':LB+'94.png',
+  'scottish premiership':LB+'179.png','mls':LB+'253.png','npfl':LB+'335.png',
+  'super lig':LB+'203.png','turquie super lig':LB+'203.png',
+  'saudi professional league':LB+'307.png','saudi league':LB+'307.png',
+  'african champions league':LB+'20.png','caf':LB+'20.png',
+};
+function getLogo(n){
+  if(!n)return'';
+  const k=n.toLowerCase().trim();
+  return LOGOS[k]||'https://ui-avatars.com/api/?name='+encodeURIComponent(n)+'&background=131920&color=8a9ab0&size=60&bold=true&font-size=0.35';
+}
+function getLeagueLogo(comp){
+  if(!comp)return'';
+  const k=comp.toLowerCase().trim();
+  return LEAGUE_LOGOS[k]||'https://ui-avatars.com/api/?name='+encodeURIComponent((comp||'').substring(0,2))+'&background=1a2330&color=8a9ab0&size=30&bold=true&font-size=0.5';
+}
 function getLogo(n){if(!n)return'';const k=n.toLowerCase().trim();return LOGOS[k]||'https://ui-avatars.com/api/?name='+encodeURIComponent(n)+'&background=1a2330&color=00e96b&size=40&bold=true&font-size=0.4';}
 let matches=[],isSubscribed=false,currentMatch=null,selectedPlan='yr';
 try{isSubscribed=localStorage.getItem('ft_subscribed')==='true';}catch(e){}
@@ -584,34 +651,41 @@ function buildTicker(){
   document.getElementById('ticker-inner').innerHTML=s+s;
 }
 function buildHero(){
-  // Admin-selected Match of the Day first, then first live, then first match
   let motdId=null;
   try{motdId=localStorage.getItem('ft_motd');}catch(e){}
   let f=null;
   if(motdId) f=matches.find(m=>String(m.id)===String(motdId));
-  if(!f) f=matches.find(m=>m.status==='live');
+  if(!f) f=matches.find(m=>getMatchStatus(m)==='live');
   if(!f) f=matches[0];
-
   const heroSec=document.getElementById('hero-section');
-  if(!f){
-    if(heroSec) heroSec.style.display='none';
-    return;
-  }
-  if(heroSec) heroSec.style.display='';
-
-  document.getElementById('hero-tag').textContent=(f.comp||'Football')+(f.round?' · '+f.round:'')+(f.status==='live'?' · LIVE':'');
+  if(!f){if(heroSec)heroSec.style.display='none';return;}
+  if(heroSec)heroSec.style.display='';
+  const status=getMatchStatus(f);
+  const minute=status==='live'?getLiveMinute(f):'';
+  const isLive=status==='live', isFt=status==='finished';
+  document.getElementById('hero-tag').textContent=(f.comp||'Football')+(f.round?' · '+f.round:'')+(isLive?' · LIVE':'');
   document.getElementById('hero-title').innerHTML=f.home+' <em>vs</em> '+f.away;
   document.getElementById('feat-comp').textContent=(f.comp||'')+(f.round?' · '+f.round:'');
-  document.getElementById('feat-time').textContent=f.status==='live'?(f.minute||'Live'):f.status==='upcoming'?(f.time||'Upcoming'):'FT';
-  document.getElementById('feat-sh').textContent=f.status!=='upcoming'?f.hscore:'–';
-  document.getElementById('feat-sa').textContent=f.status!=='upcoming'?f.ascore:'–';
+  document.getElementById('feat-time').textContent=isLive?(minute||'Live'):isFt?'FT':(f.time||'Upcoming');
+  document.getElementById('feat-sh').textContent=status!=='upcoming'?f.hscore:'–';
+  document.getElementById('feat-sa').textContent=status!=='upcoming'?f.ascore:'–';
   document.getElementById('feat-home').textContent=f.home;
   document.getElementById('feat-away').textContent=f.away;
   const hi=document.getElementById('fh-img');hi.src=getLogo(f.home);hi.alt=f.home;
   const ai=document.getElementById('fa-img');ai.src=getLogo(f.away);ai.alt=f.away;
   document.getElementById('feat-card').onclick=()=>openWatch(f);
-  const btnLabel = f.status==='live' ? '▶  Watch Live' : f.status==='finished' ? '▶  Watch Replay' : '▶  Watch Preview';
-  document.getElementById('feat-btn').textContent = btnLabel;
+  document.getElementById('feat-btn').textContent=isLive?'▶  Watch Live':isFt?'▶  Watch Replay':'▶  Watch';
+}
+function updateCount(){
+  const n=matches.filter(m=>getMatchStatus(m)==='live').length;
+  document.getElementById('live-count').textContent=n+' Live';
+}
+function buildTicker(){
+  const live=matches.filter(m=>getMatchStatus(m)==='live');
+  if(!live.length)return;
+  let s='';
+  live.forEach(m=>{const min=getLiveMinute(m);s+=`<span>${m.home} ${m.hscore||0}-${m.ascore||0} ${m.away}</span><span class="sep"> · </span><span>${min||'LIVE'}</span><span class="sep"> | </span>`;});
+  document.getElementById('ticker-inner').innerHTML=s+s;
 }
 function buildFilters(){
   const comps=[...new Set(matches.map(m=>m.comp).filter(Boolean))];
@@ -698,7 +772,7 @@ function buildMatchList(filter){
     html+=`<div class="match-card" style="animation-delay:${i*.06}s" data-mid="${mid}">
       <div class="mc-header">
         <div class="mc-league">
-          <img class="mc-league-logo" src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.comp||'F')}&background=1a2330&color=8a9ab0&size=20&bold=true&font-size=0.4" alt="${m.comp||''}">
+          <img class="mc-league-logo" src="${getLeagueLogo(m.comp)}" alt="${m.comp||''}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((m.comp||'F').substring(0,2))}&background=1a2330&color=8a9ab0&size=30'">>
           <span class="mc-league-name">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
         </div>
         ${badge}
@@ -748,40 +822,42 @@ function openWatch(m){
   if(!m){return;}
   currentMatch=m;
 
+  // Use auto-status based on time
+  const status = getMatchStatus(m);
+  const isLive = status==='live';
+  const isFt = status==='finished';
+  const minute = isLive ? getLiveMinute(m) : (m.minute||'');
+
   // Header
-  const scoreStr = m.status!=='upcoming' ? m.hscore+' - '+m.ascore : 'vs';
+  const scoreStr = status!=='upcoming' ? m.hscore+' – '+m.ascore : 'vs';
   document.getElementById('w-teams').textContent = m.home+' '+scoreStr+' '+m.away;
 
   // Meta line
   let metaParts = [];
   if(m.comp) metaParts.push(m.comp);
   if(m.round) metaParts.push(m.round);
-  if(m.status==='live') metaParts.push((m.minute||'')+" · LIVE");
-  else if(m.status==='finished') metaParts.push('Full Time');
+  if(isLive) metaParts.push((minute||'')+" · LIVE");
+  else if(isFt) metaParts.push('Full Time');
   else metaParts.push(m.time ? 'Kick-off '+m.time : 'Upcoming');
   document.getElementById('w-meta').textContent = metaParts.join(' · ');
 
   // Progress bar
   let prog = 0;
-  if(m.status==='finished') prog = 100;
-  else if(m.status==='live'){
-    const min = parseInt((m.minute||'0').replace(/[^0-9]/g,''));
+  if(isFt) prog = 100;
+  else if(isLive){
+    const min = parseInt((minute||'0').replace(/[^0-9]/g,''));
     prog = Math.min(Math.round((min/90)*100), 99);
   }
   document.getElementById('prog-fill').style.width = prog+'%';
   document.getElementById('prog-time').textContent =
-    m.status==='finished' ? 'FT · 90:00' :
-    m.status==='upcoming' ? 'Kick-off: '+(m.time||'TBC') :
-    (m.minute||'0\'') + ' / 90\'';
+    isFt ? 'FT · 90:00' :
+    !isLive ? 'Kick-off: '+(m.time||'TBC') :
+    (minute||'0\'') + ' / 90\'';
 
   // Match description
   const descEl = document.getElementById('w-desc');
-  if(m.desc && m.desc.trim()){
-    descEl.textContent = m.desc;
-    descEl.style.display = 'block';
-  } else {
-    descEl.style.display = 'none';
-  }
+  if(m.desc && m.desc.trim()){ descEl.textContent=m.desc; descEl.style.display='block'; }
+  else { descEl.style.display='none'; }
 
   // Stream embed — AUTO PLAY immediately
   const fr = document.getElementById('stream-frame');
@@ -789,21 +865,23 @@ function openWatch(m){
   fr.src=''; fr.srcdoc='';
 
   if(m.stream && m.stream.trim()){
-    // Has a stream — load it immediately
     ph.style.display='none';
     fr.style.display='block';
     if(m.stream.trim().startsWith('<')){
       fr.srcdoc = m.stream;
     } else {
-      // Append autoplay param if YouTube
       let streamUrl = m.stream.trim();
+      // Add autoplay for YouTube
       if(streamUrl.includes('youtube.com/embed') && !streamUrl.includes('autoplay')){
-        streamUrl += (streamUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+        streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1&mute=0';
+      }
+      // Add autoplay for Dailymotion
+      if(streamUrl.includes('dailymotion.com/embed') && !streamUrl.includes('autoplay')){
+        streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1';
       }
       fr.src = streamUrl;
     }
-  } else if(m.status === 'live'){
-    // Live but no stream set — show animated loading state
+  } else if(isLive){
     ph.style.display='flex';
     fr.style.display='none';
     ph.innerHTML = `
@@ -819,11 +897,10 @@ function openWatch(m){
         <div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div>
         <span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">LIVE — Stream Loading</span>
       </div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);letter-spacing:.5px;text-align:center">Admin is setting up the stream.<br>Refresh in a moment.</div>
-      <button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh</button>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);letter-spacing:.5px;text-align:center;padding:0 16px">Admin is setting up the stream.<br>Check back in a moment.</div>
+      <button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh Page</button>
     `;
   } else {
-    // Upcoming/Finished with no stream
     ph.style.display='flex';
     fr.style.display='none';
     ph.innerHTML = `
@@ -836,11 +913,10 @@ function openWatch(m){
         <circle cx="100" cy="65" r="2" fill="#00e96b"/>
       </svg>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--t3);text-transform:uppercase;text-align:center">
-        ${m.status==='upcoming'?'⏰ Stream starts at kick-off':'No stream available'}
+        ${isFt ? 'No replay stream available' : '\u23f0 Stream starts at kick-off'}
       </div>
     `;
   }
-
   // Reset tabs to Events
   document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.w-tab').classList.add('active');
