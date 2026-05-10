@@ -1061,17 +1061,26 @@ function buildEvs(m){
 function buildLu(m){
   const el = document.getElementById('lu-grid');
   if(!el) return;
-  const hLu = m.homeLineup || [];
-  const aLu = m.awayLineup || [];
-  const hHtml = hLu.length > 0
-    ? hLu.map(p=>`<div class="lu-p"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')
-    : `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;line-height:1.6">Lineup not available.<br>Admin can add lineups via the dashboard.</div>`;
-  const aHtml = aLu.length > 0
-    ? aLu.map(p=>`<div class="lu-p"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')
-    : `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;line-height:1.6">Lineup not available.<br>Admin can add lineups via the dashboard.</div>`;
+
+  function renderPlayers(arr, label){
+    if(!arr||!arr.length) return `<div style="color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;line-height:1.6;padding:6px 0">Lineup not available.<br><span style="font-size:.68rem">Admin can add lineups via the dashboard.</span></div>`;
+    return arr.map(p=>`<div class="lu-p"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('');
+  }
+
+  const hLu = m.homeLineup||[], aLu = m.awayLineup||[];
+  const hSubs = m.homeSubs||[], aSubs = m.awaySubs||[];
+
   el.innerHTML = `
-    <div><div class="lu-name" style="color:var(--g)">${m.home}</div>${hHtml}</div>
-    <div><div class="lu-name" style="color:#4fc3f7">${m.away}</div>${aHtml}</div>`;
+    <div>
+      <div class="lu-name" style="color:var(--g)">${m.home}</div>
+      ${renderPlayers(hLu)}
+      ${hSubs.length ? `<div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin:8px 0 4px;padding-top:6px;border-top:1px solid var(--bd)">Substitutes</div>${hSubs.map(p=>`<div class="lu-p" style="color:var(--t3)"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')}` : ''}
+    </div>
+    <div>
+      <div class="lu-name" style="color:#4fc3f7">${m.away}</div>
+      ${renderPlayers(aLu)}
+      ${aSubs.length ? `<div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin:8px 0 4px;padding-top:6px;border-top:1px solid var(--bd)">Substitutes</div>${aSubs.map(p=>`<div class="lu-p" style="color:var(--t3)"><span class="lu-num">${p.num||''}</span>${p.name}</div>`).join('')}` : ''}
+    </div>`;
 }
 
 function buildSt(m){
