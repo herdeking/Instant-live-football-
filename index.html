@@ -557,11 +557,32 @@ function loadMatches(){
   matches=[];
   try{
     const s=localStorage.getItem('ft_matches');
-    if(s) matches=JSON.parse(s);
-  }catch(e){matches=[];}
+    if(s){
+      const parsed = JSON.parse(s);
+      if(Array.isArray(parsed)) matches=parsed;
+    }
+  }catch(e){ matches=[]; }
   renderAll();
 }
-function renderAll(){applyAds();buildTicker();buildHero();buildFilters();buildMatchList('all');buildSidebar();updateCount();}
+function renderAll(){
+  applyAds();
+  buildTicker();
+  buildHero();
+  buildFilters();
+  buildMatchList('all');
+  buildSidebar();
+  updateCount();
+  // Auto-refresh every 60s to update live minutes
+  if(!window._autoRefresh){
+    window._autoRefresh = setInterval(()=>{
+      buildTicker();
+      buildHero();
+      buildMatchList(window._currentFilter||'all');
+      buildSidebar();
+      updateCount();
+    }, 60000);
+  }
+}
 
 function buildSidebar(){
   const schedEl=document.getElementById('sb-schedule');
@@ -836,7 +857,12 @@ function buildMatchList(filter){
     });
   });
 }
-function filterM(f,btn){document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildMatchList(f);}
+function filterM(f,btn){
+  window._currentFilter = f;
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildMatchList(f);
+}
 // ===================== WATCH MODAL =====================
 function openWatch(m){
   if(!m){return;}
