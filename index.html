@@ -731,6 +731,26 @@ function buildMatchList(filter){
   else if(filter!=='all') vis=withStatus.filter(m=>(m.comp||'').toLowerCase()===decodeURIComponent(filter).toLowerCase());
   else vis=withStatus;
 
+  // SORT: Live → Upcoming → Finished
+  const order = {live:0, upcoming:1, finished:2, draft:3};
+  vis = [...vis].sort((a,b)=>{
+    const ao = order[a._status||'draft'] ?? 3;
+    const bo = order[b._status||'draft'] ?? 3;
+    if(ao !== bo) return ao - bo;
+    // Within same status: sort live by minute desc, upcoming by kickoff asc
+    if(a._status==='live'){
+      const am = parseInt((a.minute||'0').replace(/[^0-9]/g,''));
+      const bm = parseInt((b.minute||'0').replace(/[^0-9]/g,''));
+      return bm - am; // higher minute first
+    }
+    if(a._status==='upcoming'){
+      const at = (a.date||'')+(a.time||'');
+      const bt = (b.date||'')+(b.time||'');
+      return at.localeCompare(bt); // earliest first
+    }
+    return 0;
+  });
+
   document.getElementById('mc').textContent=vis.length+' match'+(vis.length!==1?'es':'');
   const list=document.getElementById('match-list');
 
