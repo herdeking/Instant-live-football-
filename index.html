@@ -223,10 +223,10 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 .w-teams{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px}
 .w-meta{font-size:.68rem;color:var(--t2);font-family:'Barlow Condensed',sans-serif;margin-top:1px}
 .w-close{background:none;border:none;color:var(--t2);font-size:1rem;cursor:pointer}
-.vid-wrap{position:relative;background:#000;aspect-ratio:16/9}
+.vid-wrap{position:relative;background:#000;aspect-ratio:16/9;min-height:220px}
 .vid-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(160deg,#040a06,#0a1508)}
 .pitch-svg{width:150px;opacity:.25}
-.stream-iframe{width:100%;aspect-ratio:16/9;border:none;display:none}
+.stream-iframe{width:100%;height:100%;min-height:280px;border:none;display:none;position:absolute;inset:0}
 .vid-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase}
 .controls{background:var(--s2);padding:7px 13px;display:flex;align-items:center;gap:8px}
 .ctrl{background:none;border:none;color:var(--t2);cursor:pointer;font-size:.9rem;padding:3px;transition:color .15s}
@@ -720,9 +720,37 @@ function openWatch(m){
   const ph=document.getElementById('vid-ph');
   fr.src='';fr.srcdoc='';
   if(m.stream&&m.stream.trim()){
-    ph.style.display='none';fr.style.display='block';
-    if(m.stream.trim().startsWith('<')){fr.srcdoc=m.stream;}
-    else{let u=m.stream.trim();if(u.includes('youtube.com/embed')&&!u.includes('autoplay'))u+=(u.includes('?')?'&':'?')+'autoplay=1';fr.src=u;}
+    let streamUrl = m.stream.trim();
+
+    // If it's an iframe embed code — extract the src URL
+    if(streamUrl.startsWith('<')){
+      const srcMatch = streamUrl.match(/src=["']([^"']+)["']/i);
+      if(srcMatch && srcMatch[1]){
+        streamUrl = srcMatch[1];
+      }
+    }
+
+    // Clean up the URL
+    streamUrl = streamUrl.trim();
+
+    // Add autoplay for YouTube
+    if(streamUrl.includes('youtube.com/embed')&&!streamUrl.includes('autoplay')){
+      streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1';
+    }
+
+    // Build a full iframe with all needed attributes
+    ph.style.display='none';
+    fr.style.display='block';
+    fr.setAttribute('src', streamUrl);
+    fr.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+    fr.setAttribute('allowfullscreen', 'true');
+    fr.setAttribute('frameborder', '0');
+    fr.setAttribute('scrolling', 'no');
+
+    // If direct src fails, try srcdoc wrapper as fallback
+    fr.onerror = function(){
+      fr.srcdoc = `<!DOCTYPE html><html><head><style>*{margin:0;padding:0;overflow:hidden}body{background:#000;width:100%;height:100vh}</style></head><body><iframe src="${streamUrl}" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; fullscreen; encrypted-media"></iframe></body></html>`;
+    };
   } else {
     ph.style.display='flex';fr.style.display='none';
     ph.innerHTML=isLive?`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">LIVE — Stream Loading</span></div><div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);text-align:center;padding:0 16px">Admin is setting up the stream.<br>Refresh in a moment.</div><button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh Page</button>`:
@@ -944,57 +972,54 @@ function scheduleLineupFetch(match){
 
 async function fetchLineupForMatch(match){
   try{
-    const prompt = `You are a football data assistant. Find the confirmed or predicted starting lineup for this match:
+    // Try Sofascore for lineups (free, no key)
+    const query = encodeURIComponent(match.home);
+    const res = await fetch(`https://api.sofascore.com/api/v1/search/events?q=${query}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    const events = data.events||[];
 
-Match: ${match.home} vs ${match.away}
-Competition: ${match.comp||'Football'}
-Date: ${match.date}
-Kickoff: ${match.time} WAT (Nigeria)
-
-Search for the latest confirmed lineup news. Return ONLY a JSON object in this exact format, no other text:
-{
-  "homeLineup": ["1. PlayerName (GK)", "2. PlayerName", "3. PlayerName", "4. PlayerName", "5. PlayerName", "6. PlayerName", "7. PlayerName", "8. PlayerName", "9. PlayerName", "10. PlayerName", "11. PlayerName"],
-  "awayLineup": ["1. PlayerName (GK)", "2. PlayerName", "3. PlayerName", "4. PlayerName", "5. PlayerName", "6. PlayerName", "7. PlayerName", "8. PlayerName", "9. PlayerName", "10. PlayerName", "11. PlayerName"],
-  "homeFormation": "4-3-3",
-  "awayFormation": "4-2-3-1",
-  "confirmed": true,
-  "source": "official/predicted"
-}
-
-If you cannot find confirmed lineups, provide the most likely predicted lineup based on recent squad news. Always return 11 players per team.`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:prompt}]
-      })
+    // Find matching event
+    const found = events.find(e=>{
+      const hn=(e.homeTeam?.name||'').toLowerCase();
+      const an=(e.awayTeam?.name||'').toLowerCase();
+      const mh=match.home.toLowerCase();
+      const ma=match.away.toLowerCase();
+      return (hn.includes(mh.split(' ')[0])||mh.includes(hn.split(' ')[0]))&&
+             (an.includes(ma.split(' ')[0])||ma.includes(an.split(' ')[0]));
     });
 
-    if(!response.ok) return;
-    const data = await response.json();
-    const text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-    const clean = text.replace(/```json|```/g,'').trim();
-    const lineup = JSON.parse(clean);
+    if(!found) return;
 
-    if(lineup.homeLineup&&lineup.awayLineup&&lineup.homeLineup.length>0){
-      // Save lineup to Firebase — will auto-update for all users
+    // Get lineups
+    const luRes = await fetch(`https://api.sofascore.com/api/v1/event/${found.id}/lineups`);
+    if(!luRes.ok) return;
+    const luData = await luRes.json();
+
+    const formatPlayers = (players=[]) => {
+      return players
+        .filter(p=>p.player)
+        .sort((a,b)=>(a.jerseyNumber||99)-(b.jerseyNumber||99))
+        .map((p,i)=>`${p.jerseyNumber||i+1}. ${p.player.name}${p.position==='G'?' (GK)':''}`);
+    };
+
+    const homeLineup = formatPlayers(luData.home?.players);
+    const awayLineup = formatPlayers(luData.away?.players);
+
+    if(homeLineup.length>0 && awayLineup.length>0){
       await db.collection('matches').doc(match.id).update({
-        homeLineup: lineup.homeLineup,
-        awayLineup: lineup.awayLineup,
-        homeFormation: lineup.homeFormation||'',
-        awayFormation: lineup.awayFormation||'',
-        lineupConfirmed: lineup.confirmed||false,
-        lineupSource: lineup.source||'predicted',
+        homeLineup,
+        awayLineup,
+        homeFormation: luData.home?.formation||'',
+        awayFormation: luData.away?.formation||'',
+        lineupConfirmed: true,
+        lineupSource: 'sofascore',
         lineupFetchedAt: new Date().toISOString()
       });
-      console.log('Lineup saved for', match.home, 'vs', match.away);
+      console.log('✓ Lineup saved for', match.home, 'vs', match.away);
     }
   }catch(e){
-    console.log('Lineup fetch failed for', match.home, 'vs', match.away, e.message);
+    console.log('Lineup fetch failed:', match.home, 'vs', match.away, e.message);
   }
 }
 
@@ -1032,16 +1057,34 @@ async function loadLiveScores(){
 }
 
 // =====================================================
-// AUTO SCORE + SCORER UPDATER — Claude AI
-// Updates live match scores + goal scorers every 2 mins
+// =====================================================
+// AUTO SCORE + SCORER UPDATER — FREE APIs (No key needed)
+// Uses TheSportsDB (free) + Sofascore (free)
+// Updates every 90 seconds for live matches
 // =====================================================
 let scoreUpdateTimers = {};
+
+// League name to TheSportsDB league ID mapping
+const LEAGUE_IDS = {
+  'premier league': 4328,
+  'la liga': 4335, 'laliga': 4335,
+  'serie a': 4332,
+  'bundesliga': 4331,
+  'ligue 1': 4334,
+  'champions league': 4480, 'uefa champions league': 4480,
+  'europa league': 4481,
+  'fa cup': 4337,
+  'eredivisie': 4337,
+  'npfl': 4370,
+};
 
 function startAutoScoreUpdate(match) {
   const id = match.id;
   if(scoreUpdateTimers[id]) return;
   if(match.status !== 'live') return;
 
+  // Fetch immediately then every 90 seconds
+  fetchScoreUpdate(match);
   scoreUpdateTimers[id] = setInterval(async () => {
     const fresh = matches.find(m => m.id === id);
     if(!fresh || fresh.status !== 'live') {
@@ -1050,98 +1093,241 @@ function startAutoScoreUpdate(match) {
       return;
     }
     await fetchScoreUpdate(fresh);
-  }, 2 * 60 * 1000); // every 2 minutes
-
-  // Also fetch immediately
-  fetchScoreUpdate(match);
+  }, 90 * 1000);
 }
 
 async function fetchScoreUpdate(match) {
   try {
-    const prompt = `You are a live football score tracker. Find the CURRENT live score for this match:
+    // Strategy 1: Try Sofascore API (most accurate, free, no key)
+    const result = await fetchFromSofascore(match);
+    if(result) {
+      await applyScoreUpdate(match, result);
+      return;
+    }
 
-Match: ${match.home} vs ${match.away}
-Competition: ${match.comp || 'Football'}
-Date: ${match.date}
-Kickoff: ${match.time} WAT
+    // Strategy 2: Try TheSportsDB (free, no key)
+    const result2 = await fetchFromTheSportsDB(match);
+    if(result2) {
+      await applyScoreUpdate(match, result2);
+      return;
+    }
 
-Search for the latest live score RIGHT NOW. Return ONLY this JSON, no other text:
-{
-  "homeScore": 0,
-  "awayScore": 0,
-  "minute": "67'",
-  "status": "live",
-  "events": [
-    {"min": "23'", "type": "goal", "player": "Player Name", "team": "home", "detail": "assisted by Player"},
-    {"min": "45'", "type": "goal", "player": "Player Name", "team": "away", "detail": "penalty"},
-    {"min": "55'", "type": "yellow", "player": "Player Name", "team": "home", "detail": ""},
-    {"min": "67'", "type": "red", "player": "Player Name", "team": "away", "detail": ""}
-  ],
-  "finished": false
-}
+    // Strategy 3: Try AllSportsAPI (free tier)
+    const result3 = await fetchFromAllSports(match);
+    if(result3) {
+      await applyScoreUpdate(match, result3);
+    }
 
-Include ALL goals, yellow cards, red cards, and substitutions so far. If match is finished set finished to true and status to finished.`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{type: 'web_search_20250305', name: 'web_search'}],
-        messages: [{role: 'user', content: prompt}]
-      })
-    });
-
-    if(!response.ok) return;
-    const data = await response.json();
-    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
-
-    const prevMatch = matches.find(m => m.id === match.id);
-    const prevHome = prevMatch?.hscore || 0;
-    const prevAway = prevMatch?.ascore || 0;
-    const newHome = result.homeScore ?? prevHome;
-    const newAway = result.awayScore ?? prevAway;
-
-    const updateData = {
-      hscore: newHome,
-      ascore: newAway,
-      minute: result.minute || '',
-      status: result.finished ? 'finished' : 'live',
-      events: result.events || [],
-      scoreUpdatedAt: new Date().toISOString()
-    };
-
-    await db.collection('matches').doc(match.id).update(updateData);
-
-    // Show goal notification if score changed
-    if(newHome > prevHome) showGoalAlert(match.home, result.events);
-    if(newAway > prevAway) showGoalAlert(match.away, result.events);
-
-    console.log(`Score updated: ${match.home} ${newHome}-${newAway} ${match.away} (${result.minute})`);
   } catch(e) {
     console.log('Score update failed:', e.message);
   }
 }
 
-function showGoalAlert(team, events) {
-  // Find the most recent goal event
-  const goals = (events || []).filter(e => e.type === 'goal');
-  const lastGoal = goals[goals.length - 1];
-  const scorer = lastGoal ? lastGoal.player : '';
+async function fetchFromSofascore(match) {
+  try {
+    // Search for the event by team names
+    const query = encodeURIComponent(match.home);
+    const res = await fetch(`https://api.sofascore.com/api/v1/search/events?q=${query}`, {
+      headers: {'Accept': 'application/json'}
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    const events = data.events || [];
+
+    // Find matching event
+    const found = events.find(e => {
+      const hn = (e.homeTeam?.name||'').toLowerCase();
+      const an = (e.awayTeam?.name||'').toLowerCase();
+      const mh = match.home.toLowerCase();
+      const ma = match.away.toLowerCase();
+      return (hn.includes(mh.split(' ')[0]) || mh.includes(hn.split(' ')[0])) &&
+             (an.includes(ma.split(' ')[0]) || ma.includes(an.split(' ')[0]));
+    });
+
+    if(!found) return null;
+
+    // Get detailed event data
+    const detailRes = await fetch(`https://api.sofascore.com/api/v1/event/${found.id}`);
+    if(!detailRes.ok) return null;
+    const detail = await detailRes.json();
+    const ev = detail.event;
+
+    // Get incidents (goals, cards)
+    let events2 = [];
+    try {
+      const incRes = await fetch(`https://api.sofascore.com/api/v1/event/${found.id}/incidents`);
+      if(incRes.ok){
+        const incData = await incRes.json();
+        events2 = (incData.incidents||[]).map(inc => ({
+          min: inc.time ? inc.time+"'" : '',
+          type: inc.incidentType==='goal'||inc.incidentType==='ownGoal'?'goal':
+                inc.incidentType==='card'&&inc.incidentClass==='yellow'?'yellow':
+                inc.incidentType==='card'&&inc.incidentClass==='red'?'red':'sub',
+          player: inc.player?.name || inc.playerName || '',
+          team: inc.isHome ? 'home' : 'away',
+          detail: inc.incidentType==='ownGoal'?'Own Goal':inc.assist1?.name||''
+        }));
+      }
+    } catch(e){}
+
+    const statusType = ev?.status?.type || '';
+    return {
+      homeScore: ev?.homeScore?.current ?? 0,
+      awayScore: ev?.awayScore?.current ?? 0,
+      minute: ev?.time?.played ? ev.time.played+"'" : '',
+      finished: statusType === 'finished',
+      events: events2
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function fetchFromTheSportsDB(match) {
+  try {
+    // Search events by team name using free TheSportsDB API
+    const teamQuery = encodeURIComponent(match.home);
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${teamQuery}&s=Soccer`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    const events = data.event || [];
+
+    // Find today's match
+    const today = match.date;
+    const found = events.find(e => {
+      const hn = (e.strHomeTeam||'').toLowerCase();
+      const an = (e.strAwayTeam||'').toLowerCase();
+      const mh = match.home.toLowerCase();
+      const ma = match.away.toLowerCase();
+      const dateMatch = e.dateEvent === today;
+      return dateMatch &&
+        (hn.includes(mh.split(' ')[0]) || mh.includes(hn.split(' ')[0])) &&
+        (an.includes(ma.split(' ')[0]) || ma.includes(an.split(' ')[0]));
+    });
+
+    if(!found) return null;
+
+    const hs = parseInt(found.intHomeScore) || 0;
+    const as_ = parseInt(found.intAwayScore) || 0;
+    const finished = found.strStatus === 'Match Finished' || found.strProgress === 'FT';
+    const minute = found.strProgress && found.strProgress !== 'FT' ? found.strProgress : '';
+
+    return {
+      homeScore: hs,
+      awayScore: as_,
+      minute: minute,
+      finished: finished,
+      events: []
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function fetchFromAllSports(match) {
+  try {
+    const today = match.date;
+    const res = await fetch(`https://apiv2.allsportsapi.com/football/?met=Fixtures&from=${today}&to=${today}&APIkey=9c25b305c60c17e3da15ca27890d7e51875bece4bfbd3bcce5d5b2cce5f2cb0e`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    const fixtures = data.result || [];
+
+    const found = fixtures.find(f => {
+      const hn = (f.event_home_team||'').toLowerCase();
+      const an = (f.event_away_team||'').toLowerCase();
+      const mh = match.home.toLowerCase();
+      const ma = match.away.toLowerCase();
+      return (hn.includes(mh.split(' ')[0]) || mh.includes(hn.split(' ')[0])) &&
+             (an.includes(ma.split(' ')[0]) || ma.includes(an.split(' ')[0]));
+    });
+
+    if(!found) return null;
+
+    // Build events from goalscorers
+    const events = [];
+    const goalscorers = found.goalscorer || [];
+    goalscorers.forEach(g => {
+      events.push({
+        min: g.time ? g.time+"'" : '',
+        type: 'goal',
+        player: g.home_scorer || g.away_scorer || '',
+        team: g.home_scorer ? 'home' : 'away',
+        detail: g.score || ''
+      });
+    });
+
+    // Yellow cards
+    const cards = found.cards || [];
+    cards.forEach(c => {
+      events.push({
+        min: c.time ? c.time+"'" : '',
+        type: c.card === 'yellow card' ? 'yellow' : 'red',
+        player: c.home_fault || c.away_fault || '',
+        team: c.home_fault ? 'home' : 'away',
+        detail: ''
+      });
+    });
+
+    return {
+      homeScore: parseInt(found.event_final_result?.split(' - ')[0]) || 0,
+      awayScore: parseInt(found.event_final_result?.split(' - ')[1]) || 0,
+      minute: found.event_status || '',
+      finished: found.event_status === 'Finished',
+      events: events
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function applyScoreUpdate(match, result) {
+  const prevMatch = matches.find(m => m.id === match.id);
+  const prevHome = prevMatch?.hscore || 0;
+  const prevAway = prevMatch?.ascore || 0;
+  const newHome = result.homeScore ?? prevHome;
+  const newAway = result.awayScore ?? prevAway;
+
+  // Only update if something changed
+  if(newHome === prevHome && newAway === prevAway &&
+     result.minute === prevMatch?.minute && !result.events?.length) return;
+
+  const updateData = {
+    hscore: newHome,
+    ascore: newAway,
+    minute: result.minute || prevMatch?.minute || '',
+    status: result.finished ? 'finished' : 'live',
+    scoreUpdatedAt: new Date().toISOString()
+  };
+
+  // Only update events if we got some
+  if(result.events && result.events.length > 0) {
+    updateData.events = result.events;
+  }
+
+  await db.collection('matches').doc(match.id).update(updateData);
+
+  // Show goal notification if score changed
+  if(newHome > prevHome) showGoalAlert(match.home, result.events, 'home');
+  if(newAway > prevAway) showGoalAlert(match.away, result.events, 'away');
+
+  console.log(`✓ Score: ${match.home} ${newHome}-${newAway} ${match.away} ${result.minute}`);
+}
+
+function showGoalAlert(team, events, side) {
+  const goals = (events||[]).filter(e=>e.type==='goal' && e.team===side);
+  const lastGoal = goals[goals.length-1];
+  const scorer = lastGoal?.player || '';
 
   const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#0d1117;border:1px solid #00e96b;border-radius:12px;padding:12px 20px;z-index:9999;display:flex;align-items:center;gap:10px;animation:slideDown .3s ease;box-shadow:0 4px 24px rgba(0,233,107,.2);min-width:260px;max-width:90vw';
-  toast.innerHTML = `
-    <span style="font-size:1.4rem">⚽</span>
+  toast.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#0d1117;border:1px solid #00e96b;border-radius:12px;padding:12px 20px;z-index:9999;display:flex;align-items:center;gap:10px;animation:slideDown .3s ease;box-shadow:0 4px 24px rgba(0,233,107,.2);min-width:260px;max-width:90vw';
+  toast.innerHTML=`
+    <span style="font-size:1.5rem">⚽</span>
     <div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:#00e96b">GOAL! ${team}</div>
-      ${scorer ? `<div style="font-size:.75rem;color:#8a9ab0;font-family:'Barlow Condensed',sans-serif">${scorer}${lastGoal?.detail ? ' · ' + lastGoal.detail : ''}</div>` : ''}
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:#00e96b">GOAL! ${team}</div>
+      ${scorer?`<div style="font-size:.78rem;color:#8a9ab0;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${scorer}${lastGoal?.detail?' · '+lastGoal.detail:''}</div>`:''}
     </div>`;
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 5000);
+  setTimeout(()=>toast.remove(), 6000);
 }
 
 // Start auto score updates for all live matches
