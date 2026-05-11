@@ -441,6 +441,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Fix for slow connections / offline
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+try {
+  db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
+} catch(e){}
+
 // =====================================================
 // TEAM & LEAGUE LOGOS
 // =====================================================
@@ -462,27 +468,49 @@ try{isSubscribed=localStorage.getItem('ft_subscribed')==='true';}catch(e){}
 // LOAD MATCHES FROM FIREBASE (visible to everyone!)
 // =====================================================
 async function loadMatches(){
-  try {
-    const snapshot = await db.collection('matches').orderBy('createdAt','desc').get();
-    matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-  } catch(e) {
-    // Fallback if no createdAt field or first load
-    try {
-      const snapshot = await db.collection('matches').get();
-      matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-    } catch(e2) {
-      matches = [];
-    }
-  }
-  renderAll();
+  // Show loading state
+  document.getElementById('match-list').innerHTML='<div class="fb-loading"><div class="ls-spinner"></div><span>Connecting to database…</span></div>';
 
-  // Real-time listener: auto-update when admin changes anything
-  db.collection('matches').onSnapshot(snapshot => {
+  try {
+    // Test Firebase connection first
+    const snapshot = await db.collection('matches').get();
     matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+    // Sort by createdAt if available
+    matches.sort((a,b)=>{
+      const at = a.createdAt?.seconds || 0;
+      const bt = b.createdAt?.seconds || 0;
+      return bt - at;
+    });
+
     renderAll();
-    scheduleAllLineups();
-    startAllScoreUpdates(); // Auto-update live scores + scorers
-  });
+
+    // Real-time listener: auto-update when admin changes anything
+    db.collection('matches').onSnapshot(snapshot => {
+      matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+      matches.sort((a,b)=>{
+        const at = a.createdAt?.seconds || 0;
+        const bt = b.createdAt?.seconds || 0;
+        return bt - at;
+      });
+      renderAll();
+      scheduleAllLineups();
+      startAllScoreUpdates();
+    }, err => {
+      console.log('Snapshot error:', err.message);
+    });
+
+  } catch(e) {
+    console.log('Firebase error:', e.message);
+    // Show helpful error
+    document.getElementById('match-list').innerHTML=`
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <p style="color:var(--red)">Database connection failed</p>
+      <p style="font-size:.72rem;margin-top:4px;color:var(--t3)">${e.message}</p>
+      <button onclick="loadMatches()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;margin-top:10px">Retry</button>
+    </div>`;
+  }
 }
 
 // =====================================================
@@ -616,7 +644,7 @@ function buildMatchList(filter){
   document.getElementById('mc').textContent=vis.length+' match'+(vis.length!==1?'es':'');
   const list=document.getElementById('match-list');
   if(!vis.length){
-    list.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>No matches found</p></div>';
+    list.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>No matches yet for this filter</p><p style="font-size:.7rem;margin-top:4px;color:var(--t3)">Try "All" or check back soon</p></div>';
     return;
   }
 
