@@ -153,7 +153,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <a class="sb-item" onclick="showPanel('upload',this)" href="#"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Add Match</span></a>
 <a class="sb-item" onclick="showPanel('streams',this)" href="#"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Live Streams</span></a>
 <div class="sb-section">Settings</div>
-<a class="sb-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>View Site</span></a>
+<a class="sb-item" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>View Public Site</span></a>
+<a class="sb-item" onclick="showPanel('liveupdates',this)" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Live Updates</span></a>
+<a class="sb-item" onclick="copyPublicLink()" href="#"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><span>Copy Public Link</span></a>
 </nav>
 <div class="sb-footer">
 <div class="sb-admin">
@@ -184,7 +186,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <!-- DASHBOARD -->
 <div class="panel active" id="panel-dashboard">
 <div class="firebase-badge">
-🔥 <strong>Firebase Connected</strong> — All matches you save here are instantly visible to every visitor on the public site. No more localStorage issues!
+🔥 <strong>Firebase Connected</strong> — All matches are instantly visible to every visitor.
+<span style="margin-left:8px;background:rgba(0,233,107,.15);border:1px solid rgba(0,233,107,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer" onclick="window.open('index.html','_blank')">👁 View Public Site →</span>
+<span style="margin-left:4px;background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:#4fc3f7" onclick="copyPublicLink()">🔗 Copy Link</span>
 </div>
 <div class="stats-strip">
 <div class="stat-card"><div class="stat-label">Live Matches</div><div class="stat-val" style="color:var(--live)" id="stat-live">0</div><div class="stat-sub">Currently live</div></div>
@@ -305,6 +309,68 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 </div>
 <div class="section-hdr"><div class="section-title">Matches With Streams</div></div>
 <div id="streams-list"></div>
+</div>
+
+<!-- LIVE UPDATES PANEL -->
+<div class="panel" id="panel-liveupdates">
+<div class="section-hdr"><div class="section-title">Live Score Updates</div></div>
+<div class="firebase-badge" style="background:rgba(255,53,53,.08);border-color:rgba(255,53,53,.25);color:#ff8a8a">
+⚽ <strong style="color:#e8edf2">Select a live match below</strong> to manually update the score, minute, and add goal scorers. Changes appear instantly on the public site.
+</div>
+<div id="live-match-selector" style="margin-bottom:16px"></div>
+
+<!-- Score Update Form -->
+<div class="form-card" id="score-update-form" style="display:none">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Update Score — <span id="su-match-name" style="color:var(--g)"></span></div>
+<div class="form-grid">
+  <div class="field-group"><label id="su-home-lbl">Home Score</label><input type="number" id="su-hscore" min="0" value="0"></div>
+  <div class="field-group"><label id="su-away-lbl">Away Score</label><input type="number" id="su-ascore" min="0" value="0"></div>
+  <div class="field-group"><label>Current Minute</label><input type="text" id="su-minute" placeholder="e.g. 67'"></div>
+  <div class="field-group">
+    <label>Match Status</label>
+    <select id="su-status">
+      <option value="live">Live</option>
+      <option value="finished">Full Time</option>
+      <option value="upcoming">Upcoming</option>
+    </select>
+  </div>
+</div>
+<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:10px">Add Match Event</div>
+  <div class="form-grid">
+    <div class="field-group"><label>Minute</label><input type="text" id="ev-min" placeholder="e.g. 23'"></div>
+    <div class="field-group">
+      <label>Event Type</label>
+      <select id="ev-type">
+        <option value="goal">⚽ Goal</option>
+        <option value="yellow">🟨 Yellow Card</option>
+        <option value="red">🟥 Red Card</option>
+        <option value="sub">🔄 Substitution</option>
+        <option value="pen_miss">❌ Penalty Missed</option>
+      </select>
+    </div>
+    <div class="field-group"><label>Player Name</label><input type="text" id="ev-player" placeholder="e.g. Saka"></div>
+    <div class="field-group">
+      <label>Team</label>
+      <select id="ev-team">
+        <option value="home">Home</option>
+        <option value="away">Away</option>
+      </select>
+    </div>
+    <div class="field-group full"><label>Detail (optional)</label><input type="text" id="ev-detail" placeholder="e.g. assisted by Odegaard / penalty"></div>
+  </div>
+  <button class="btn-secondary" style="margin-top:8px" onclick="addEvent()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Event
+  </button>
+  <div id="events-preview" style="margin-top:10px"></div>
+</div>
+<div class="form-actions">
+  <button class="btn-secondary" onclick="document.getElementById('score-update-form').style.display='none';selectedLiveMatch=null">Cancel</button>
+  <button class="btn-primary" onclick="pushScoreUpdate()">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Push Update Live
+  </button>
+</div>
+</div>
 </div>
 
 </div><!-- end content -->
@@ -645,27 +711,118 @@ function showToast(msg){
 }
 
 // =====================================================
-// PANEL NAVIGATION
+// INIT
 // =====================================================
+
+function copyPublicLink(){
+  const url=window.location.origin+'/index.html';
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('✓ Public link copied!')).catch(()=>prompt('Copy this link:',url));}
+  else{prompt('Copy this link:',url);}
+}
+
+// =====================================================
+// LIVE UPDATES — Manual Score Push + Events
+// =====================================================
+let selectedLiveMatch = null;
+let pendingEvents = [];
+
 function showPanel(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   if(el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',matches:'All Matches',upload:'Add Match',streams:'Live Streams'};
+  const titles={dashboard:'Dashboard',matches:'All Matches',upload:'Add Match',streams:'Live Streams',liveupdates:'Live Updates'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
   if(id==='matches') renderMatchCards();
   if(id==='streams') renderStreams();
   if(id==='upload') clearForm();
+  if(id==='liveupdates') renderLiveSelector();
   document.getElementById('sidebar').classList.remove('open');
 }
 
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
-function logout(){try{localStorage.removeItem('ft_admin_auth');}catch(e){}window.location.href='admin-login.html';}
+function renderLiveSelector(){
+  const el=document.getElementById('live-match-selector');
+  const live=matches.filter(m=>m.status==='live'||m.status==='upcoming');
+  if(!live.length){el.innerHTML='<div style="color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.85rem;padding:16px 0;text-align:center">No live or upcoming matches. Set a match status to Live first.</div>';return;}
+  el.innerHTML=`<div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:8px">Select Match to Update</div>`+
+  live.map(m=>`<div class="m-admin-card ${m.status}" style="cursor:pointer;margin-bottom:8px" onclick="selectLiveMatch('${m.id}')">
+    <div class="mac-top"><div class="mac-comp">${m.comp||'Football'}</div>${statusPill(m.status,m.minute)}</div>
+    <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${m.status==='upcoming'?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`}</div><div class="mac-away">${m.away}</div></div>
+    <div style="text-align:center;margin-top:8px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--g);letter-spacing:1px">TAP TO UPDATE →</span></div>
+  </div>`).join('');
+}
 
-// =====================================================
-// INIT
-// =====================================================
+function selectLiveMatch(id){
+  selectedLiveMatch=matches.find(m=>m.id===id);
+  if(!selectedLiveMatch) return;
+  pendingEvents=[...(selectedLiveMatch.events||[])];
+  document.getElementById('su-match-name').textContent=selectedLiveMatch.home+' vs '+selectedLiveMatch.away;
+  document.getElementById('su-home-lbl').textContent=selectedLiveMatch.home+' Score';
+  document.getElementById('su-away-lbl').textContent=selectedLiveMatch.away+' Score';
+  document.getElementById('su-hscore').value=selectedLiveMatch.hscore||0;
+  document.getElementById('su-ascore').value=selectedLiveMatch.ascore||0;
+  document.getElementById('su-minute').value=selectedLiveMatch.minute||'';
+  document.getElementById('su-status').value=selectedLiveMatch.status||'live';
+  renderEventsPreview();
+  document.getElementById('score-update-form').style.display='';
+  document.getElementById('score-update-form').scrollIntoView({behavior:'smooth'});
+}
+
+function addEvent(){
+  const min=document.getElementById('ev-min').value.trim();
+  const type=document.getElementById('ev-type').value;
+  const player=document.getElementById('ev-player').value.trim();
+  const team=document.getElementById('ev-team').value;
+  const detail=document.getElementById('ev-detail').value.trim();
+  if(!min||!player){showToast('Enter minute and player name');return;}
+  pendingEvents.push({min,type,player,team,detail});
+  // Clear inputs
+  document.getElementById('ev-min').value='';
+  document.getElementById('ev-player').value='';
+  document.getElementById('ev-detail').value='';
+  renderEventsPreview();
+  showToast('Event added — tap Push Update Live to save');
+}
+
+function removeEvent(i){
+  pendingEvents.splice(i,1);
+  renderEventsPreview();
+}
+
+function renderEventsPreview(){
+  const el=document.getElementById('events-preview');
+  if(!pendingEvents.length){el.innerHTML='<div style="color:var(--t3);font-size:.78rem;font-family:\'Barlow Condensed\',sans-serif;padding:4px 0">No events yet</div>';return;}
+  el.innerHTML=pendingEvents.map((e,i)=>`
+  <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-family:'Barlow Condensed',sans-serif;font-size:.82rem">
+    <span style="color:var(--g);min-width:28px;font-weight:700">${e.min}</span>
+    <span>${e.type==='goal'?'⚽':e.type==='yellow'?'🟨':e.type==='red'?'🟥':e.type==='sub'?'🔄':'❌'}</span>
+    <span style="flex:1"><strong>${e.player}</strong>${e.detail?' · <span style="color:var(--t3)">'+e.detail+'</span>':''} <span style="color:var(--t3);font-size:.7rem">(${e.team})</span></span>
+    <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding:2px 6px">✕</button>
+  </div>`).join('');
+}
+
+async function pushScoreUpdate(){
+  if(!selectedLiveMatch) return;
+  const hscore=parseInt(document.getElementById('su-hscore').value)||0;
+  const ascore=parseInt(document.getElementById('su-ascore').value)||0;
+  const minute=document.getElementById('su-minute').value.trim();
+  const status=document.getElementById('su-status').value;
+
+  try{
+    await db.collection('matches').doc(selectedLiveMatch.id).update({
+      hscore, ascore, minute, status,
+      events: pendingEvents,
+      scoreUpdatedAt: new Date().toISOString(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(`✓ ${selectedLiveMatch.home} ${hscore}–${ascore} ${selectedLiveMatch.away} pushed live!`);
+    document.getElementById('score-update-form').style.display='none';
+    selectedLiveMatch=null;
+    renderLiveSelector();
+  }catch(err){
+    alert('Error: '+err.message);
+  }
+}
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   loadMatches();
