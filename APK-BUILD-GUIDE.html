@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FullTime — Build Your Android APK</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#07090a;color:#e8edf2;padding:20px;line-height:1.6}
+h1{color:#00e96b;font-size:1.8rem;margin-bottom:6px}
+h2{color:#00e96b;font-size:1.1rem;margin:20px 0 8px;display:flex;align-items:center;gap:8px}
+.step{background:#0d1117;border:1px solid #1e2d3d;border-left:3px solid #00e96b;border-radius:8px;padding:14px 16px;margin-bottom:12px}
+.step-num{background:#00e96b;color:#07090a;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.url{background:#131920;border:1px solid #1e2d3d;border-radius:5px;padding:8px 12px;font-family:monospace;font-size:.85rem;color:#4fc3f7;word-break:break-all;margin:8px 0}
+.note{background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.2);border-radius:6px;padding:10px 12px;font-size:.82rem;color:#ffc107;margin-top:8px}
+.green{color:#00e96b;font-weight:700}
+.btn{display:inline-block;background:#00e96b;color:#07090a;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:.9rem;margin-top:10px}
+hr{border:none;border-top:1px solid #1e2d3d;margin:20px 0}
+code{background:#131920;padding:2px 6px;border-radius:3px;font-size:.85rem;color:#4fc3f7}
+</style>
+</head>
+<body>
+
+<h1>📱 FullTime Android APK Guide</h1>
+<p style="color:#8a9ab0;margin-bottom:20px">Follow these steps to convert your FullTime site into a real Android APK using PWABuilder (free).</p>
+
+<hr>
+
+<h2>PART 1 — Upload Files to Your Hosting First</h2>
+
+<div class="step">
+<p>Make sure these files are uploaded to <strong style="color:#00e96b">instantlivefootball.com.ng</strong>:</p>
+<ul style="margin-top:8px;margin-left:16px;font-size:.88rem;color:#8a9ab0;line-height:2">
+  <li>✅ <code>index.html</code></li>
+  <li>✅ <code>sw.js</code> (service worker)</li>
+  <li>✅ <code>manifest.json</code></li>
+  <li>✅ <code>icons/</code> folder with all icon PNG files</li>
+</ul>
+<div class="note">⚠️ The icons folder is important. First open <code>generate-icons.html</code> in your browser, tap "Generate & Download All Icons", then upload them all into a folder called <code>icons</code> on your hosting.</div>
+</div>
+
+<hr>
+
+<h2>PART 2 — Build the APK with PWABuilder</h2>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">1</span><strong>Go to PWABuilder</strong></div>
+<div class="url">https://www.pwabuilder.com</div>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">2</span><strong>Enter your site URL</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">Type your URL and click Start:</p>
+<div class="url">https://instantlivefootball.com.ng</div>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">3</span><strong>Wait for the scan</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">PWABuilder will scan your site. You should see a high score (green). Click <span class="green">Next</span>.</p>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">4</span><strong>Choose Android package</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">On the "Publish" page, find the <span class="green">Android</span> card and click <span class="green">Generate</span>.</p>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">5</span><strong>Configure your app</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">Fill in these details:</p>
+<ul style="margin:8px 0 0 16px;font-size:.85rem;line-height:2;color:#8a9ab0">
+  <li>App name: <code>FullTime</code></li>
+  <li>Package ID: <code>com.instantlivefootball.app</code></li>
+  <li>App version: <code>1.0</code></li>
+  <li>Version code: <code>1</code></li>
+  <li>Display mode: <code>standalone</code></li>
+  <li>Status bar color: <code>#07090a</code></li>
+  <li>Nav bar color: <code>#07090a</code></li>
+  <li>Splash screen color: <code>#07090a</code></li>
+</ul>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">6</span><strong>Download the APK</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">Click <span class="green">Download</span>. You'll get a ZIP file. Inside it is your <code>FullTime.apk</code> file.</p>
+<div class="note">📦 The ZIP also contains signing keys and a bundle. Use the <strong>.apk</strong> file for direct installation. Use the <strong>.aab</strong> bundle if you want to upload to Google Play Store.</div>
+</div>
+
+<hr>
+
+<h2>PART 3 — Share Your APK</h2>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">7</span><strong>Host the APK for download</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">Upload the APK to your hosting at:</p>
+<div class="url">instantlivefootball.com.ng/FullTime.apk</div>
+<p style="font-size:.85rem;color:#8a9ab0;margin-top:8px">Then users can download and install it directly. Add this button to your site:</p>
+<div style="background:#131920;border:1px solid #1e2d3d;border-radius:6px;padding:10px;font-family:monospace;font-size:.8rem;color:#4fc3f7;margin-top:6px;word-break:break-all">&lt;a href="/FullTime.apk" download&gt;Download Android App&lt;/a&gt;</div>
+</div>
+
+<div class="step">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="step-num">8</span><strong>Or share via WhatsApp / Telegram</strong></div>
+<p style="font-size:.88rem;color:#8a9ab0">You can also send the APK file directly via WhatsApp or Telegram to your users. They tap it to install.</p>
+<div class="note">⚠️ Users need to enable "Install from unknown sources" in their Android settings. Tell them: <strong>Settings → Security → Install unknown apps → Allow</strong></div>
+</div>
+
+<hr>
+
+<h2>PART 4 — iOS (iPhone)</h2>
+
+<div class="step">
+<p style="font-size:.88rem;color:#8a9ab0">iPhones can install your app as a PWA without an APK:</p>
+<ol style="margin:8px 0 0 16px;font-size:.85rem;line-height:2.2;color:#8a9ab0">
+  <li>Open <code>instantlivefootball.com.ng</code> in Safari</li>
+  <li>Tap the <strong>Share</strong> button (box with arrow)</li>
+  <li>Tap <strong>"Add to Home Screen"</strong></li>
+  <li>Tap <strong>Add</strong> — app icon appears on home screen!</li>
+</ol>
+</div>
+
+<hr>
+
+<p style="text-align:center;color:#4a5a6a;font-size:.78rem;margin-top:20px">FullTime — instantlivefootball.com.ng</p>
+
+</body>
+</html>
