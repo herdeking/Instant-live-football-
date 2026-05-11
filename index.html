@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FULLTIME — Live Football</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00e96b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FullTime">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icon-144.png">
+<link rel="apple-touch-icon" sizes="128x128" href="icon-128.png">
+<meta name="msapplication-TileImage" content="icon-144.png">
+<meta name="msapplication-TileColor" content="#00e96b">
+<!-- SEO -->
+<meta name="description" content="Watch live football streams, real-time scores, lineups and goal alerts. Premier League, Serie A, La Liga and more.">
+<meta property="og:title" content="FullTime — Live Football">
+<meta property="og:description" content="Live football streams, scores and lineups in real time">
+<meta property="og:image" content="icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <!-- ===== FIREBASE SDK ===== -->
@@ -232,6 +251,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 .stat-prog{height:100%;background:var(--g);border-radius:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .match-card{animation:fadeUp .35s ease both}
 .ls-loading{display:flex;align-items:center;gap:10px;padding:16px 0;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.5px}
 .ls-spinner{width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
@@ -1132,8 +1152,79 @@ function startAllScoreUpdates() {
 }
 
 // =====================================================
-// INIT
+// PWA — Service Worker + Install Prompt
 // =====================================================
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg=>{
+        console.log('SW registered:', reg.scope);
+        // Check for updates every 60 seconds
+        setInterval(()=>reg.update(), 60000);
+      })
+      .catch(err=>console.log('SW failed:', err));
+  });
+}
+
+// Install prompt — show "Add to Home Screen" banner
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  showInstallBanner();
+});
+
+function showInstallBanner(){
+  // Don't show if already installed
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  // Don't show if dismissed before
+  try{if(localStorage.getItem('ft_install_dismissed')==='true') return;}catch(e){}
+
+  const banner=document.createElement('div');
+  banner.id='install-banner';
+  banner.style.cssText='position:fixed;bottom:72px;left:12px;right:12px;background:#0d1117;border:1px solid #00e96b;border-radius:12px;padding:12px 14px;z-index:1000;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,233,107,.15);animation:slideUp .3s ease';
+  banner.innerHTML=`
+  <img src="icons/icon-72.png" style="width:42px;height:42px;border-radius:10px;flex-shrink:0" onerror="this.style.display='none'">
+  <div style="flex:1;min-width:0">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:#00e96b">Install FullTime App</div>
+    <div style="font-size:.72rem;color:#8a9ab0;font-family:'Barlow Condensed',sans-serif">Add to home screen for the best experience</div>
+  </div>
+  <button onclick="installApp()" style="background:#00e96b;color:#07090a;border:none;border-radius:6px;padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;white-space:nowrap;flex-shrink:0">Install</button>
+  <button onclick="dismissInstall()" style="background:none;border:none;color:#4a5a6a;cursor:pointer;font-size:1.1rem;padding:4px;flex-shrink:0">✕</button>`;
+  document.body.appendChild(banner);
+}
+
+async function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result=await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  const banner=document.getElementById('install-banner');
+  if(banner) banner.remove();
+  if(result.outcome==='accepted'){
+    showToastPWA('✓ FullTime installed! Check your home screen.');
+  }
+}
+
+function dismissInstall(){
+  try{localStorage.setItem('ft_install_dismissed','true');}catch(e){}
+  const banner=document.getElementById('install-banner');
+  if(banner) banner.remove();
+}
+
+function showToastPWA(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0d1117;border:1px solid #00e96b;color:#e8edf2;font-family:\'Barlow Condensed\',sans-serif;font-size:.8rem;font-weight:600;padding:10px 16px;border-radius:6px;z-index:9999;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+// Detect if already running as installed app
+window.addEventListener('appinstalled',()=>{
+  showToastPWA('🎉 FullTime installed successfully!');
+  try{localStorage.removeItem('ft_install_dismissed');}catch(e){}
+});
 window.addEventListener('DOMContentLoaded', ()=>{
   checkSubscription();
   loadMatches();
