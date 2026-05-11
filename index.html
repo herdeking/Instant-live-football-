@@ -29,43 +29,116 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- AD BLOCKER DETECTION -->
+<!-- Google AdSense — REPLACE with your publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-REPLACE_WITH_YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+
+<!-- Monetag Ad Code — Zone 3325630 -->
+<script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',3325630,document.createElement('script'))</script>
+
+<!-- Adsterra Ad Code — Site 5777232 -->
+<script type="text/javascript">
+  atOptions = {
+    'key' : '5777232',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"></script>
+
+<!-- AD BLOCKER DETECTION — Multiple methods -->
 <script>
 (function(){
-  // Method 1: bait element
-  function checkAdBlock(){
-    const bait=document.createElement('div');
-    bait.setAttribute('class','ad-banner ads adsbox ad-placement');
-    bait.style.cssText='width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;';
+  let adBlockDetected = false;
+
+  // Method 1: Bait element
+  function checkBait(){
+    const bait = document.createElement('div');
+    bait.setAttribute('class','adsbygoogle ad-banner ads adsbox ad-placement carbon-ads');
+    bait.setAttribute('id','ad-bait');
+    bait.style.cssText='width:1px;height:1px;position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;';
     bait.innerHTML='&nbsp;';
     document.body.appendChild(bait);
     setTimeout(()=>{
-      const blocked=bait.offsetHeight===0||bait.offsetParent===null||window.getComputedStyle(bait).display==='none'||window.getComputedStyle(bait).visibility==='hidden';
-      document.body.removeChild(bait);
-      if(blocked) showAdBlockWall();
-    },200);
+      const el = document.getElementById('ad-bait');
+      if(!el) { adBlockDetected=true; showAdBlockWall(); return; }
+      const style = window.getComputedStyle(el);
+      if(el.offsetHeight===0 || el.offsetParent===null ||
+         style.display==='none' || style.visibility==='hidden' ||
+         style.opacity==='0' || el.offsetWidth===0){
+        adBlockDetected=true;
+      }
+      try{ document.body.removeChild(bait); }catch(e){}
+      if(adBlockDetected) showAdBlockWall();
+    },300);
   }
+
+  // Method 2: Check if ad scripts loaded
+  function checkAdScripts(){
+    setTimeout(()=>{
+      if(adBlockDetected) return;
+      // Check Adsterra
+      const atteraLoaded = typeof window.atOptions !== 'undefined';
+      // Check Monetag
+      const monetagLoaded = document.querySelector('script[src*="gizokraijaw"]') !== null;
+      if(!atteraLoaded && !monetagLoaded){
+        adBlockDetected=true; showAdBlockWall();
+      }
+    },2500);
+  }
+
+  // Method 3: Try fetching a known ad URL
+  function checkAdURL(){
+    setTimeout(()=>{
+      if(adBlockDetected) return;
+      const img = new Image();
+      img.onload = ()=>{};
+      img.onerror = ()=>{ adBlockDetected=true; showAdBlockWall(); };
+      img.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?t='+Date.now();
+    },1500);
+  }
+
   function showAdBlockWall(){
-    // Don't show wall to subscribers
-    try{if(localStorage.getItem('ft_subscribed')==='true')return;}catch(e){}
-    const wall=document.createElement('div');
-    wall.id='adblock-wall';
-    wall.style.cssText='position:fixed;inset:0;background:rgba(7,9,10,.98);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px)';
+    try{if(localStorage.getItem('ft_subscribed')==='true') return;}catch(e){}
+    if(document.getElementById('adblock-wall')) return;
+    const wall = document.createElement('div');
+    wall.id = 'adblock-wall';
+    wall.style.cssText='position:fixed;inset:0;background:rgba(7,9,10,.99);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(16px)';
     wall.innerHTML=`
-    <div style="background:#0d1117;border:1px solid #1e2d3d;border-top:3px solid #00e96b;border-radius:16px;padding:32px 24px;max-width:380px;width:100%;text-align:center">
-      <div style="width:64px;height:64px;border-radius:50%;background:rgba(0,233,107,.1);border:2px solid rgba(0,233,107,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00e96b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+    <div style="background:#0d1117;border:1px solid #1e2d3d;border-top:3px solid #00e96b;border-radius:18px;padding:34px 24px;max-width:380px;width:100%;text-align:center">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(0,233,107,.08);border:2px solid rgba(0,233,107,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00e96b" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+        </svg>
       </div>
-      <div style="font-family:'Bebas Neue',cursive;font-size:1.8rem;letter-spacing:3px;color:#e8edf2;margin-bottom:8px">Ad Blocker Detected</div>
-      <div style="font-size:.88rem;color:#8a9ab0;line-height:1.7;margin-bottom:20px">We rely on ads to keep this service free. Please disable your ad blocker to continue watching live football, or subscribe to go completely ad-free.</div>
-      <button onclick="window.location.reload()" style="width:100%;background:#00e96b;color:#07090a;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',cursive;font-weight:900;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:10px">I've Disabled My Ad Blocker</button>
-      <button onclick="document.getElementById('adblock-wall').remove();openSub&&openSub();" style="width:100%;background:transparent;color:#00e96b;border:1px solid rgba(0,233,107,.3);border-radius:8px;padding:12px;font-family:'Barlow Condensed',cursive;font-weight:700;font-size:.85rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">Subscribe Ad-Free — ₦1,000/mo</button>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;color:#e8edf2;margin-bottom:8px">Ad Blocker Detected</div>
+      <div style="font-size:.88rem;color:#8a9ab0;line-height:1.8;margin-bottom:24px">We rely on ads to keep FullTime free. Please <strong style="color:#e8edf2">disable your ad blocker</strong> to watch live football — or subscribe to go completely ad-free.</div>
+      <div style="background:#131920;border:1px solid #1e2d3d;border-radius:10px;padding:12px;margin-bottom:16px;text-align:left;font-size:.82rem;color:#8a9ab0;line-height:1.8">
+        <strong style="color:#e8edf2;display:block;margin-bottom:4px">How to disable:</strong>
+        1. Tap your ad blocker icon in browser<br>
+        2. Select "Pause" or "Disable for this site"<br>
+        3. Tap the button below to reload
+      </div>
+      <button onclick="window.location.reload()" style="width:100%;background:#00e96b;color:#07090a;border:none;border-radius:10px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;margin-bottom:10px">✓ I've Disabled It — Reload</button>
+      <button onclick="document.getElementById('adblock-wall').remove();setTimeout(()=>openSub&&openSub(),100);" style="width:100%;background:transparent;color:#00e96b;border:1px solid rgba(0,233,107,.3);border-radius:10px;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;cursor:pointer">Subscribe Ad-Free — ₦1,000/mo</button>
     </div>`;
     document.body.appendChild(wall);
   }
-  // Run after DOM ready
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',checkAdBlock);}
-  else{checkAdBlock();}
+
+  // Run all checks after page loads
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{
+      checkBait();
+      checkAdScripts();
+      checkAdURL();
+    });
+  } else {
+    checkBait();
+    checkAdScripts();
+    checkAdURL();
+  }
 })();
 </script>
 
@@ -322,7 +395,22 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 </div>
 </div>
 
-<div class="ad-wrap" id="ad-top"><div class="ad-lbl">AD</div><div class="ad-box"><div class="ad-text"><div class="ad-title">Bet365 — Best Football Odds</div><div class="ad-sub">50% bonus on first deposit. 18+ only.</div></div><button class="ad-cta">Claim</button></div></div>
+<div class="ad-wrap" id="ad-top">
+<div class="ad-lbl">AD</div>
+<!-- Adsterra Banner Ad -->
+<div style="text-align:center;overflow:hidden">
+<script type="text/javascript">
+  atOptions = {
+    'key' : '5777232',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"></script>
+</div>
+</div>
 <div class="sub-nudge" id="sub-nudge"><div class="sn-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="sn-text"><div class="sn-title">Go Ad-Free from ₦1,000/mo</div><div class="sn-sub">Watch without interruptions. Cancel anytime.</div></div><button class="sn-btn" onclick="openSub()">Subscribe</button></div>
 
 <div class="section" id="livescore-section">
@@ -650,7 +738,7 @@ function buildMatchList(filter){
 
   let html='';
   vis.forEach((m,i)=>{
-    if(i===3&&!isSubscribed){html+='<div class="ad-mid"><div class="ad-mid-lbl">Advertisement</div><div class="ad-mid-title">SuperSport — All Leagues in HD</div><div class="ad-mid-sub">Premier League, La Liga, UCL and more</div><button class="ad-mid-btn">Learn More</button></div>';}
+    if(i===3&&!isSubscribed){html+='<div class="ad-mid"><div class="ad-mid-lbl">Advertisement</div><div style="text-align:center"><script type="text/javascript">atOptions={\'key\':\'5777232\',\'format\':\'iframe\',\'height\':60,\'width\':468,\'params\':{}}<\/script><script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"><\/script></div></div>';}
     const status=m._status||m.status;
     const isLive=status==='live',isFt=status==='finished';
     const minute=isLive?getLiveMinute(m):'';
