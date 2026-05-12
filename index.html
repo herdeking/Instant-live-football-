@@ -47,60 +47,44 @@
 </script>
 <script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"></script>
 
-<!-- AD BLOCKER DETECTION — Multiple methods -->
+<!-- AD BLOCKER DETECTION — Bait method only (no false positives) -->
 <script>
 (function(){
-  let adBlockDetected = false;
+  // Only run once
+  if(sessionStorage.getItem('ft_adcheck_done')) return;
+  sessionStorage.setItem('ft_adcheck_done','1');
 
-  // Method 1: Bait element
-  function checkBait(){
+  function checkAdBlock(){
+    // Don't show to subscribers
+    try{if(localStorage.getItem('ft_subscribed')==='true') return;}catch(e){}
+
+    // Create bait element that ad blockers will hide
     const bait = document.createElement('div');
-    bait.setAttribute('class','adsbygoogle ad-banner ads adsbox ad-placement carbon-ads');
-    bait.setAttribute('id','ad-bait');
-    bait.style.cssText='width:1px;height:1px;position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;';
-    bait.innerHTML='&nbsp;';
+    bait.setAttribute('class','adsbygoogle');
+    bait.setAttribute('id','ft-ad-bait');
+    bait.style.cssText='width:1px;height:1px;position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;background:transparent;';
     document.body.appendChild(bait);
+
+    // Wait long enough for ad blockers to act
     setTimeout(()=>{
-      const el = document.getElementById('ad-bait');
-      if(!el) { adBlockDetected=true; showAdBlockWall(); return; }
+      const el = document.getElementById('ft-ad-bait');
+      if(!el){ showAdBlockWall(); return; }
+
       const style = window.getComputedStyle(el);
-      if(el.offsetHeight===0 || el.offsetParent===null ||
-         style.display==='none' || style.visibility==='hidden' ||
-         style.opacity==='0' || el.offsetWidth===0){
-        adBlockDetected=true;
-      }
-      try{ document.body.removeChild(bait); }catch(e){}
-      if(adBlockDetected) showAdBlockWall();
-    },300);
-  }
+      const blocked =
+        el.offsetHeight === 0 ||
+        style.display === 'none' ||
+        style.visibility === 'hidden';
 
-  // Method 2: Check if ad scripts loaded
-  function checkAdScripts(){
-    setTimeout(()=>{
-      if(adBlockDetected) return;
-      // Check Adsterra
-      const atteraLoaded = typeof window.atOptions !== 'undefined';
-      // Check Monetag
-      const monetagLoaded = document.querySelector('script[src*="gizokraijaw"]') !== null;
-      if(!atteraLoaded && !monetagLoaded){
-        adBlockDetected=true; showAdBlockWall();
-      }
-    },2500);
-  }
+      try{ document.body.removeChild(el); }catch(e){}
 
-  // Method 3: Try fetching a known ad URL
-  function checkAdURL(){
-    setTimeout(()=>{
-      if(adBlockDetected) return;
-      const img = new Image();
-      img.onload = ()=>{};
-      img.onerror = ()=>{ adBlockDetected=true; showAdBlockWall(); };
-      img.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?t='+Date.now();
-    },1500);
+      // Only show wall if DEFINITELY blocked
+      if(blocked) showAdBlockWall();
+
+    }, 800); // Give ads time to load first
   }
 
   function showAdBlockWall(){
-    try{if(localStorage.getItem('ft_subscribed')==='true') return;}catch(e){}
     if(document.getElementById('adblock-wall')) return;
     const wall = document.createElement('div');
     wall.id = 'adblock-wall';
@@ -121,23 +105,17 @@
         2. Select "Pause" or "Disable for this site"<br>
         3. Tap the button below to reload
       </div>
-      <button onclick="window.location.reload()" style="width:100%;background:#00e96b;color:#07090a;border:none;border-radius:10px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;margin-bottom:10px">✓ I've Disabled It — Reload</button>
-      <button onclick="document.getElementById('adblock-wall').remove();setTimeout(()=>openSub&&openSub(),100);" style="width:100%;background:transparent;color:#00e96b;border:1px solid rgba(0,233,107,.3);border-radius:10px;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;cursor:pointer">Subscribe Ad-Free — ₦1,000/mo</button>
+      <button onclick="sessionStorage.removeItem('ft_adcheck_done');window.location.reload();" style="width:100%;background:#00e96b;color:#07090a;border:none;border-radius:10px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;margin-bottom:10px">✓ I've Disabled It — Reload</button>
+      <button onclick="document.getElementById('adblock-wall').remove();sessionStorage.setItem('ft_adcheck_done','1');setTimeout(()=>openSub&&openSub(),100);" style="width:100%;background:transparent;color:#00e96b;border:1px solid rgba(0,233,107,.3);border-radius:10px;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;cursor:pointer">Subscribe Ad-Free — ₦1,000/mo</button>
     </div>`;
     document.body.appendChild(wall);
   }
 
-  // Run all checks after page loads
+  // Wait for DOM then check
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>{
-      checkBait();
-      checkAdScripts();
-      checkAdURL();
-    });
+    document.addEventListener('DOMContentLoaded', checkAdBlock);
   } else {
-    checkBait();
-    checkAdScripts();
-    checkAdURL();
+    checkAdBlock();
   }
 })();
 </script>
