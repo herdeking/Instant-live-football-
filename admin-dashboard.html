@@ -228,7 +228,24 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <label>Competition / League</label>
 <select id="f-comp">
 <option value="">Select competition…</option>
-<option>Premier League</option><option>La Liga</option><option>Serie A</option><option>Bundesliga</option><option>Ligue 1</option><option>UEFA Champions League</option><option>UEFA Europa League</option><option>FA Cup</option><option>Serie B</option><option>NPFL</option><option>Other</option>
+<optgroup label="Top 5 Leagues">
+<option>Premier League</option><option>La Liga</option><option>Serie A</option><option>Bundesliga</option><option>Ligue 1</option>
+</optgroup>
+<optgroup label="European Cups">
+<option>UEFA Champions League</option><option>UEFA Europa League</option><option>Conference League</option><option>UEFA Super Cup</option>
+</optgroup>
+<optgroup label="Domestic Cups">
+<option>FA Cup</option><option>Carabao Cup</option><option>Copa Del Rey</option><option>DFB Pokal</option><option>Coppa Italia</option><option>Coupe de France</option>
+</optgroup>
+<optgroup label="Other European">
+<option>Eredivisie</option><option>Liga Portugal</option><option>Scottish Premiership</option><option>Super Lig</option><option>Serie B</option><option>Championship</option>
+</optgroup>
+<optgroup label="International">
+<option>World Cup</option><option>UEFA Euro</option><option>AFCON</option><option>Copa America</option><option>Nations League</option><option>Club World Cup</option>
+</optgroup>
+<optgroup label="Other Leagues">
+<option>Saudi Pro League</option><option>MLS</option><option>Liga MX</option><option>Brasileirao</option><option>J1 League</option><option>NPFL</option><option>Other</option>
+</optgroup>
 </select>
 </div>
 <div class="field-group"><label>Matchday / Round</label><input type="text" id="f-round" placeholder="e.g. Matchday 36"></div>

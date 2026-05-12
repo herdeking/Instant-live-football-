@@ -518,8 +518,71 @@ try {
 // =====================================================
 const B='https://media.api-sports.io/football/teams/';
 const LB='https://media.api-sports.io/football/leagues/';
-const LOGOS={'arsenal':B+'42.png','man city':B+'50.png','manchester city':B+'50.png','liverpool':B+'40.png','chelsea':B+'49.png','tottenham':B+'47.png','spurs':B+'47.png','tottenham hotspur':B+'47.png','man united':B+'33.png','manchester united':B+'33.png','man utd':B+'33.png','newcastle':B+'34.png','newcastle united':B+'34.png','aston villa':B+'66.png','west ham':B+'48.png','west ham united':B+'48.png','brighton':B+'51.png','brentford':B+'55.png','fulham':B+'36.png','wolves':B+'39.png','wolverhampton':B+'39.png','everton':B+'45.png','crystal palace':B+'52.png','nottingham forest':B+'65.png','nottm forest':B+'65.png','leicester':B+'46.png','leicester city':B+'46.png','bournemouth':B+'35.png','southampton':B+'41.png','ipswich':B+'57.png','leeds':B+'63.png','leeds united':B+'63.png','burnley':B+'44.png','sheffield united':B+'62.png','watford':B+'38.png','norwich':B+'43.png','real madrid':B+'541.png','barcelona':B+'529.png','atletico':B+'530.png','atletico madrid':B+'530.png','sevilla':B+'536.png','villarreal':B+'533.png','juventus':B+'496.png','ac milan':B+'489.png','milan':B+'489.png','inter milan':B+'505.png','inter':B+'505.png','internazionale':B+'505.png','napoli':B+'492.png','roma':B+'497.png','as roma':B+'497.png','lazio':B+'487.png','atalanta':B+'499.png','fiorentina':B+'502.png','torino':B+'503.png','bologna':B+'500.png','genoa':B+'495.png','monza':B+'2715.png','hellas verona':B+'504.png','verona':B+'504.png','bayern':B+'157.png','bayern munich':B+'157.png','dortmund':B+'165.png','borussia dortmund':B+'165.png','bvb':B+'165.png','rb leipzig':B+'173.png','bayer leverkusen':B+'168.png','leverkusen':B+'168.png','psg':B+'85.png','paris saint-germain':B+'85.png','lyon':B+'80.png','marseille':B+'81.png','monaco':B+'91.png','porto':B+'212.png','benfica':B+'211.png','sporting cp':B+'228.png','ajax':B+'194.png','psv':B+'197.png','feyenoord':B+'193.png','celtic':B+'232.png','rangers':B+'234.png','al nassr':B+'2932.png','al hilal':B+'2931.png','al ittihad':B+'2933.png','cremonese':B+'488.png','pisa':B+'509.png'};
-const LEAGUE_LOGOS={'premier league':LB+'39.png','la liga':LB+'140.png','laliga':LB+'140.png','serie a':LB+'135.png','bundesliga':LB+'78.png','ligue 1':LB+'61.png','champions league':LB+'2.png','ucl':LB+'2.png','uefa champions league':LB+'2.png','europa league':LB+'3.png','conference league':LB+'848.png','fa cup':LB+'45.png','carabao cup':LB+'48.png','world cup':LB+'1.png','eredivisie':LB+'88.png','primeira liga':LB+'94.png','mls':LB+'253.png','npfl':LB+'335.png','super lig':LB+'203.png','saudi professional league':LB+'307.png','serie b':LB+'136.png'};
+const LOGOS={
+// Premier League
+'arsenal':B+'42.png','man city':B+'50.png','manchester city':B+'50.png','liverpool':B+'40.png','chelsea':B+'49.png','tottenham':B+'47.png','spurs':B+'47.png','tottenham hotspur':B+'47.png','man united':B+'33.png','manchester united':B+'33.png','man utd':B+'33.png','newcastle':B+'34.png','newcastle united':B+'34.png','aston villa':B+'66.png','west ham':B+'48.png','west ham united':B+'48.png','brighton':B+'51.png','brentford':B+'55.png','fulham':B+'36.png','wolves':B+'39.png','wolverhampton':B+'39.png','everton':B+'45.png','crystal palace':B+'52.png','nottingham forest':B+'65.png','nottm forest':B+'65.png','leicester':B+'46.png','leicester city':B+'46.png','bournemouth':B+'35.png','southampton':B+'41.png','ipswich':B+'57.png','leeds':B+'63.png','leeds united':B+'63.png','burnley':B+'44.png','sheffield united':B+'62.png','watford':B+'38.png','norwich':B+'43.png','luton':B+'389.png','luton town':B+'389.png',
+// La Liga
+'real madrid':B+'541.png','barcelona':B+'529.png','atletico':B+'530.png','atletico madrid':B+'530.png','sevilla':B+'536.png','villarreal':B+'533.png','real betis':B+'543.png','betis':B+'543.png','real sociedad':B+'548.png','sociedad':B+'548.png','athletic bilbao':B+'531.png','athletic club':B+'531.png','bilbao':B+'531.png','valencia':B+'532.png','osasuna':B+'727.png','getafe':B+'546.png','celta vigo':B+'538.png','celta':B+'538.png','rayo vallecano':B+'728.png','rayo':B+'728.png','espanyol':B+'540.png','girona':B+'547.png','mallorca':B+'724.png','granada':B+'715.png','cadiz':B+'724.png','elche':B+'727.png','almeria':B+'715.png','las palmas':B+'546.png','leganes':B+'541.png','alaves':B+'542.png','valladolid':B+'720.png',
+// Serie A
+'juventus':B+'496.png','ac milan':B+'489.png','milan':B+'489.png','inter milan':B+'505.png','inter':B+'505.png','internazionale':B+'505.png','napoli':B+'492.png','roma':B+'497.png','as roma':B+'497.png','lazio':B+'487.png','atalanta':B+'499.png','fiorentina':B+'502.png','torino':B+'503.png','bologna':B+'500.png','genoa':B+'495.png','monza':B+'2715.png','hellas verona':B+'504.png','verona':B+'504.png','udinese':B+'494.png','sassuolo':B+'488.png','empoli':B+'511.png','lecce':B+'867.png','salernitana':B+'514.png','frosinone':B+'512.png','cagliari':B+'490.png','venezia':B+'517.png','cremonese':B+'488.png','pisa':B+'509.png','spezia':B+'515.png','sampdoria':B+'493.png',
+// Bundesliga
+'bayern':B+'157.png','bayern munich':B+'157.png','dortmund':B+'165.png','borussia dortmund':B+'165.png','bvb':B+'165.png','rb leipzig':B+'173.png','bayer leverkusen':B+'168.png','leverkusen':B+'168.png','eintracht frankfurt':B+'169.png','frankfurt':B+'169.png','wolfsburg':B+'161.png','borussia monchengladbach':B+'163.png','gladbach':B+'163.png','freiburg':B+'160.png','union berlin':B+'182.png','union':B+'182.png','hoffenheim':B+'167.png','werder bremen':B+'162.png','werder':B+'162.png','mainz':B+'164.png','augsburg':B+'170.png','koln':B+'159.png','hertha':B+'158.png','stuttgart':B+'172.png','heidenheim':B+'180.png','darmstadt':B+'176.png','bochum':B+'174.png',
+// Ligue 1
+'psg':B+'85.png','paris saint-germain':B+'85.png','paris sg':B+'85.png','lyon':B+'80.png','marseille':B+'81.png','monaco':B+'91.png','lille':B+'79.png','rennes':B+'94.png','nice':B+'84.png','lens':B+'116.png','strasbourg':B+'95.png','nantes':B+'83.png','montpellier':B+'82.png','toulouse':B+'96.png','reims':B+'93.png','lorient':B+'113.png','metz':B+'115.png','brest':B+'130.png','clermont':B+'512.png','ajaccio':B+'78.png','le havre':B+'108.png',
+// Portugal
+'porto':B+'212.png','benfica':B+'211.png','sporting cp':B+'228.png','sporting':B+'228.png','braga':B+'217.png','guimaraes':B+'229.png',
+// Netherlands
+'ajax':B+'194.png','psv':B+'197.png','feyenoord':B+'193.png','az alkmaar':B+'196.png','az':B+'196.png','twente':B+'198.png','utrecht':B+'199.png',
+// Scotland
+'celtic':B+'232.png','rangers':B+'234.png','hearts':B+'235.png','hibernian':B+'236.png',
+// Turkey
+'galatasaray':B+'207.png','fenerbahce':B+'210.png','besiktas':B+'206.png','trabzonspor':B+'209.png',
+// Saudi Arabia
+'al nassr':B+'2932.png','al hilal':B+'2931.png','al ittihad':B+'2933.png','al ahli':B+'2934.png',
+// Champions League / Others
+'real madrid cf':B+'541.png','fc barcelona':B+'529.png','manchester city fc':B+'50.png','liverpool fc':B+'40.png',
+};
+
+const LEAGUE_LOGOS={
+'premier league':LB+'39.png','epl':LB+'39.png',
+'la liga':LB+'140.png','laliga':LB+'140.png',
+'serie a':LB+'135.png',
+'bundesliga':LB+'78.png',
+'ligue 1':LB+'61.png',
+'champions league':LB+'2.png','ucl':LB+'2.png','uefa champions league':LB+'2.png',
+'europa league':LB+'3.png','uel':LB+'3.png','uefa europa league':LB+'3.png',
+'conference league':LB+'848.png','uecl':LB+'848.png',
+'fa cup':LB+'45.png',
+'carabao cup':LB+'48.png','efl cup':LB+'48.png',
+'world cup':LB+'1.png','fifa world cup':LB+'1.png',
+'eredivisie':LB+'88.png',
+'primeira liga':LB+'94.png','liga portugal':LB+'94.png',
+'mls':LB+'253.png',
+'npfl':LB+'335.png',
+'super lig':LB+'203.png',
+'saudi professional league':LB+'307.png','saudi pro league':LB+'307.png',
+'serie b':LB+'136.png',
+'championship':LB+'40.png','efl championship':LB+'40.png',
+'league one':LB+'41.png','efl league one':LB+'41.png',
+'scottish premiership':LB+'179.png',
+'euro':LB+'4.png','euros':LB+'4.png','uefa euro':LB+'4.png',
+'afcon':LB+'6.png','africa cup of nations':LB+'6.png',
+'copa america':LB+'9.png',
+'copa del rey':LB+'143.png','copa del rey':LB+'143.png',
+'dfb pokal':LB+'81.png','dfb-pokal':LB+'81.png',
+'coppa italia':LB+'137.png',
+'coupe de france':LB+'66.png',
+'community shield':LB+'528.png',
+'super cup':LB+'531.png','uefa super cup':LB+'531.png',
+'club world cup':LB+'15.png',
+'nations league':LB+'5.png','uefa nations league':LB+'5.png',
+'j1 league':LB+'98.png','j league':LB+'98.png',
+'k league':LB+'292.png',
+'a-league':LB+'188.png',
+'brasileirao':LB+'71.png','serie a brazil':LB+'71.png',
+'liga mx':LB+'262.png',
+'argentine primera':LB+'128.png',
+};
 
 function getLogo(n){if(!n)return'';const k=n.toLowerCase().trim();return LOGOS[k]||'https://ui-avatars.com/api/?name='+encodeURIComponent(n)+'&background=1a2330&color=00e96b&size=40&bold=true&font-size=0.4';}
 function getLeagueLogo(comp){if(!comp)return'';const k=comp.toLowerCase().trim();return LEAGUE_LOGOS[k]||'https://ui-avatars.com/api/?name='+encodeURIComponent((comp||'').substring(0,2))+'&background=1a2330&color=8a9ab0&size=30&bold=true&font-size=0.5';}
@@ -826,39 +889,44 @@ function openWatch(m){
   if(m.desc&&m.desc.trim()){descEl.textContent=m.desc;descEl.style.display='block';}else{descEl.style.display='none';}
   const fr=document.getElementById('stream-frame');
   const ph=document.getElementById('vid-ph');
-  fr.src='';fr.srcdoc='';
+  fr.src='about:blank';fr.srcdoc='';
   if(m.stream&&m.stream.trim()){
     let streamUrl = m.stream.trim();
 
-    // If it's an iframe embed code — extract the src URL
-    if(streamUrl.startsWith('<')){
+    // Extract src from iframe embed code
+    if(streamUrl.includes('<iframe')||streamUrl.includes('<IFRAME')){
       const srcMatch = streamUrl.match(/src=["']([^"']+)["']/i);
-      if(srcMatch && srcMatch[1]){
-        streamUrl = srcMatch[1];
-      }
+      if(srcMatch && srcMatch[1]) streamUrl = srcMatch[1];
     }
 
-    // Clean up the URL
     streamUrl = streamUrl.trim();
 
     // Add autoplay for YouTube
     if(streamUrl.includes('youtube.com/embed')&&!streamUrl.includes('autoplay')){
-      streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1';
+      streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1&mute=0';
     }
 
-    // Build a full iframe with all needed attributes
     ph.style.display='none';
     fr.style.display='block';
-    fr.setAttribute('src', streamUrl);
-    fr.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-    fr.setAttribute('allowfullscreen', 'true');
-    fr.setAttribute('frameborder', '0');
-    fr.setAttribute('scrolling', 'no');
 
-    // If direct src fails, try srcdoc wrapper as fallback
-    fr.onerror = function(){
-      fr.srcdoc = `<!DOCTYPE html><html><head><style>*{margin:0;padding:0;overflow:hidden}body{background:#000;width:100%;height:100vh}</style></head><body><iframe src="${streamUrl}" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; fullscreen; encrypted-media"></iframe></body></html>`;
-    };
+    // Build full page wrapper to bypass X-Frame restrictions
+    const html = `<!DOCTYPE html>
+<html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>*{margin:0;padding:0;overflow:hidden}html,body{width:100%;height:100vh;background:#000}
+iframe{width:100%;height:100%;border:none;display:block}</style>
+</head><body>
+<iframe src="${streamUrl}"
+  allowfullscreen="true"
+  allow="autoplay; fullscreen; encrypted-media; picture-in-picture; camera; microphone"
+  frameborder="0"
+  scrolling="no"
+  marginwidth="0"
+  marginheight="0">
+</iframe>
+</body></html>`;
+
+    fr.srcdoc = html;
   } else {
     ph.style.display='flex';fr.style.display='none';
     ph.innerHTML=isLive?`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">LIVE — Stream Loading</span></div><div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);text-align:center;padding:0 16px">Admin is setting up the stream.<br>Refresh in a moment.</div><button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh Page</button>`:
