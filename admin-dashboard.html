@@ -505,6 +505,7 @@ async function saveMatch(){
   const awayLineup=document.getElementById('f-away-lineup').value.trim().split('\n').map(s=>s.trim()).filter(Boolean);
 
   const matchData={
+    published: document.getElementById('f-status').value !== 'draft', // drafts hidden from public
     home, away,
     comp:document.getElementById('f-comp').value||'',
     round:document.getElementById('f-round').value.trim()||'',
@@ -614,14 +615,43 @@ function statusPill(s,min){
   return`<span class="status-pill pill-draft">Draft</span>`;
 }
 
+// Same status detection as public site (WAT = UTC+1)
+function getMatchStatus(m){
+  if(m.status==='finished'||m.status==='draft') return m.status;
+  if(m.date && m.time){
+    const kickoff=new Date(m.date+'T'+m.time+':00+01:00');
+    const now=new Date();
+    const diffMins=(now-kickoff)/60000;
+    if(diffMins>=0 && diffMins<110) return 'live';
+    if(diffMins>=110) return 'finished';
+  }
+  return m.status||'upcoming';
+}
+
+function getLiveMinute(m){
+  if(m.minute) return m.minute;
+  if(m.date && m.time){
+    const kickoff=new Date(m.date+'T'+m.time+':00+01:00');
+    const diff=Math.floor((new Date()-kickoff)/60000);
+    if(diff>=0&&diff<=45) return diff+"'";
+    if(diff>45&&diff<=60) return "45+'";
+    if(diff>60&&diff<=105) return (diff-15)+"'";
+    if(diff>105) return "90+'";
+  }
+  return '';
+}
+
 function updateStats(){
-  const live=matches.filter(m=>m.status==='live').length;
-  const up=matches.filter(m=>m.status==='upcoming').length;
-  const ft=matches.filter(m=>m.status==='finished').length;
+  const withStatus = matches.map(m=>({...m, _status: getMatchStatus(m)}));
+  const live=withStatus.filter(m=>m._status==='live').length;
+  const up=withStatus.filter(m=>m._status==='upcoming').length;
+  const ft=withStatus.filter(m=>m._status==='finished').length;
   document.getElementById('stat-live').textContent=live;
   document.getElementById('stat-total').textContent=matches.length;
   document.getElementById('stat-up').textContent=up;
   document.getElementById('stat-ft').textContent=ft;
+  // Refresh every 30 seconds to keep counts accurate
+  if(!window._statsTimer) window._statsTimer=setInterval(updateStats, 30000);
 }
 
 function renderDashboard(){
@@ -637,19 +667,22 @@ function renderMatchCards(){
 }
 
 function buildMatchCard(m){
-  const isUp=m.status==='upcoming';
-  const scoreStr=isUp?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore}–${m.ascore}`;
+  const status=getMatchStatus(m);
+  const minute=status==='live'?(m.minute||getLiveMinute(m)):'';
+  const isUp=status==='upcoming';
+  const scoreStr=isUp?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`;
   const hasStream=m.stream&&m.stream.trim();
-  return`<div class="m-admin-card ${m.status}">
-<div class="mac-top"><div class="mac-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</div>${statusPill(m.status,m.minute)}</div>
+  return`<div class="m-admin-card ${status}">
+<div class="mac-top"><div class="mac-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</div>${statusPill(status,minute)}</div>
 <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${scoreStr}</div><div class="mac-away">${m.away}</div></div>
 <div class="mac-meta">
-<span style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--t3)">${m.date||''} ${m.time||''}</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--t3)">${m.date||''} ${m.time||''} WAT</span>
 <span class="mac-stream-tag ${hasStream?'on':'off'}">${hasStream?'✓ Stream Active':'No Stream'}</span>
 </div>
 <div class="mac-actions">
 <button class="mac-btn edit-btn" onclick="openEdit('${m.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
 <button class="mac-btn stream-btn" onclick="openStreamEdit('${m.id}')"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Stream</button>
+<button class="mac-btn ${m.published===false?'edit-btn':'del-btn'}" onclick="togglePublish('${m.id}',${m.published!==false})">${m.published===false?'🔒 Publish':'👁 Hide'}</button>
 <button class="mac-btn del-btn" onclick="openDelete('${m.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>Delete</button>
 </div>
 </div>`;
@@ -731,6 +764,16 @@ function showToast(msg){
 // INIT
 // =====================================================
 
+async function togglePublish(id, currentlyPublished){
+  try{
+    await db.collection('matches').doc(id).update({
+      published: !currentlyPublished,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(currentlyPublished ? '🔒 Match hidden from public site' : '✓ Match published — visible to all users');
+  }catch(err){alert('Error: '+err.message);}
+}
+
 function copyPublicLink(){
   const url=window.location.origin+'/index.html';
   if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('✓ Public link copied!')).catch(()=>prompt('Copy this link:',url));}
@@ -759,14 +802,25 @@ function showPanel(id,el){
 
 function renderLiveSelector(){
   const el=document.getElementById('live-match-selector');
-  const live=matches.filter(m=>m.status==='live'||m.status==='upcoming');
-  if(!live.length){el.innerHTML='<div style="color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.85rem;padding:16px 0;text-align:center">No live or upcoming matches. Set a match status to Live first.</div>';return;}
+  const live=matches.filter(m=>getMatchStatus(m)==='live'||getMatchStatus(m)==='upcoming');
+  if(!live.length){el.innerHTML='<div style="color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.85rem;padding:16px 0;text-align:center">No live or upcoming matches found.</div>';return;}
   el.innerHTML=`<div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:8px">Select Match to Update</div>`+
-  live.map(m=>`<div class="m-admin-card ${m.status}" style="cursor:pointer;margin-bottom:8px" onclick="selectLiveMatch('${m.id}')">
-    <div class="mac-top"><div class="mac-comp">${m.comp||'Football'}</div>${statusPill(m.status,m.minute)}</div>
-    <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${m.status==='upcoming'?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`}</div><div class="mac-away">${m.away}</div></div>
-    <div style="text-align:center;margin-top:8px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--g);letter-spacing:1px">TAP TO UPDATE →</span></div>
-  </div>`).join('');
+  live.map(m=>{
+    const status=getMatchStatus(m);
+    const min=status==='live'?(m.minute||getLiveMinute(m)):'';
+    const hasStream=m.stream&&m.stream.trim();
+    return`<div class="m-admin-card ${status}" style="cursor:pointer;margin-bottom:8px">
+    <div onclick="selectLiveMatch('${m.id}')">
+      <div class="mac-top"><div class="mac-comp">${m.comp||'Football'}</div>${statusPill(status,min)}</div>
+      <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${status==='upcoming'?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`}</div><div class="mac-away">${m.away}</div></div>
+    </div>
+    ${!hasStream?`<div style="background:rgba(255,53,53,.08);border:1px solid rgba(255,53,53,.2);border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--red)">⚠️ No stream added — users see black screen</span>
+      <button onclick="openStreamEdit('${m.id}')" style="background:var(--g);color:var(--bg);border:none;border-radius:4px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;cursor:pointer">Add Stream</button>
+    </div>`:''}
+    <div style="text-align:center;margin-top:8px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--g);letter-spacing:1px" onclick="selectLiveMatch('${m.id}')">TAP TO UPDATE SCORE →</span></div>
+    </div>`;
+  }).join('');
 }
 
 function selectLiveMatch(id){

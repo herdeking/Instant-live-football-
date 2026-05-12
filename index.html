@@ -603,7 +603,8 @@ async function loadMatches(){
   try {
     // Test Firebase connection first
     const snapshot = await db.collection('matches').get();
-    matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+    matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))
+      .filter(m => m.published !== false); // hide drafts from public
 
     // Sort by createdAt if available
     matches.sort((a,b)=>{
@@ -616,7 +617,8 @@ async function loadMatches(){
 
     // Real-time listener: auto-update when admin changes anything
     db.collection('matches').onSnapshot(snapshot => {
-      matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+      matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))
+        .filter(m => m.published !== false); // hide drafts from public
       matches.sort((a,b)=>{
         const at = a.createdAt?.seconds || 0;
         const bt = b.createdAt?.seconds || 0;
