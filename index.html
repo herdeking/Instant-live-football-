@@ -354,7 +354,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 <div class="hero-tag" id="hero-tag">Loading…</div>
 <h1 class="hero-title" id="hero-title">—</h1>
 <div class="feat-card" id="feat-card">
-<div class="feat-row1"><div class="feat-comp" id="feat-comp">—</div><div class="feat-live-badge"><div class="ldot"></div><span id="feat-time">—</span></div></div>
+<div class="feat-row1"><div class="feat-comp" id="feat-comp">—</div><div class="feat-live-badge" id="feat-live-badge"><div class="ldot" id="feat-ldot"></div><span id="feat-time">—</span></div></div>
 <div class="feat-teams">
 <div class="feat-team"><div class="feat-crest"><img id="fh-img" src="" alt=""></div><div class="feat-name" id="feat-home">—</div></div>
 <div class="feat-score"><span id="feat-sh">0</span><span class="feat-div">—</span><span id="feat-sa">0</span></div>
@@ -612,6 +612,11 @@ function applyAds(){
 function updateCount(){
   const n=matches.filter(m=>getMatchStatus(m)==='live').length;
   document.getElementById('live-count').textContent=n+' Live';
+  // Only show blinking dot when there are live matches
+  const dot=document.querySelector('.live-pill .ldot');
+  if(dot) dot.style.display=n>0?'block':'none';
+  const pill=document.querySelector('.live-pill');
+  if(pill) pill.style.opacity=n>0?'1':'0.5';
 }
 
 function buildTicker(){
@@ -639,6 +644,15 @@ function buildHero(){
   document.getElementById('hero-title').innerHTML=f.home+' <em>vs</em> '+f.away;
   document.getElementById('feat-comp').textContent=(f.comp||'')+(f.round?' · '+f.round:'');
   document.getElementById('feat-time').textContent=isLive?(minute||'Live'):isFt?'FT':(f.time||'Upcoming');
+  // Only show blinking dot for LIVE matches
+  const featDot=document.getElementById('feat-ldot');
+  const featBadge=document.getElementById('feat-live-badge');
+  if(featDot){
+    featDot.style.display=isLive?'block':'none';
+  }
+  if(featBadge){
+    featBadge.style.color=isLive?'var(--live)':isFt?'var(--t3)':'var(--gold)';
+  }
   document.getElementById('feat-sh').textContent=status!=='upcoming'?f.hscore:'–';
   document.getElementById('feat-sa').textContent=status!=='upcoming'?f.ascore:'–';
   document.getElementById('feat-home').textContent=f.home;
