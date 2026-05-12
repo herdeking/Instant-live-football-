@@ -867,6 +867,91 @@ function setTab(t){
 // =====================================================
 // WATCH MODAL
 // =====================================================
+// =====================================================
+// PPV.TO AUTO STREAM — Fetches live streams automatically
+// =====================================================
+let ppvStreams = [];
+let ppvLastFetch = 0;
+
+async function fetchPPVStreams(){
+  // Cache for 1 minute
+  if(Date.now() - ppvLastFetch < 60000 && ppvStreams.length) return ppvStreams;
+  try{
+    const res = await fetch('https://ppv.to/api/streams', {
+      headers: {'Accept': 'application/json'}
+    });
+    if(!res.ok) return ppvStreams;
+    const data = await res.json();
+    ppvStreams = [];
+    (data.streams||[]).forEach(cat=>{
+      (cat.streams||[]).forEach(s=>{
+        ppvStreams.push({
+          id: s.id,
+          name: s.name||'',
+          category: cat.category||'',
+          iframe: s.iframe||'',
+          poster: s.poster||'',
+          starts_at: s.starts_at||0,
+          ends_at: s.ends_at||0,
+          always_live: s.always_live||0,
+          uri_name: s.uri_name||''
+        });
+      });
+    });
+    ppvLastFetch = Date.now();
+    return ppvStreams;
+  }catch(e){
+    console.log('PPV.to fetch failed:', e.message);
+    return ppvStreams;
+  }
+}
+
+async function findPPVStream(match){
+  const streams = await fetchPPVStreams();
+  if(!streams.length) return null;
+
+  const mh = match.home.toLowerCase().replace(/[^a-z0-9]/g,' ').trim();
+  const ma = match.away.toLowerCase().replace(/[^a-z0-9]/g,' ').trim();
+  const mhWords = mh.split(' ').filter(w=>w.length>2);
+  const maWords = ma.split(' ').filter(w=>w.length>2);
+
+  // Score each stream by how well it matches the match
+  let best = null, bestScore = 0;
+  const now = Date.now()/1000;
+
+  streams.forEach(s=>{
+    const sname = s.name.toLowerCase();
+    let score = 0;
+
+    // Check if stream is currently live or upcoming
+    const isLive = s.always_live===1 || (s.starts_at<=now && (s.ends_at===0||s.ends_at>now));
+    if(!isLive) return;
+
+    // Match home team name
+    mhWords.forEach(w=>{ if(sname.includes(w)) score+=2; });
+    // Match away team name
+    maWords.forEach(w=>{ if(sname.includes(w)) score+=2; });
+
+    // Bonus for football/soccer category
+    const cat = s.category.toLowerCase();
+    if(cat.includes('football')||cat.includes('soccer')||cat.includes('futbol')) score+=1;
+
+    // Bonus for matching competition
+    if(match.comp){
+      const comp = match.comp.toLowerCase();
+      if(sname.includes('premier')||sname.includes('liga')||sname.includes('serie')) score+=1;
+      if(cat.includes(comp.split(' ')[0])) score+=2;
+    }
+
+    if(score > bestScore && score >= 3){
+      bestScore = score;
+      best = s;
+    }
+  });
+
+  return best;
+}
+
 function openWatch(m){
   if(!m) return;
   currentMatch=m;
@@ -889,67 +974,118 @@ function openWatch(m){
   document.getElementById('prog-time').textContent=isFt?'FT · 90:00':!isLive?'Kick-off: '+(m.time||'TBC'):(minute||"0'")+' / 90\'';
   const descEl=document.getElementById('w-desc');
   if(m.desc&&m.desc.trim()){descEl.textContent=m.desc;descEl.style.display='block';}else{descEl.style.display='none';}
+
   const fr=document.getElementById('stream-frame');
   const ph=document.getElementById('vid-ph');
   fr.src='about:blank';fr.srcdoc='';
-  if(m.stream&&m.stream.trim()){
-    let streamUrl = m.stream.trim();
 
-    // Extract src from iframe embed code
-    if(streamUrl.includes('<iframe')||streamUrl.includes('<IFRAME')){
-      const srcMatch = streamUrl.match(/src=["']([^"']+)["']/i);
-      if(srcMatch && srcMatch[1]) streamUrl = srcMatch[1];
-    }
+  // Show loading state first
+  ph.style.display='flex';fr.style.display='none';
+  ph.innerHTML=`<div class="ls-spinner" style="width:28px;height:28px;border:2px solid var(--bd2);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite"></div><div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:var(--t3);margin-top:8px;letter-spacing:1px">Loading stream…</div>`;
 
-    streamUrl = streamUrl.trim();
+  // Try to load stream
+  loadStream(m, fr, ph, isLive, isFt);
 
-    // Add autoplay for YouTube
-    if(streamUrl.includes('youtube.com/embed')&&!streamUrl.includes('autoplay')){
-      streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1&mute=0';
-    }
-
-    ph.style.display='none';
-    fr.style.display='block';
-
-    // Build full page wrapper to bypass X-Frame restrictions
-    const html = `<!DOCTYPE html>
-<html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>*{margin:0;padding:0;overflow:hidden}html,body{width:100%;height:100vh;background:#000}
-iframe{width:100%;height:100%;border:none;display:block}</style>
-</head><body>
-<iframe src="${streamUrl}"
-  allowfullscreen="true"
-  allow="autoplay; fullscreen; encrypted-media; picture-in-picture; camera; microphone"
-  frameborder="0"
-  scrolling="no"
-  marginwidth="0"
-  marginheight="0">
-</iframe>
-</body></html>`;
-
-    fr.srcdoc = html;
-  } else {
-    ph.style.display='flex';fr.style.display='none';
-    ph.innerHTML=isLive?`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">LIVE — Stream Loading</span></div><div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);text-align:center;padding:0 16px">Admin is setting up the stream.<br>Refresh in a moment.</div><button onclick="location.reload()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:4px">Refresh Page</button>`:
-    `<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg><div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--t3);text-transform:uppercase;text-align:center">${isFt?'No replay stream available':'⏰ Stream starts at kick-off'}</div>`;
-  }
   document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.w-tab').classList.add('active');
   ['ev','lu','st'].forEach(t=>{const el=document.getElementById('wt-'+t);if(el)el.style.display=t==='ev'?'':'none';});
   buildEvs(m);buildLu(m);buildSt(m);
   document.getElementById('watch-overlay').classList.add('open');
   document.body.style.overflow='hidden';
+
+  // Auto landscape on mobile
+  tryLandscape();
+}
+
+async function loadStream(m, fr, ph, isLive, isFt){
+  let streamHtml = '';
+
+  // Priority 1: Admin-set stream URL
+  if(m.stream && m.stream.trim()){
+    let streamUrl = m.stream.trim();
+    if(streamUrl.includes('<iframe')||streamUrl.includes('<IFRAME')){
+      const srcMatch = streamUrl.match(/src=["']([^"']+)["']/i);
+      if(srcMatch && srcMatch[1]) streamUrl = srcMatch[1];
+    }
+    if(streamUrl.includes('youtube.com/embed')&&!streamUrl.includes('autoplay')){
+      streamUrl += (streamUrl.includes('?')?'&':'?')+'autoplay=1&mute=0';
+    }
+    streamHtml = `<iframe src="${streamUrl}" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" scrolling="no" style="width:100%;height:100%;border:none"></iframe>`;
+  }
+
+  // Priority 2: PPV.to auto stream (if live and no admin stream)
+  if(!streamHtml && isLive){
+    const ppvStream = await findPPVStream(m);
+    if(ppvStream){
+      if(ppvStream.iframe){
+        // Use iframe embed directly from PPV.to
+        streamHtml = ppvStream.iframe;
+      } else if(ppvStream.uri_name){
+        streamHtml = `<iframe src="https://ppv.to/streams/${ppvStream.uri_name}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" frameborder="0" style="width:100%;height:100%;border:none"></iframe>`;
+      }
+    }
+  }
+
+  if(streamHtml){
+    ph.style.display='none';
+    fr.style.display='block';
+    fr.srcdoc = `<!DOCTYPE html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>*{margin:0;padding:0}html,body{width:100%;height:100vh;background:#000;overflow:hidden}
+iframe,div{width:100%;height:100vh;border:none;display:block}</style>
+</head><body>${streamHtml}</body></html>`;
+  } else {
+    // No stream available
+    ph.style.display='flex';fr.style.display='none';
+    ph.innerHTML=isLive
+      ?`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg>
+<div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">Searching for stream…</span></div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);text-align:center;padding:0 16px">No stream found yet.<br>Admin can add one manually.</div>
+<button onclick="loadStream(currentMatch,document.getElementById('stream-frame'),document.getElementById('vid-ph'),true,false)" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;cursor:pointer;margin-top:4px">Retry</button>`
+      :`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg>
+<div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--t3);text-transform:uppercase;text-align:center">${isFt?'No replay available':'⏰ Stream starts at kick-off'}</div>`;
+  }
+}
+
+// =====================================================
+// AUTO LANDSCAPE ON MOBILE
+// =====================================================
+function tryLandscape(){
+  try{
+    if(screen.orientation && screen.orientation.lock){
+      screen.orientation.lock('landscape').catch(()=>{});
+    } else if(window.screen && window.screen.lockOrientation){
+      window.screen.lockOrientation('landscape');
+    }
+  }catch(e){}
 }
 
 function closeWatch(){
   document.getElementById('watch-overlay').classList.remove('open');
   document.body.style.overflow='';
-  setTimeout(()=>{document.getElementById('stream-frame').src='';},400);
+  // Restore portrait on close
+  try{
+    if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+    else if(window.screen && window.screen.unlockOrientation) window.screen.unlockOrientation();
+  }catch(e){}
+  setTimeout(()=>{
+    const fr=document.getElementById('stream-frame');
+    fr.src='about:blank';fr.srcdoc='';
+  },400);
 }
 
 function wTab(el,t){document.querySelectorAll('.w-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');['ev','lu','st'].forEach(x=>{const d=document.getElementById('wt-'+x);if(d)d.style.display=x===t?'':'none';});}
-function goFS(){const fr=document.getElementById('stream-frame');if(fr.requestFullscreen)fr.requestFullscreen();}
+function goFS(){
+  const fr=document.getElementById('stream-frame');
+  const wrap=document.querySelector('.vid-wrap');
+  // Try fullscreen on the wrapper first
+  const el=wrap||fr;
+  if(el.requestFullscreen) el.requestFullscreen();
+  else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if(el.mozRequestFullScreen) el.mozRequestFullScreen();
+  // Lock to landscape in fullscreen
+  tryLandscape();
+}
 
 function buildEvs(m){
   const el=document.getElementById('ev-list');
