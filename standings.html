@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Standings — FullTime</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00e96b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',3325630,document.createElement('script'))</script>
+<script type="text/javascript">atOptions={'key':'5777232','format':'iframe','height':60,'width':468,'params':{}};</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#00e96b;--red:#ff3535;--gold:#ffc107;--bg:#07090a;--s1:#0d1117;--s2:#131920;--s3:#1a2330;--bd:#1e2d3d;--t1:#e8edf2;--t2:#8a9ab0;--t3:#4a5a6a;--live:#ff3535}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;padding-bottom:70px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);height:54px;display:flex;align-items:center;padding:0 14px;gap:10px}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--g);text-decoration:none}
+.nav-logo span{color:var(--t1)}
+.nav-links{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;gap:2px}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);text-decoration:none;padding:0 10px;height:54px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+.nav-links a.active,.nav-links a:hover{color:var(--t1);border-bottom-color:var(--g)}
+.page-header{padding:14px;border-bottom:1px solid var(--bd)}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px}
+.league-picker{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
+.league-picker::-webkit-scrollbar{display:none}
+.lpick{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:64px}
+.lpick img{width:28px;height:28px;object-fit:contain;border-radius:50%;background:var(--s2)}
+.lpick span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;text-align:center;line-height:1.2}
+.lpick.active{background:rgba(0,233,107,.08);border-color:rgba(0,233,107,.4);color:var(--g)}
+.lpick.active img{box-shadow:0 0 0 2px var(--g)}
+.content{padding:10px 14px}
+.table-wrap{overflow-x:auto}
+.standings-table{width:100%;border-collapse:collapse;min-width:340px}
+.standings-table thead tr{background:var(--s2);border-bottom:1px solid var(--bd)}
+.standings-table th{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:8px 6px;text-align:center;white-space:nowrap}
+.standings-table th.left{text-align:left;padding-left:10px}
+.standings-table td{font-family:'Barlow Condensed',sans-serif;font-size:.84rem;padding:9px 6px;text-align:center;border-bottom:1px solid rgba(30,45,61,.5)}
+.standings-table td.left{text-align:left;padding-left:10px}
+.standings-table tr:hover td{background:var(--s2)}
+.pos{font-weight:700;color:var(--t3);min-width:20px}
+.pos.champ{color:var(--g)}
+.pos.ucl{color:#4fc3f7}
+.pos.uecl{color:var(--gold)}
+.pos.rel{color:var(--red)}
+.team-cell{display:flex;align-items:center;gap:8px}
+.team-crest{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.team-name{font-weight:700;font-size:.84rem;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.pts{font-weight:900;color:var(--t1);font-size:.92rem}
+.form-cell{display:flex;gap:2px;justify-content:center}
+.form-dot{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:900;font-family:'Barlow Condensed',sans-serif}
+.form-w{background:rgba(0,233,107,.2);color:var(--g)}
+.form-d{background:rgba(138,154,176,.15);color:var(--t2)}
+.form-l{background:rgba(255,53,53,.15);color:var(--red)}
+.league-info{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:var(--s1);border:1px solid var(--bd);border-radius:8px}
+.league-info img{width:36px;height:36px;object-fit:contain}
+.league-info-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px}
+.league-info-sub{font-size:.72rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.legend-item{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;color:var(--t3)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.loading-state{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem}
+.spinner{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 16px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.85rem}
+.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(10,14,18,.98);border-top:1px solid var(--bd);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
+@media(min-width:601px){.bottom-nav{display:none}}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;text-decoration:none}
+.bn-item svg{width:22px;height:22px;fill:none;stroke:var(--t3);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bn-item span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.bn-item.active svg{stroke:var(--g)}
+.bn-item.active span{color:var(--g)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="index.html">FULL<span>TIME</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="livescores.html">Live Scores</a>
+    <a href="fixtures.html">Fixtures</a>
+    <a href="standings.html" class="active">Standings</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">Standings</div>
+</div>
+
+<div class="league-picker" id="league-picker"></div>
+
+<div class="content" id="standings-content">
+  <div class="loading-state"><div class="spinner"></div><span>Loading standings…</span></div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="bn-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
+  <a class="bn-item" href="livescores.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg><span>Scores</span></a>
+  <a class="bn-item" href="fixtures.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Fixtures</span></a>
+  <a class="bn-item active" href="standings.html"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Standings</span></a>
+</nav>
+
+<script>
+const LB = 'https://media.api-sports.io/football/leagues/';
+const TB = 'https://media.api-sports.io/football/teams/';
+
+const LEAGUES = [
+  {name:'Premier League', id:17, ssid:17, logo:LB+'39.png', ucl:4, uecl:6, rel:3},
+  {name:'La Liga', id:8, ssid:8, logo:LB+'140.png', ucl:4, uecl:6, rel:3},
+  {name:'Serie A', id:23, ssid:23, logo:LB+'135.png', ucl:4, uecl:6, rel:3},
+  {name:'Bundesliga', id:35, ssid:35, logo:LB+'78.png', ucl:4, uecl:6, rel:2},
+  {name:'Ligue 1', id:34, ssid:34, logo:LB+'61.png', ucl:3, uecl:5, rel:3},
+  {name:'Champions League', id:7, ssid:7, logo:LB+'2.png', ucl:0, uecl:0, rel:0},
+  {name:'Europa League', id:679, ssid:679, logo:LB+'3.png', ucl:0, uecl:0, rel:0},
+  {name:'Eredivisie', id:37, ssid:37, logo:LB+'88.png', ucl:2, uecl:5, rel:2},
+  {name:'Liga Portugal', id:238, ssid:238, logo:LB+'94.png', ucl:2, uecl:4, rel:2},
+  {name:'Championship', id:18, ssid:18, logo:LB+'40.png', ucl:0, uecl:0, rel:3},
+];
+
+let selectedLeague = LEAGUES[0];
+
+function buildLeaguePicker(){
+  const picker = document.getElementById('league-picker');
+  picker.innerHTML = LEAGUES.map((l,i)=>`
+    <button class="lpick${i===0?' active':''}" onclick="selectLeague(${i},this)">
+      <img src="${l.logo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(l.name.substring(0,2))}&background=1a2330&color=8a9ab0&size=60'">
+      <span>${l.name}</span>
+    </button>`).join('');
+}
+
+function selectLeague(idx, btn){
+  selectedLeague = LEAGUES[idx];
+  document.querySelectorAll('.lpick').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  loadStandings();
+}
+
+async function loadStandings(){
+  document.getElementById('standings-content').innerHTML = '<div class="loading-state"><div class="spinner"></div><span>Loading standings…</span></div>';
+  try{
+    // Use Sofascore tournament standings API
+    const res = await fetch(`https://api.sofascore.com/api/v1/unique-tournament/${selectedLeague.ssid}/season/latest/standings/total`);
+    if(!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const rows = data.standings?.[0]?.rows || [];
+    renderStandings(rows);
+  }catch(e){
+    // Fallback: try another endpoint
+    try{
+      const res2 = await fetch(`https://api.sofascore.com/api/v1/unique-tournament/${selectedLeague.ssid}/standings`);
+      if(!res2.ok) throw new Error();
+      const data2 = await res2.json();
+      const rows = data2.standings?.[0]?.rows || [];
+      renderStandings(rows);
+    }catch(e2){
+      document.getElementById('standings-content').innerHTML = `<div class="empty">Could not load standings.<br><button onclick="loadStandings()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;cursor:pointer;margin-top:10px">Retry</button></div>`;
+    }
+  }
+}
+
+function renderStandings(rows){
+  if(!rows.length){
+    document.getElementById('standings-content').innerHTML = '<div class="empty">No standings data available</div>';
+    return;
+  }
+
+  const l = selectedLeague;
+  const totalTeams = rows.length;
+
+  let html = `
+  <div class="league-info">
+    <img src="${l.logo}" onerror="this.style.display='none'">
+    <div>
+      <div class="league-info-name">${l.name}</div>
+      <div class="league-info-sub">${rows[0]?.team?.tournament?.name||'Season standings'}</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+  <table class="standings-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th class="left">Club</th>
+      <th>MP</th>
+      <th>W</th>
+      <th>D</th>
+      <th>L</th>
+      <th>GF</th>
+      <th>GA</th>
+      <th>GD</th>
+      <th>Pts</th>
+      <th>Form</th>
+    </tr>
+  </thead>
+  <tbody>`;
+
+  rows.forEach((row, i)=>{
+    const pos = row.position || (i+1);
+    const isChamp = pos === 1;
+    const isUCL = pos > 1 && pos <= l.ucl;
+    const isUECL = pos > l.ucl && pos <= l.uecl;
+    const isRel = pos > totalTeams - l.rel;
+    let posClass = isChamp?'champ':isUCL?'ucl':isUECL?'uecl':isRel?'rel':'';
+
+    const form = (row.team?.form||'').split('').slice(-5);
+    const formHtml = form.map(f=>`<div class="form-dot form-${f==='W'?'w':f==='L'?'l':'d'}">${f}</div>`).join('');
+
+    const teamLogo = row.team?.id ? `https://api.sofascore.com/api/v1/team/${row.team.id}/image` : '';
+
+    html += `<tr>
+      <td><span class="pos ${posClass}">${pos}</span></td>
+      <td class="left">
+        <div class="team-cell">
+          <img class="team-crest" src="${teamLogo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((row.team?.name||'?').substring(0,2))}&background=131920&color=00e96b&size=40'">
+          <span class="team-name">${row.team?.shortName||row.team?.name||''}</span>
+        </div>
+      </td>
+      <td>${row.matches||0}</td>
+      <td>${row.wins||0}</td>
+      <td>${row.draws||0}</td>
+      <td>${row.losses||0}</td>
+      <td>${row.scoresFor||0}</td>
+      <td>${row.scoresAgainst||0}</td>
+      <td style="color:${(row.scoreDiffFormatted||'+0').startsWith('-')?'var(--red)':'var(--g)'}">${row.scoreDiffFormatted||0}</td>
+      <td><span class="pts">${row.points||0}</span></td>
+      <td><div class="form-cell">${formHtml}</div></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+
+  // Legend
+  if(l.ucl > 0){
+    html += `<div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--g)"></div>Champions</div>
+      ${l.ucl>1?`<div class="legend-item"><div class="legend-dot" style="background:#4fc3f7"></div>Champions League</div>`:''}
+      ${l.uecl>l.ucl?`<div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Europa/Conference</div>`:''}
+      ${l.rel>0?`<div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Relegation</div>`:''}
+    </div>`;
+  }
+
+  document.getElementById('standings-content').innerHTML = html;
+}
+
+buildLeaguePicker();
+loadStandings();
+</script>
+</body>
+</html>
