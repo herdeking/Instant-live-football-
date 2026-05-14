@@ -27,25 +27,19 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .page-header{padding:14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px}
 .page-sub{font-size:.75rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif;margin-top:2px}
-.refresh-btn{background:none;border:1px solid var(--bd);border-radius:6px;padding:6px 12px;color:var(--g);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;cursor:pointer}
-.date-strip{display:flex;overflow-x:auto;gap:6px;padding:10px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
-.date-strip::-webkit-scrollbar{display:none}
-.date-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:52px}
-.date-btn .day{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase}
-.date-btn .num{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;line-height:1}
-.date-btn.active{background:var(--g);border-color:var(--g);color:var(--bg)}
-.ftabs{display:flex;overflow-x:auto;gap:6px;padding:8px 14px;scrollbar-width:none}
-.ftabs::-webkit-scrollbar{display:none}
+.live-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,53,53,.12);border:1px solid rgba(255,53,53,.3);border-radius:10px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:var(--live);margin-left:8px}
+.refresh-btn{background:none;border:1px solid var(--bd);border-radius:6px;padding:6px 12px;color:var(--g);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1px;cursor:pointer}
+.filter-tabs{display:flex;overflow-x:auto;gap:6px;padding:8px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
+.filter-tabs::-webkit-scrollbar{display:none}
 .ftab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;white-space:nowrap}
 .ftab.active{background:var(--g);border-color:var(--g);color:var(--bg)}
-.ftab:hover:not(.active){border-color:var(--g);color:var(--g)}
 .content{padding:10px 14px}
 .match-group{margin-bottom:14px}
 .group-hdr{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);margin-bottom:6px}
 .group-hdr img{width:18px;height:18px;object-fit:contain;border-radius:50%}
 .group-hdr-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
-.score-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;transition:all .15s}
-.score-card:hover{border-color:var(--g);background:var(--s2)}
+.score-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;transition:all .15s;cursor:pointer}
+.score-card:hover,.score-card.has-stream{border-color:rgba(0,233,107,.3)}
 .sc-status{min-width:40px;text-align:center;flex-shrink:0}
 .sc-live{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;color:var(--live);display:flex;flex-direction:column;align-items:center;gap:2px}
 .ldot{width:6px;height:6px;border-radius:50%;background:var(--live);animation:blink 1.1s ease-in-out infinite;display:block;margin:0 auto}
@@ -53,23 +47,18 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .sc-time{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--gold)}
 .sc-teams{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
 .sc-team-row{display:flex;align-items:center;gap:7px}
-.sc-crest{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.sc-crest{width:20px;height:20px;object-fit:contain;flex-shrink:0;border-radius:50%}
 .sc-tname{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.86rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sc-tname.dim{color:var(--t3)}
-.sc-tscore{font-family:'Bebas Neue',sans-serif;font-size:1rem;min-width:14px;text-align:right;flex-shrink:0}
-.sc-tscore.win{color:var(--t1);font-size:1.1rem}
-.sc-tscore.lose{color:var(--t3)}
+.sc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.sc-play{font-size:.7rem;color:var(--g);font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.stream-tag{background:rgba(0,233,107,.1);border:1px solid rgba(0,233,107,.25);border-radius:4px;padding:1px 5px;font-family:'Barlow Condensed',sans-serif;font-size:.58rem;color:var(--g);font-weight:700}
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:50px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;text-align:center}
 .spinner{width:24px;height:24px;border:2px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .empty{text-align:center;padding:30px 16px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;line-height:1.8}
-.setup-card{background:var(--s2);border:1px solid rgba(0,233,107,.25);border-radius:10px;padding:16px;margin:10px 0}
-.setup-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--g);margin-bottom:10px}
-.setup-step{font-size:.8rem;color:var(--t2);line-height:2;font-family:'Barlow Condensed',sans-serif}
-.setup-step strong{color:var(--t1)}
-.setup-url{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:7px 10px;font-family:monospace;font-size:.75rem;color:#4fc3f7;word-break:break-all;margin:6px 0;display:block}
-.live-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,53,53,.12);border:1px solid rgba(255,53,53,.3);border-radius:10px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;color:var(--live);margin-left:8px}
+.source-bar{padding:5px 14px;background:rgba(0,233,107,.05);border-bottom:1px solid var(--bd);font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--t3);display:flex;align-items:center;gap:6px}
+.source-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0}
 .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(10,14,18,.98);border-top:1px solid var(--bd);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
 @media(min-width:601px){.bottom-nav{display:none}}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;text-decoration:none}
@@ -92,204 +81,201 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 <div class="page-header">
   <div>
     <div style="display:flex;align-items:center;gap:8px">
-      <div class="page-title">Live Scores</div>
+      <div class="page-title">Live Now</div>
       <div class="live-badge" id="live-badge" style="display:none"><span class="ldot"></span><span id="live-num">0</span> Live</div>
     </div>
     <div class="page-sub" id="last-updated">Loading…</div>
   </div>
-  <button class="refresh-btn" onclick="loadScores()">↻ Refresh</button>
+  <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
 </div>
-<div class="date-strip" id="date-strip"></div>
-<div class="ftabs">
-  <button class="ftab active" onclick="filterStatus('all',this)">All</button>
-  <button class="ftab" onclick="filterStatus('live',this)">🔴 Live</button>
-  <button class="ftab" onclick="filterStatus('finished',this)">FT</button>
-  <button class="ftab" onclick="filterStatus('upcoming',this)">Upcoming</button>
+<div class="source-bar"><div class="source-dot"></div><span id="source-label">Connecting to live sources…</span></div>
+<div class="filter-tabs">
+  <button class="ftab active" onclick="filterCat('all',this)">All Sports</button>
+  <button class="ftab" onclick="filterCat('football',this)">⚽ Football</button>
+  <button class="ftab" onclick="filterCat('basketball',this)">🏀 Basketball</button>
+  <button class="ftab" onclick="filterCat('tennis',this)">🎾 Tennis</button>
+  <button class="ftab" onclick="filterCat('other',this)">More</button>
 </div>
 <div class="content" id="scores-content">
-  <div class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
+  <div class="loading-state"><div class="spinner"></div><span>Fetching live streams…</span></div>
 </div>
 <nav class="bottom-nav">
   <a class="bn-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
-  <a class="bn-item active" href="livescores.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg><span>Scores</span></a>
+  <a class="bn-item active" href="livescores.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg><span>Live</span></a>
   <a class="bn-item" href="fixtures.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Fixtures</span></a>
   <a class="bn-item" href="standings.html"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Standings</span></a>
 </nav>
 <script>
-// =====================================================
-// MULTIPLE API SERVERS — Tries each in order until one works
-// Replace REPLACE_ME_1 and REPLACE_ME_2 with your worker names
-// =====================================================
-const API_SERVERS = [
-  { name: 'PPV.to',       type: 'ppv', url: 'https://ppv.to/api/streams' },
-  { name: 'Worker-1',     type: 'worker', url: 'https://fulltime-proxy.REPLACE_ME_1.workers.dev' },
-  { name: 'Worker-2',     type: 'worker', url: 'https://fulltime-proxy.REPLACE_ME_2.workers.dev' },
-  { name: 'Football-Data',type: 'fd', url: 'https://api.football-data.org/v4', key: '6e26ab7db1044d37bd7b0a94a6c06f1c' },
+// PPV.to API — works directly, no proxy needed
+const PPV_API = 'https://ppv.to/api/streams';
+// Backup sources
+const BACKUP_APIS = [
+  'https://holy-band-6142.herdeking.workers.dev/live',
 ];
-const LB = 'https://media.api-sports.io/football/leagues/';
-const COMP_LOGOS = {'PL':LB+'39.png','PD':LB+'140.png','SA':LB+'135.png','BL1':LB+'78.png','FL1':LB+'61.png','CL':LB+'2.png','EL':LB+'3.png','ELC':LB+'40.png','DED':LB+'88.png','PPL':LB+'94.png'};
 
-function getCompLogo(code){return COMP_LOGOS[code]||`https://ui-avatars.com/api/?name=${encodeURIComponent(code||'?')}&background=1a2330&color=8a9ab0&size=30`;}
+let allStreams=[], catFilter='all';
 
-let allMatches=[], selectedDate=new Date().toISOString().split('T')[0], statusFilter='all';
+const CAT_MAP = {
+  football: ['football','soccer','liga','premier','serie','bundesliga','champions','europa','ligue','laliga','calcio','futbol','fa cup','coppa','dfb','eredivisie','primera','super lig'],
+  basketball: ['basketball','nba','nbl','euroleague','bbl','bsn'],
+  tennis: ['tennis','atp','wta','wimbledon','roland','us open','australian'],
+};
 
-function buildDateStrip(){
-  const strip=document.getElementById('date-strip');
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  let html='';
-  for(let i=-2;i<=4;i++){
-    const d=new Date();d.setDate(d.getDate()+i);
-    const str=d.toISOString().split('T')[0];
-    const label=i===0?'Today':i===-1?'Yest':i===1?'Tom':days[d.getDay()];
-    html+=`<button class="date-btn${str===selectedDate?' active':''}" onclick="selectDate('${str}',this)"><div class="day">${label}</div><div class="num">${d.getDate()}</div></button>`;
+function getCategory(catName){
+  const n=(catName||'').toLowerCase();
+  for(const [key,words] of Object.entries(CAT_MAP)){
+    if(words.some(w=>n.includes(w))) return key;
   }
-  strip.innerHTML=html;
+  return 'other';
 }
 
-function selectDate(date,btn){
-  selectedDate=date;
-  document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  loadScores();
-}
-
-function filterStatus(s,btn){
-  statusFilter=s;
+function filterCat(cat,btn){
+  catFilter=cat;
   document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  renderMatches();
+  renderStreams();
 }
 
-async function fetchFromServers(date){
-  for(const server of API_SERVERS){
-    if(server.url.includes('REPLACE_ME')) continue;
-    try{
-      let url, headers={};
-      if(server.type==='ppv'){
-        // PPV.to — shows live streams only
-        const res=await fetch(server.url);
-        if(!res.ok) continue;
-        const data=await res.json();
-        const matches=[];
-        const now=Date.now()/1000;
-        (data.streams||[]).forEach(cat=>{
-          const isFootball=cat.category?.toLowerCase().match(/football|soccer|liga|premier|serie|bundesliga|champions|europa|ligue/);
-          if(!isFootball) return;
-          (cat.streams||[]).forEach(s=>{
-            const isLive=s.always_live===1||(s.starts_at&&s.starts_at<=now&&(s.ends_at===0||s.ends_at>now));
-            if(!isLive) return;
-            const vs=s.name.match(/^(.+?)\s+(?:vs?\.?|–|-)\s+(.+?)(\s+\[|$)/i);
-            matches.push({
-              id:s.id,
-              homeTeam:{name:vs?vs[1].trim():s.name,shortName:vs?vs[1].trim():s.name,crest:''},
-              awayTeam:{name:vs?vs[2]?.trim()||'':s.name,shortName:vs?vs[2]?.trim()||'':'',crest:''},
-              competition:{name:cat.category||'Football',code:''},
-              status:'IN_PLAY',
-              utcDate:s.starts_at?new Date(s.starts_at*1000).toISOString():new Date().toISOString(),
-              score:{fullTime:{home:null,away:null},halfTime:{home:null,away:null}},
-              hasStream:true,
-            });
-          });
-        });
-        if(matches.length){
-          showApiSource(server.name);
-          return matches;
-        }
-        continue;
-      } else if(server.type==='worker'){
-        url=`${server.url}/matches?date=${date}`;
-      } else if(server.type==='fd'){
-        url=`${server.url}/matches?dateFrom=${date}&dateTo=${date}`;
-        headers={'X-Auth-Token':server.key};
-      }
-      const res=await fetch(url,{headers});
-      if(!res.ok) continue;
-      const json=await res.json();
-      if(json.matches){
-        showApiSource(server.name);
-        return json.matches;
-      }
-    }catch(e){ continue; }
-  }
-  return null;
-}
-
-function showApiSource(name){
-  // Silently log which server worked
-  console.log('Using API server:', name);
-}
-
-async function loadScores(){
-  document.getElementById('scores-content').innerHTML='<div class="loading-state"><div class="spinner"></div><span>Loading scores…</span></div>';
+async function loadAll(){
+  document.getElementById('scores-content').innerHTML='<div class="loading-state"><div class="spinner"></div><span>Fetching live streams…</span></div>';
   document.getElementById('last-updated').textContent='Updating…';
-  try{
-    const matches=await fetchFromServers(selectedDate);
-    if(!matches) throw new Error('All servers failed');
-    allMatches=matches;
-    renderMatches();
-    const live=allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED').length;
-    document.getElementById('live-num').textContent=live;
-    document.getElementById('live-badge').style.display=live>0?'inline-flex':'none';
-    document.getElementById('last-updated').textContent=`Updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} · ${allMatches.length} matches`;
-  }catch(e){showSetupInstructions();}
+
+  // Try PPV.to first
+  let data = await fetchPPV();
+
+  // Try backup if PPV fails
+  if(!data){
+    for(const url of BACKUP_APIS){
+      try{
+        const res=await fetch(url);
+        if(res.ok){ data=await res.json(); break; }
+      }catch(e){}
+    }
+  }
+
+  if(!data){
+    document.getElementById('scores-content').innerHTML=`<div class="empty">Could not load live streams.<br><br><button onclick="loadAll()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;cursor:pointer">Retry</button></div>`;
+    document.getElementById('last-updated').textContent='Failed — tap Retry';
+    return;
+  }
+
+  // Parse PPV.to response
+  allStreams=[];
+  const now=Date.now()/1000;
+  (data.streams||[]).forEach(cat=>{
+    (cat.streams||[]).forEach(s=>{
+      const isLive=s.always_live===1||(s.starts_at&&s.starts_at<=now&&(s.ends_at===0||s.ends_at>now));
+      const isUpcoming=s.starts_at&&s.starts_at>now&&s.starts_at<now+86400;
+      if(!isLive&&!isUpcoming) return;
+      allStreams.push({
+        id:s.id,
+        name:s.name||'Unknown',
+        category:cat.category||'Other',
+        catType:getCategory(cat.category),
+        poster:s.poster||'',
+        starts_at:s.starts_at||0,
+        ends_at:s.ends_at||0,
+        always_live:s.always_live||0,
+        uri_name:s.uri_name||'',
+        iframe:s.iframe||'',
+        isLive:isLive,
+        isUpcoming:isUpcoming,
+      });
+    });
+  });
+
+  // Sort: live first then upcoming
+  allStreams.sort((a,b)=>a.isLive===b.isLive?0:a.isLive?-1:1);
+
+  const liveCount=allStreams.filter(s=>s.isLive).length;
+  document.getElementById('live-num').textContent=liveCount;
+  document.getElementById('live-badge').style.display=liveCount>0?'inline-flex':'none';
+  document.getElementById('last-updated').textContent=`Updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} · ${allStreams.length} streams`;
+  document.getElementById('source-label').textContent=`PPV.to · ${liveCount} live · ${allStreams.filter(s=>s.isUpcoming).length} upcoming`;
+
+  renderStreams();
 }
 
-function renderMatches(){
-  let filtered=allMatches;
-  if(statusFilter==='live')filtered=allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED');
-  else if(statusFilter==='finished')filtered=allMatches.filter(m=>m.status==='FINISHED');
-  else if(statusFilter==='upcoming')filtered=allMatches.filter(m=>m.status==='SCHEDULED'||m.status==='TIMED');
-  if(!filtered.length){document.getElementById('scores-content').innerHTML='<div class="empty">No matches found for this filter</div>';return;}
+async function fetchPPV(){
+  try{
+    const res=await fetch(PPV_API,{headers:{'Accept':'application/json'}});
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){return null;}
+}
+
+function renderStreams(){
+  let filtered=allStreams;
+  if(catFilter!=='all') filtered=allStreams.filter(s=>s.catType===catFilter);
+
+  if(!filtered.length){
+    document.getElementById('scores-content').innerHTML='<div class="empty">No live streams for this category right now</div>';
+    return;
+  }
+
+  // Group by category
   const groups={};
-  filtered.forEach(m=>{const k=m.competition?.name||'Football';if(!groups[k])groups[k]={code:m.competition?.code||'',matches:[]};groups[k].matches.push(m);});
-  const order={'IN_PLAY':0,'PAUSED':1,'FINISHED':2,'SCHEDULED':3,'TIMED':3};
+  filtered.forEach(s=>{
+    if(!groups[s.category]) groups[s.category]=[];
+    groups[s.category].push(s);
+  });
+
   let html='';
-  Object.entries(groups).forEach(([league,{code,matches}])=>{
-    html+=`<div class="match-group"><div class="group-hdr"><img src="${getCompLogo(code)}" onerror="this.style.display='none'"><span class="group-hdr-name">${league}</span><span style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--t3)">${matches.length}</span></div>`;
-    matches.sort((a,b)=>(order[a.status]??3)-(order[b.status]??3)).forEach(m=>{
-      const isLive=m.status==='IN_PLAY'||m.status==='PAUSED';
-      const isFt=m.status==='FINISHED';
-      const hs=m.score?.fullTime?.home??m.score?.halfTime?.home??'';
-      const as_=m.score?.fullTime?.away??m.score?.halfTime?.away??'';
-      const kickoff=m.utcDate?new Date(m.utcDate).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Lagos'}):'';
-      const hWin=isFt&&hs!==''&&hs>as_;const aWin=isFt&&as_!==''&&as_>hs;
-      const hLogo=m.homeTeam?.crest||`https://crests.football-data.org/${m.homeTeam?.id}.png`;
-      const aLogo=m.awayTeam?.crest||`https://crests.football-data.org/${m.awayTeam?.id}.png`;
-      html+=`<div class="score-card">
-        <div class="sc-status">${isLive?`<div class="sc-live"><span class="ldot"></span><span>${m.minute?m.minute+"'":''}</span></div>`:isFt?`<div class="sc-ft">FT</div>`:`<div class="sc-time">${kickoff}</div>`}</div>
+  Object.entries(groups).forEach(([cat,streams])=>{
+    html+=`<div class="match-group">
+    <div class="group-hdr">
+      <span style="font-size:1rem">${getCatEmoji(cat)}</span>
+      <span class="group-hdr-name">${cat}</span>
+      <span style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--t3)">${streams.length}</span>
+    </div>`;
+    streams.forEach(s=>{
+      const vs=s.name.match(/^(.+?)\s+(?:vs?\.?|–|-)\s+(.+?)(\s+\[.*\])?$/i);
+      const home=vs?vs[1].trim():s.name;
+      const away=vs?vs[2]?.trim():'';
+      const now=Date.now()/1000;
+      const minutesUntil=s.starts_at?Math.round((s.starts_at-now)/60):0;
+      const timeLabel=s.isLive?'LIVE':minutesUntil<=60?`in ${minutesUntil}m`:new Date(s.starts_at*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Lagos'});
+      const streamUrl=s.uri_name?`https://ppv.to/streams/${s.uri_name}`:'';
+
+      html+=`<div class="score-card ${s.isLive?'has-stream':''}" onclick="${streamUrl?`window.open('${streamUrl}','_blank')`:''}">
+        <div class="sc-status">
+          ${s.isLive?`<div class="sc-live"><span class="ldot"></span><span style="font-size:.6rem">LIVE</span></div>`:`<div class="sc-time" style="font-size:.8rem">${timeLabel}</div>`}
+        </div>
         <div class="sc-teams">
-          <div class="sc-team-row"><img class="sc-crest" src="${hLogo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((m.homeTeam?.shortName||'?').substring(0,2))}&background=131920&color=00e96b&size=40'"><span class="sc-tname${aWin?' dim':''}">${m.homeTeam?.shortName||m.homeTeam?.name||''}</span>${isLive||isFt?`<span class="sc-tscore${hWin?' win':aWin?' lose':''}">${hs}</span>`:''}</div>
-          <div class="sc-team-row"><img class="sc-crest" src="${aLogo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((m.awayTeam?.shortName||'?').substring(0,2))}&background=131920&color=00e96b&size=40'"><span class="sc-tname${hWin?' dim':''}">${m.awayTeam?.shortName||m.awayTeam?.name||''}</span>${isLive||isFt?`<span class="sc-tscore${aWin?' win':hWin?' lose':''}">${as_}</span>`:''}</div>
+          <div class="sc-team-row">
+            ${s.poster?`<img class="sc-crest" src="${s.poster}" onerror="this.style.display='none'">`:'<div style="width:20px;height:20px;border-radius:50%;background:var(--s2);flex-shrink:0"></div>'}
+            <span class="sc-tname" style="font-size:.9rem">${home}</span>
+          </div>
+          ${away?`<div class="sc-team-row"><div style="width:20px;height:20px;border-radius:50%;background:var(--s3);flex-shrink:0"></div><span class="sc-tname" style="color:var(--t2)">${away}</span></div>`:''}
+        </div>
+        <div class="sc-right">
+          ${s.isLive?`<span class="stream-tag">▶ Watch</span>`:''}
         </div>
       </div>`;
     });
     html+='</div>';
   });
+
   document.getElementById('scores-content').innerHTML=html;
 }
 
-function showSetupInstructions(){
-  document.getElementById('scores-content').innerHTML=`
-  <div class="setup-card">
-    <div class="setup-title">⚙️ Free Setup Required — 5 Minutes</div>
-    <div class="setup-step">
-    <strong>Step 1:</strong> Go to <strong>workers.cloudflare.com</strong> — sign up FREE<br>
-    <strong>Step 2:</strong> Click <strong>Create Worker → Edit Code</strong><br>
-    <strong>Step 3:</strong> Upload/paste the <strong>cloudflare-worker.js</strong> file from our chat<br>
-    <strong>Step 4:</strong> Click <strong>Deploy</strong><br>
-    <strong>Step 5:</strong> Copy your worker URL (like below)<br>
-    <strong>Step 6:</strong> In livescores.html, fixtures.html & standings.html replace:<br>
-    </div>
-    <code class="setup-url">REPLACE_ME → your-worker-name</code>
-    <div class="setup-step" style="margin-top:8px">✅ <strong style="color:var(--g)">100,000 free requests/day</strong> — more than enough!</div>
-  </div>
-  <div class="empty">Your admin-managed matches are still visible on the <a href="index.html" style="color:var(--g)">Home page</a></div>`;
-  document.getElementById('last-updated').textContent='Setup needed';
+function getCatEmoji(cat){
+  const n=(cat||'').toLowerCase();
+  if(n.includes('football')||n.includes('soccer')||n.includes('liga')||n.includes('premier')||n.includes('serie')||n.includes('bundesliga')||n.includes('champions')||n.includes('europa')||n.includes('calcio')) return '⚽';
+  if(n.includes('basketball')||n.includes('nba')) return '🏀';
+  if(n.includes('tennis')) return '🎾';
+  if(n.includes('boxing')||n.includes('mma')||n.includes('ufc')) return '🥊';
+  if(n.includes('rugby')) return '🏉';
+  if(n.includes('cricket')) return '🏏';
+  if(n.includes('baseball')) return '⚾';
+  if(n.includes('hockey')) return '🏒';
+  if(n.includes('golf')) return '⛳';
+  if(n.includes('motor')||n.includes('f1')||n.includes('racing')) return '🏎️';
+  return '🏆';
 }
 
-buildDateStrip();
-loadScores();
-setInterval(loadScores,60000);
+loadAll();
+setInterval(loadAll, 60000);
 </script>
 </body>
 </html>
