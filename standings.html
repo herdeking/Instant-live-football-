@@ -8,15 +8,12 @@
 <meta name="theme-color" content="#00e96b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',3325630,document.createElement('script'))</script>
-<script type="text/javascript">atOptions={'key':'5777232','format':'iframe','height':60,'width':468,'params':{}};</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/5777232/invoke.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--g:#00e96b;--red:#ff3535;--gold:#ffc107;--blue:#4fc3f7;--bg:#07090a;--s1:#0d1117;--s2:#131920;--bd:#1e2d3d;--t1:#e8edf2;--t2:#8a9ab0;--t3:#4a5a6a}
+:root{--g:#00e96b;--bg:#07090a;--s1:#0d1117;--s2:#131920;--bd:#1e2d3d;--t1:#e8edf2;--t2:#8a9ab0;--t3:#4a5a6a}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;padding-bottom:70px}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
 nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);height:54px;display:flex;align-items:center;padding:0 14px;gap:10px}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--g);text-decoration:none}
 .nav-logo span{color:var(--t1)}
@@ -24,8 +21,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .nav-links::-webkit-scrollbar{display:none}
 .nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);text-decoration:none;padding:0 10px;height:54px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
 .nav-links a.active,.nav-links a:hover{color:var(--t1);border-bottom-color:var(--g)}
-.page-header{padding:14px;border-bottom:1px solid var(--bd)}
-.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px}
+.page-header{padding:12px 14px;border-bottom:1px solid var(--bd)}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px}
 .league-picker{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
 .league-picker::-webkit-scrollbar{display:none}
 .lpick{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:60px}
@@ -33,42 +30,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .lpick span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;text-align:center;line-height:1.2}
 .lpick.active{background:rgba(0,233,107,.08);border-color:rgba(0,233,107,.4);color:var(--g)}
 .lpick.active img{box-shadow:0 0 0 2px var(--g)}
-.source-bar{padding:5px 14px;background:rgba(0,233,107,.05);border-bottom:1px solid var(--bd);font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--t3);display:flex;align-items:center;gap:6px}
-.source-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0}
-.content{padding:10px 14px;overflow-x:auto}
-.standings-table{width:100%;border-collapse:collapse;min-width:360px}
-.standings-table thead tr{background:var(--s2);border-bottom:1px solid var(--bd)}
-.standings-table th{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:8px 4px;text-align:center;white-space:nowrap}
-.standings-table th.left{text-align:left;padding-left:8px}
-.standings-table td{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;padding:8px 4px;text-align:center;border-bottom:1px solid rgba(30,45,61,.5)}
-.standings-table td.left{text-align:left;padding-left:8px}
-.standings-table tr:hover td{background:var(--s2)}
-.pos{font-weight:700;color:var(--t3);font-size:.82rem}
-.pos.champ{color:var(--g)}
-.pos.ucl{color:var(--blue)}
-.pos.uecl{color:var(--gold)}
-.pos.rel{color:var(--red)}
-.team-cell{display:flex;align-items:center;gap:7px}
-.team-crest{width:20px;height:20px;object-fit:contain;flex-shrink:0}
-.team-name{font-weight:700;font-size:.82rem;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
-.pts{font-weight:900;color:var(--t1);font-size:.9rem}
-.form-cell{display:flex;gap:2px;justify-content:center}
-.form-dot{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:900}
-.form-w{background:rgba(0,233,107,.2);color:var(--g)}
-.form-d{background:rgba(138,154,176,.15);color:var(--t2)}
-.form-l{background:rgba(255,53,53,.15);color:var(--red)}
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding:10px;background:var(--s1);border:1px solid var(--bd);border-radius:8px}
-.legend-item{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;color:var(--t3)}
-.legend-dot{width:8px;height:8px;border-radius:50%}
-.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:50px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;text-align:center}
-.spinner{width:24px;height:24px;border:2px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:30px 16px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;line-height:1.8}
-.setup-card{background:var(--s2);border:1px solid rgba(0,233,107,.2);border-radius:10px;padding:16px;margin:10px 0}
-.setup-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--g);margin-bottom:8px}
-.setup-step{font-size:.8rem;color:var(--t2);line-height:2;font-family:'Barlow Condensed',sans-serif}
-.setup-step strong{color:var(--t1)}
-.setup-url{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:6px 10px;font-family:monospace;font-size:.75rem;color:#4fc3f7;word-break:break-all;margin:4px 0;display:block}
+.frame-wrap{width:100%}
+.st-frame{width:100%;border:none;display:block;height:calc(100vh - 180px)}
+.btn-links{display:flex;flex-direction:column;gap:10px;padding:20px 14px;max-width:340px;margin:0 auto}
+.ext-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none}
+.btn-primary{background:var(--g);color:var(--bg)}
+.btn-secondary{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
 .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(10,14,18,.98);border-top:1px solid var(--bd);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
 @media(min-width:601px){.bottom-nav{display:none}}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;text-decoration:none}
@@ -88,11 +55,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
     <a href="standings.html" class="active">Standings</a>
   </div>
 </nav>
-<div class="page-header"><div class="page-title">Standings</div></div>
+<div class="page-header">
+  <div class="page-title">Standings</div>
+</div>
 <div class="league-picker" id="league-picker"></div>
-<div class="source-bar"><div class="source-dot"></div><span id="source-label">Loading standings…</span></div>
-<div class="content" id="standings-content">
-  <div class="loading-state"><div class="spinner"></div><span>Loading standings…</span></div>
+<div class="frame-wrap" id="fw">
+  <iframe class="st-frame" id="stf" src="" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
 </div>
 <nav class="bottom-nav">
   <a class="bn-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
@@ -102,30 +70,36 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 </nav>
 <script>
 const LB='https://media.api-sports.io/football/leagues/';
-
-// Multiple API servers — tries each until one works
-const STANDINGS_SERVERS=[
-  'https://holy-band-6142.herdeking.workers.dev',  // Cloudflare Worker
-  'https://api.football-data.org/v4',              // Direct (may work)
-];
-const FD_KEY='6e26ab7db1044d37bd7b0a94a6c06f1c';
-
 const LEAGUES=[
-  {name:'Premier League',code:'PL',logo:LB+'39.png',ucl:4,uecl:6,rel:3},
-  {name:'La Liga',code:'PD',logo:LB+'140.png',ucl:4,uecl:6,rel:3},
-  {name:'Serie A',code:'SA',logo:LB+'135.png',ucl:4,uecl:6,rel:3},
-  {name:'Bundesliga',code:'BL1',logo:LB+'78.png',ucl:4,uecl:6,rel:2},
-  {name:'Ligue 1',code:'FL1',logo:LB+'61.png',ucl:3,uecl:5,rel:3},
-  {name:'Champions League',code:'CL',logo:LB+'2.png',ucl:0,uecl:0,rel:0},
-  {name:'Europa League',code:'EL',logo:LB+'3.png',ucl:0,uecl:0,rel:0},
-  {name:'Eredivisie',code:'DED',logo:LB+'88.png',ucl:2,uecl:5,rel:2},
-  {name:'Liga Portugal',code:'PPL',logo:LB+'94.png',ucl:2,uecl:4,rel:2},
-  {name:'Championship',code:'ELC',logo:LB+'40.png',ucl:0,uecl:0,rel:3},
+  {name:'Premier League',logo:LB+'39.png',url:'https://www.flashscore.com/football/england/premier-league/standings/'},
+  {name:'La Liga',logo:LB+'140.png',url:'https://www.flashscore.com/football/spain/laliga/standings/'},
+  {name:'Serie A',logo:LB+'135.png',url:'https://www.flashscore.com/football/italy/serie-a/standings/'},
+  {name:'Bundesliga',logo:LB+'78.png',url:'https://www.flashscore.com/football/germany/bundesliga/standings/'},
+  {name:'Ligue 1',logo:LB+'61.png',url:'https://www.flashscore.com/football/france/ligue-1/standings/'},
+  {name:'UCL',logo:LB+'2.png',url:'https://www.flashscore.com/football/europe/champions-league/standings/'},
+  {name:'Europa',logo:LB+'3.png',url:'https://www.flashscore.com/football/europe/europa-league/standings/'},
+  {name:'Eredivisie',logo:LB+'88.png',url:'https://www.flashscore.com/football/netherlands/eredivisie/standings/'},
+  {name:'Portugal',logo:LB+'94.png',url:'https://www.flashscore.com/football/portugal/liga-portugal/standings/'},
+  {name:'Championship',logo:LB+'40.png',url:'https://www.flashscore.com/football/england/championship/standings/'},
 ];
 
-let selectedLeague=LEAGUES[0];
+// Fallback to livescore.com
+const FALLBACK_LEAGUES=[
+  'https://www.livescore.com/en/football/england/premier-league/',
+  'https://www.livescore.com/en/football/spain/laliga/',
+  'https://www.livescore.com/en/football/italy/serie-a/',
+  'https://www.livescore.com/en/football/germany/bundesliga/',
+  'https://www.livescore.com/en/football/france/ligue-1/',
+  'https://www.livescore.com/en/football/europe/champions-league/',
+  'https://www.livescore.com/en/football/europe/europa-league/',
+  'https://www.livescore.com/en/football/netherlands/eredivisie/',
+  'https://www.livescore.com/en/football/portugal/liga-portugal/',
+  'https://www.livescore.com/en/football/england/championship/',
+];
 
-function buildLeaguePicker(){
+let curIdx=0;
+
+function buildPicker(){
   document.getElementById('league-picker').innerHTML=LEAGUES.map((l,i)=>`
     <button class="lpick${i===0?' active':''}" onclick="selectLeague(${i},this)">
       <img src="${l.logo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(l.name.substring(0,2))}&background=1a2330&color=8a9ab0&size=60'">
@@ -134,117 +108,37 @@ function buildLeaguePicker(){
 }
 
 function selectLeague(idx,btn){
-  selectedLeague=LEAGUES[idx];
+  curIdx=idx;
   document.querySelectorAll('.lpick').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  loadStandings();
+  loadStandings(idx);
 }
 
-async function fetchStandings(code){
-  // Try each server
-  for(const server of STANDINGS_SERVERS){
-    try{
-      const isWorker=server.includes('workers.dev');
-      const url=isWorker?`${server}/standings?league=${code}`:`${server}/competitions/${code}/standings`;
-      const headers=isWorker?{}:{'X-Auth-Token':FD_KEY};
-      const res=await fetch(url,{headers});
-      if(!res.ok) continue;
-      const data=await res.json();
-      // football-data.org format
-      const rows=data.standings?.[0]?.table||[];
-      if(rows.length){
-        document.getElementById('source-label').textContent=`${isWorker?'Worker':'Football-Data'} · ${selectedLeague.name} · Season 2024/25`;
-        return rows;
-      }
-    }catch(e){continue;}
-  }
-  return null;
+function loadStandings(idx){
+  const frame=document.getElementById('stf');
+  frame.src=LEAGUES[idx].url;
+  clearTimeout(window._st);
+  window._st=setTimeout(()=>showFallback(idx),8000);
+  frame.onload=()=>clearTimeout(window._st);
 }
 
-async function loadStandings(){
-  document.getElementById('standings-content').innerHTML='<div class="loading-state"><div class="spinner"></div><span>Loading standings…</span></div>';
-  document.getElementById('source-label').textContent='Loading…';
-
-  const rows=await fetchStandings(selectedLeague.code);
-
-  if(!rows){
-    document.getElementById('standings-content').innerHTML=`
-    <div class="setup-card">
-      <div class="setup-title">⚙️ Worker Setup Needed</div>
-      <div class="setup-step">
-        To load standings, update your Cloudflare Worker with the correct code:<br><br>
-        <strong>1.</strong> Go to <strong>dash.cloudflare.com</strong><br>
-        <strong>2.</strong> Tap <strong>Workers & Pages → holy-band-6142</strong><br>
-        <strong>3.</strong> Tap <strong>Edit Code</strong><br>
-        <strong>4.</strong> Paste the <strong>worker-simple.js</strong> content<br>
-        <strong>5.</strong> Tap <strong>Deploy</strong><br><br>
-        Your worker URL:
-      </div>
-      <code class="setup-url">https://holy-band-6142.herdeking.workers.dev</code>
-      <div class="setup-step" style="margin-top:8px">Free: <strong style="color:var(--g)">100,000 requests/day</strong></div>
+function showFallback(idx){
+  document.getElementById('fw').innerHTML=`
+  <div style="text-align:center;padding:20px 14px">
+    <div style="font-family:'Barlow Condensed',sans-serif;color:var(--t2);font-size:.85rem;margin-bottom:16px">
+      View <strong style="color:var(--t1)">${LEAGUES[idx].name}</strong> standings:
     </div>
-    <div class="empty"><button onclick="loadStandings()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;cursor:pointer">Retry</button></div>`;
-    return;
-  }
-
-  renderStandings(rows);
+    <div class="btn-links">
+      <a href="${LEAGUES[idx].url}" target="_blank" class="ext-btn btn-primary">⚡ FlashScore Standings</a>
+      <a href="${FALLBACK_LEAGUES[idx]}" target="_blank" class="ext-btn btn-secondary">📊 LiveScore Standings</a>
+      <a href="https://www.bbc.com/sport/football/tables" target="_blank" class="ext-btn btn-secondary">📺 BBC Sport Tables</a>
+      <a href="https://www.espn.com/soccer/standings" target="_blank" class="ext-btn btn-secondary">🏆 ESPN Standings</a>
+    </div>
+  </div>`;
 }
 
-function renderStandings(rows){
-  const l=selectedLeague;
-  const total=rows.length;
-  let html=`<table class="standings-table">
-  <thead><tr>
-    <th>#</th><th class="left">Club</th><th>MP</th><th>W</th><th>D</th><th>L</th>
-    <th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th>Form</th>
-  </tr></thead><tbody>`;
-
-  rows.forEach((row,i)=>{
-    const pos=row.position||(i+1);
-    const isChamp=pos===1;
-    const isUCL=pos>1&&pos<=l.ucl;
-    const isUECL=pos>l.ucl&&pos<=l.uecl;
-    const isRel=l.rel>0&&pos>total-l.rel;
-    const posClass=isChamp?'champ':isUCL?'ucl':isUECL?'uecl':isRel?'rel':'';
-    const barColor=isChamp?'var(--g)':isUCL?'var(--blue)':isUECL?'var(--gold)':isRel?'var(--red)':'transparent';
-    const form=(row.form||'').split(',').slice(-5);
-    const formHtml=form.filter(Boolean).map(f=>`<div class="form-dot form-${f==='W'?'w':f==='L'?'l':'d'}">${f}</div>`).join('');
-    const gd=row.goalDifference>=0?'+'+row.goalDifference:row.goalDifference;
-    const crest=row.team?.crest||`https://crests.football-data.org/${row.team?.id||0}.png`;
-
-    html+=`<tr style="border-left:3px solid ${barColor}">
-      <td><span class="pos ${posClass}">${pos}</span></td>
-      <td class="left"><div class="team-cell">
-        <img class="team-crest" src="${crest}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((row.team?.shortName||'?').substring(0,2))}&background=131920&color=00e96b&size=40'">
-        <span class="team-name">${row.team?.shortName||row.team?.name||''}</span>
-      </div></td>
-      <td>${row.playedGames||0}</td>
-      <td>${row.won||0}</td>
-      <td>${row.draw||0}</td>
-      <td>${row.lost||0}</td>
-      <td>${row.goalsFor||0}</td>
-      <td>${row.goalsAgainst||0}</td>
-      <td style="color:${(row.goalDifference||0)>=0?'var(--g)':'var(--red)'}">${gd}</td>
-      <td><span class="pts">${row.points||0}</span></td>
-      <td><div class="form-cell">${formHtml}</div></td>
-    </tr>`;
-  });
-
-  html+=`</tbody></table>`;
-
-  if(l.ucl>0){
-    html+=`<div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--g)"></div>Champions</div>
-      ${l.ucl>1?`<div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>UCL</div>`:''}
-      ${l.uecl>l.ucl?`<div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>UEL/UECL</div>`:''}
-      ${l.rel>0?`<div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Relegation</div>`:''}
-    </div>`;
-  }
-  document.getElementById('standings-content').innerHTML=html;
-}
-
-buildLeaguePicker();
-loadStandings();
+buildPicker();
+loadStandings(0);
 </script>
 </body>
 </html>
