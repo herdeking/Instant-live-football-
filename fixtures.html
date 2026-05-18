@@ -21,12 +21,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .nav-links::-webkit-scrollbar{display:none}
 .nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);text-decoration:none;padding:0 10px;height:54px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
 .nav-links a.active,.nav-links a:hover{color:var(--t1);border-bottom-color:var(--g)}
-.page-header{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px}
+.page-header{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px}
 .date-strip{display:flex;overflow-x:auto;gap:6px;padding:8px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
 .date-strip::-webkit-scrollbar{display:none}
-.dbtn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 11px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:48px}
-.dbtn .day{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase}
+.dbtn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:46px}
+.dbtn .day{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.57rem;letter-spacing:1.5px;text-transform:uppercase}
 .dbtn .num{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;line-height:1}
 .dbtn.active{background:var(--g);border-color:var(--g);color:var(--bg)}
 .tabs{display:flex;overflow-x:auto;gap:6px;padding:8px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
@@ -34,12 +34,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;white-space:nowrap}
 .tab.active{background:var(--g);border-color:var(--g);color:var(--bg)}
 .tab:hover:not(.active){border-color:var(--g);color:var(--g)}
-.frame-wrap{width:100%}
-.fx-frame{width:100%;border:none;display:block;height:calc(100vh - 200px)}
-.btn-links{display:flex;flex-direction:column;gap:10px;padding:20px 14px;max-width:340px;margin:0 auto}
-.ext-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none}
-.btn-primary{background:var(--g);color:var(--bg)}
-.btn-secondary{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
+.frame-outer{width:100%;overflow:hidden;position:relative;height:calc(100vh - 210px)}
+.top-mask{position:absolute;top:0;left:0;right:0;height:110px;background:var(--bg);z-index:5;pointer-events:none}
+.frame-inner{position:absolute;top:-110px;left:0;right:0;bottom:-70px}
+.fx-frame{width:100%;height:calc(100vh - 210px + 180px);border:none;display:block}
+.fallback{padding:20px 14px;text-align:center}
+.fallback p{font-family:'Barlow Condensed',sans-serif;color:var(--t2);font-size:.85rem;margin-bottom:16px;line-height:1.8}
+.ext-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-bottom:10px}
+.btn-g{background:var(--g);color:var(--bg)}
+.btn-s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
 .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(10,14,18,.98);border-top:1px solid var(--bd);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
 @media(min-width:601px){.bottom-nav{display:none}}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;text-decoration:none}
@@ -61,19 +64,22 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 </nav>
 <div class="page-header">
   <div class="page-title">Fixtures</div>
-  <div id="date-label" style="font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--t3)"></div>
+  <span id="cur-date" style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3)"></span>
 </div>
 <div class="date-strip" id="date-strip"></div>
 <div class="tabs">
   <button class="tab active" onclick="setLeague('all',this)">All</button>
-  <button class="tab" onclick="setLeague('premier-league',this)">EPL</button>
+  <button class="tab" onclick="setLeague('epl',this)">EPL</button>
   <button class="tab" onclick="setLeague('laliga',this)">La Liga</button>
-  <button class="tab" onclick="setLeague('serie-a',this)">Serie A</button>
+  <button class="tab" onclick="setLeague('seriea',this)">Serie A</button>
   <button class="tab" onclick="setLeague('bundesliga',this)">Bundesliga</button>
-  <button class="tab" onclick="setLeague('champions-league',this)">UCL</button>
+  <button class="tab" onclick="setLeague('ucl',this)">UCL</button>
 </div>
-<div class="frame-wrap" id="fw">
-  <iframe class="fx-frame" id="fxf" src="" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+<div class="frame-outer" id="fo">
+  <div class="top-mask"></div>
+  <div class="frame-inner">
+    <iframe class="fx-frame" id="fxf" src="" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+  </div>
 </div>
 <nav class="bottom-nav">
   <a class="bn-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
@@ -82,38 +88,34 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
   <a class="bn-item" href="standings.html"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Standings</span></a>
 </nav>
 <script>
-const LEAGUE_PATHS={
-  'all':'football',
-  'premier-league':'football/england/premier-league',
-  'laliga':'football/spain/laliga',
-  'serie-a':'football/italy/serie-a',
-  'bundesliga':'football/germany/bundesliga',
-  'champions-league':'football/europe/champions-league',
+const PATHS={
+  all:'football',epl:'football/england/premier-league',
+  laliga:'football/spain/laliga',seriea:'football/italy/serie-a',
+  bundesliga:'football/germany/bundesliga',ucl:'football/europe/champions-league'
 };
-let curLeague='all', curDate=getToday();
+let curLeague='all',curDate=today();
 
-function getToday(){return new Date().toISOString().split('T')[0];}
+function today(){return new Date().toISOString().split('T')[0];}
 
-function buildDateStrip(){
-  const strip=document.getElementById('date-strip');
+function buildDates(){
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  let html='';
+  let h='';
   for(let i=-1;i<=6;i++){
-    const d=new Date(); d.setDate(d.getDate()+i);
-    const str=d.toISOString().split('T')[0];
-    const label=i===0?'Today':i===-1?'Yest':i===1?'Tom':days[d.getDay()];
-    html+=`<button class="dbtn${str===curDate?' active':''}" onclick="selectDate('${str}',this)">
-      <div class="day">${label}</div><div class="num">${d.getDate()}</div>
+    const d=new Date();d.setDate(d.getDate()+i);
+    const s=d.toISOString().split('T')[0];
+    const lbl=i===0?'Today':i===-1?'Yest':i===1?'Tom':days[d.getDay()];
+    h+=`<button class="dbtn${s===curDate?' active':''}" onclick="setDate('${s}',this)">
+      <div class="day">${lbl}</div><div class="num">${d.getDate()}</div>
     </button>`;
   }
-  strip.innerHTML=html;
+  document.getElementById('date-strip').innerHTML=h;
 }
 
-function selectDate(date,btn){
-  curDate=date;
+function setDate(d,btn){
+  curDate=d;
   document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  document.getElementById('date-label').textContent=date;
+  document.getElementById('cur-date').textContent=d;
   updateFrame();
 }
 
@@ -125,35 +127,31 @@ function setLeague(l,btn){
 }
 
 function updateFrame(){
-  const path=LEAGUE_PATHS[curLeague]||'football';
-  // FlashScore uses date in URL as YYYYMMDD
-  const d=curDate.replace(/-/g,'');
+  const path=PATHS[curLeague]||'football';
   const url=`https://www.flashscore.com/${path}/`;
-  const frame=document.getElementById('fxf');
-  frame.src=url;
+  const fo=document.getElementById('fo');
+  fo.innerHTML=`
+    <div class="top-mask"></div>
+    <div class="frame-inner">
+      <iframe class="fx-frame" id="fxf" src="${url}" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+    </div>`;
   clearTimeout(window._ft);
-  window._ft=setTimeout(()=>showFallback(),8000);
-  frame.onload=()=>clearTimeout(window._ft);
+  window._ft=setTimeout(()=>showFallback(url),9000);
+  document.getElementById('fxf').onload=()=>clearTimeout(window._ft);
 }
 
-function showFallback(){
-  const path=LEAGUE_PATHS[curLeague]||'football';
-  document.getElementById('fw').innerHTML=`
-  <div style="text-align:center;padding:20px 14px">
-    <div style="font-family:'Barlow Condensed',sans-serif;color:var(--t2);font-size:.85rem;margin-bottom:16px">
-      Tap to view fixtures for <strong style="color:var(--t1)">${curDate}</strong>:
-    </div>
-    <div class="btn-links">
-      <a href="https://www.flashscore.com/${path}/" target="_blank" class="ext-btn btn-primary">⚡ FlashScore Fixtures</a>
-      <a href="https://www.livescore.com/en/${path}/" target="_blank" class="ext-btn btn-secondary">📊 LiveScore Fixtures</a>
-      <a href="https://www.bbc.com/sport/football/scores-fixtures" target="_blank" class="ext-btn btn-secondary">📺 BBC Sport</a>
-      <a href="https://www.goal.com/en/news/fixtures" target="_blank" class="ext-btn btn-secondary">⚽ Goal.com</a>
-    </div>
+function showFallback(url){
+  document.getElementById('fo').innerHTML=`
+  <div class="fallback">
+    <p>View fixtures for <strong style="color:var(--t1)">${curDate}</strong>:</p>
+    <a href="${url}" target="_blank" class="ext-btn btn-g">⚡ FlashScore Fixtures</a>
+    <a href="https://www.livescore.com/en/football/" target="_blank" class="ext-btn btn-s">📊 LiveScore Fixtures</a>
+    <a href="https://www.bbc.com/sport/football/scores-fixtures" target="_blank" class="ext-btn btn-s">📺 BBC Sport</a>
   </div>`;
 }
 
-buildDateStrip();
-document.getElementById('date-label').textContent=curDate;
+buildDates();
+document.getElementById('cur-date').textContent=curDate;
 updateFrame();
 </script>
 </body>
