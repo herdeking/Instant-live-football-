@@ -21,21 +21,24 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 .nav-links::-webkit-scrollbar{display:none}
 .nav-links a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);text-decoration:none;padding:0 10px;height:54px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
 .nav-links a.active,.nav-links a:hover{color:var(--t1);border-bottom-color:var(--g)}
-.page-header{padding:12px 14px;border-bottom:1px solid var(--bd)}
-.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px}
+.page-header{padding:10px 14px;border-bottom:1px solid var(--bd)}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px}
 .league-picker{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;scrollbar-width:none;border-bottom:1px solid var(--bd)}
 .league-picker::-webkit-scrollbar{display:none}
-.lpick{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:60px}
-.lpick img{width:26px;height:26px;object-fit:contain;border-radius:50%;background:var(--s2)}
-.lpick span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;text-align:center;line-height:1.2}
+.lpick{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 9px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t3);cursor:pointer;transition:all .2s;min-width:56px}
+.lpick img{width:24px;height:24px;object-fit:contain;border-radius:50%;background:var(--s2)}
+.lpick span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.56rem;letter-spacing:1px;text-transform:uppercase;text-align:center;line-height:1.2}
 .lpick.active{background:rgba(0,233,107,.08);border-color:rgba(0,233,107,.4);color:var(--g)}
 .lpick.active img{box-shadow:0 0 0 2px var(--g)}
-.frame-wrap{width:100%}
-.st-frame{width:100%;border:none;display:block;height:calc(100vh - 180px)}
-.btn-links{display:flex;flex-direction:column;gap:10px;padding:20px 14px;max-width:340px;margin:0 auto}
-.ext-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none}
-.btn-primary{background:var(--g);color:var(--bg)}
-.btn-secondary{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
+.frame-outer{width:100%;overflow:hidden;position:relative;height:calc(100vh - 185px)}
+.top-mask{position:absolute;top:0;left:0;right:0;height:110px;background:var(--bg);z-index:5;pointer-events:none}
+.frame-inner{position:absolute;top:-110px;left:0;right:0;bottom:-70px}
+.st-frame{width:100%;height:calc(100vh - 185px + 180px);border:none;display:block}
+.fallback{padding:20px 14px;text-align:center}
+.fallback p{font-family:'Barlow Condensed',sans-serif;color:var(--t2);font-size:.85rem;margin-bottom:16px;line-height:1.8}
+.ext-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-bottom:10px}
+.btn-g{background:var(--g);color:var(--bg)}
+.btn-s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
 .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(10,14,18,.98);border-top:1px solid var(--bd);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
 @media(min-width:601px){.bottom-nav{display:none}}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;text-decoration:none}
@@ -55,12 +58,13 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
     <a href="standings.html" class="active">Standings</a>
   </div>
 </nav>
-<div class="page-header">
-  <div class="page-title">Standings</div>
-</div>
-<div class="league-picker" id="league-picker"></div>
-<div class="frame-wrap" id="fw">
-  <iframe class="st-frame" id="stf" src="" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+<div class="page-header"><div class="page-title">Standings</div></div>
+<div class="league-picker" id="lp"></div>
+<div class="frame-outer" id="fo">
+  <div class="top-mask"></div>
+  <div class="frame-inner">
+    <iframe class="st-frame" id="stf" src="" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+  </div>
 </div>
 <nav class="bottom-nav">
   <a class="bn-item" href="index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></a>
@@ -71,74 +75,55 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,10,.97);backdrop-filte
 <script>
 const LB='https://media.api-sports.io/football/leagues/';
 const LEAGUES=[
-  {name:'Premier League',logo:LB+'39.png',url:'https://www.flashscore.com/football/england/premier-league/standings/'},
-  {name:'La Liga',logo:LB+'140.png',url:'https://www.flashscore.com/football/spain/laliga/standings/'},
-  {name:'Serie A',logo:LB+'135.png',url:'https://www.flashscore.com/football/italy/serie-a/standings/'},
-  {name:'Bundesliga',logo:LB+'78.png',url:'https://www.flashscore.com/football/germany/bundesliga/standings/'},
-  {name:'Ligue 1',logo:LB+'61.png',url:'https://www.flashscore.com/football/france/ligue-1/standings/'},
-  {name:'UCL',logo:LB+'2.png',url:'https://www.flashscore.com/football/europe/champions-league/standings/'},
-  {name:'Europa',logo:LB+'3.png',url:'https://www.flashscore.com/football/europe/europa-league/standings/'},
-  {name:'Eredivisie',logo:LB+'88.png',url:'https://www.flashscore.com/football/netherlands/eredivisie/standings/'},
-  {name:'Portugal',logo:LB+'94.png',url:'https://www.flashscore.com/football/portugal/liga-portugal/standings/'},
-  {name:'Championship',logo:LB+'40.png',url:'https://www.flashscore.com/football/england/championship/standings/'},
+  {n:'Premier League',logo:LB+'39.png',url:'https://www.flashscore.com/football/england/premier-league/standings/'},
+  {n:'La Liga',logo:LB+'140.png',url:'https://www.flashscore.com/football/spain/laliga/standings/'},
+  {n:'Serie A',logo:LB+'135.png',url:'https://www.flashscore.com/football/italy/serie-a/standings/'},
+  {n:'Bundesliga',logo:LB+'78.png',url:'https://www.flashscore.com/football/germany/bundesliga/standings/'},
+  {n:'Ligue 1',logo:LB+'61.png',url:'https://www.flashscore.com/football/france/ligue-1/standings/'},
+  {n:'UCL',logo:LB+'2.png',url:'https://www.flashscore.com/football/europe/champions-league/standings/'},
+  {n:'Europa',logo:LB+'3.png',url:'https://www.flashscore.com/football/europe/europa-league/standings/'},
+  {n:'Eredivisie',logo:LB+'88.png',url:'https://www.flashscore.com/football/netherlands/eredivisie/standings/'},
+  {n:'Portugal',logo:LB+'94.png',url:'https://www.flashscore.com/football/portugal/liga-portugal/standings/'},
+  {n:'Championship',logo:LB+'40.png',url:'https://www.flashscore.com/football/england/championship/standings/'},
 ];
+let cur=0;
 
-// Fallback to livescore.com
-const FALLBACK_LEAGUES=[
-  'https://www.livescore.com/en/football/england/premier-league/',
-  'https://www.livescore.com/en/football/spain/laliga/',
-  'https://www.livescore.com/en/football/italy/serie-a/',
-  'https://www.livescore.com/en/football/germany/bundesliga/',
-  'https://www.livescore.com/en/football/france/ligue-1/',
-  'https://www.livescore.com/en/football/europe/champions-league/',
-  'https://www.livescore.com/en/football/europe/europa-league/',
-  'https://www.livescore.com/en/football/netherlands/eredivisie/',
-  'https://www.livescore.com/en/football/portugal/liga-portugal/',
-  'https://www.livescore.com/en/football/england/championship/',
-];
+document.getElementById('lp').innerHTML=LEAGUES.map((l,i)=>`
+  <button class="lpick${i===0?' active':''}" onclick="pick(${i},this)">
+    <img src="${l.logo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(l.n.substring(0,2))}&background=1a2330&color=8a9ab0&size=60'">
+    <span>${l.n}</span>
+  </button>`).join('');
 
-let curIdx=0;
-
-function buildPicker(){
-  document.getElementById('league-picker').innerHTML=LEAGUES.map((l,i)=>`
-    <button class="lpick${i===0?' active':''}" onclick="selectLeague(${i},this)">
-      <img src="${l.logo}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(l.name.substring(0,2))}&background=1a2330&color=8a9ab0&size=60'">
-      <span>${l.name}</span>
-    </button>`).join('');
-}
-
-function selectLeague(idx,btn){
-  curIdx=idx;
+function pick(i,btn){
+  cur=i;
   document.querySelectorAll('.lpick').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  loadStandings(idx);
+  loadFrame(i);
 }
 
-function loadStandings(idx){
-  const frame=document.getElementById('stf');
-  frame.src=LEAGUES[idx].url;
+function loadFrame(i){
+  const fo=document.getElementById('fo');
+  fo.innerHTML=`
+    <div class="top-mask"></div>
+    <div class="frame-inner">
+      <iframe class="st-frame" id="stf" src="${LEAGUES[i].url}" scrolling="yes" allow="autoplay;fullscreen" loading="lazy"></iframe>
+    </div>`;
   clearTimeout(window._st);
-  window._st=setTimeout(()=>showFallback(idx),8000);
-  frame.onload=()=>clearTimeout(window._st);
+  window._st=setTimeout(()=>showFallback(i),9000);
+  document.getElementById('stf').onload=()=>clearTimeout(window._st);
 }
 
-function showFallback(idx){
-  document.getElementById('fw').innerHTML=`
-  <div style="text-align:center;padding:20px 14px">
-    <div style="font-family:'Barlow Condensed',sans-serif;color:var(--t2);font-size:.85rem;margin-bottom:16px">
-      View <strong style="color:var(--t1)">${LEAGUES[idx].name}</strong> standings:
-    </div>
-    <div class="btn-links">
-      <a href="${LEAGUES[idx].url}" target="_blank" class="ext-btn btn-primary">⚡ FlashScore Standings</a>
-      <a href="${FALLBACK_LEAGUES[idx]}" target="_blank" class="ext-btn btn-secondary">📊 LiveScore Standings</a>
-      <a href="https://www.bbc.com/sport/football/tables" target="_blank" class="ext-btn btn-secondary">📺 BBC Sport Tables</a>
-      <a href="https://www.espn.com/soccer/standings" target="_blank" class="ext-btn btn-secondary">🏆 ESPN Standings</a>
-    </div>
+function showFallback(i){
+  document.getElementById('fo').innerHTML=`
+  <div class="fallback">
+    <p>View <strong style="color:var(--t1)">${LEAGUES[i].n}</strong> table:</p>
+    <a href="${LEAGUES[i].url}" target="_blank" class="ext-btn btn-g">⚡ FlashScore Table</a>
+    <a href="https://www.bbc.com/sport/football/tables" target="_blank" class="ext-btn btn-s">📺 BBC Sport Tables</a>
+    <a href="https://www.espn.com/soccer/standings" target="_blank" class="ext-btn btn-s">🏆 ESPN Standings</a>
   </div>`;
 }
 
-buildPicker();
-loadStandings(0);
+pick(0,document.querySelector('.lpick'));
 </script>
 </body>
 </html>
