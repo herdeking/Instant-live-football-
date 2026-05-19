@@ -473,6 +473,8 @@ nav{position:sticky;top:0;z-index:200;background:rgba(7,9,10,.97);backdrop-filte
 <div class="w-tab" onclick="wTab(this,'lu')">Lineups</div>
 <div class="w-tab" onclick="wTab(this,'st')">Stats</div>
 </div>
+<!-- Server switcher — shown when match has multiple streams -->
+<div id="server-switcher" style="display:none;padding:8px 14px;border-bottom:1px solid var(--bd);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none"></div>
 <div class="w-content">
 <div id="wt-ev"><div class="w-match-desc" id="w-desc" style="font-size:.82rem;color:var(--t2);line-height:1.6;margin-bottom:10px;font-family:'Barlow',sans-serif;padding-bottom:8px;border-bottom:1px solid var(--bd);display:none"></div><div class="ev-list" id="ev-list"></div></div>
 <div id="wt-lu" style="display:none"><div class="lineup-grid" id="lu-grid"></div></div>
@@ -989,14 +991,40 @@ function openWatch(m){
   tryLandscape();
 }
 
-async function loadStream(m, fr, ph, isLive, isFt){
+async function loadStream(m, fr, ph, isLive, isFt, serverIdx){
+  serverIdx = serverIdx || 0;
+
+  // Build list of all available streams
+  const streams = [];
+  if(m.streams && m.streams.length){
+    m.streams.forEach(s=>{ if(s.url) streams.push({url:s.url, label:s.label||'Server '+(streams.length+1)}); });
+  }
+  if(!streams.length && m.stream && m.stream.trim()){
+    streams.push({url:m.stream.trim(), label:'Server 1'});
+  }
+
+  // Build server switcher buttons
+  const switcher = document.getElementById('server-switcher');
+  if(switcher){
+    if(streams.length > 1){
+      switcher.style.display='flex';
+      switcher.innerHTML = streams.map((s,i)=>`
+        <button onclick="switchServer(${i})" id="srv-btn-${i}"
+          style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid ${i===serverIdx?'var(--g)':\'var(--bd)'};background:${i===serverIdx?'var(--g)':\'transparent'};color:${i===serverIdx?'var(--bg)':\'var(--t3)'};cursor:pointer;white-space:nowrap;transition:all .2s">
+          ${i===serverIdx?'▶ ':''} ${s.label}
+        </button>`).join('');
+    } else {
+      switcher.style.display='none';
+    }
+  }
+
+  const currentStream = streams[serverIdx] || streams[0];
   let streamHtml = '';
 
-  // Priority 1: Admin-set stream URL
-  if(m.stream && m.stream.trim()){
-    let streamUrl = m.stream.trim();
+  if(currentStream){
+    let streamUrl = currentStream.url.trim();
     if(streamUrl.includes('<iframe')||streamUrl.includes('<IFRAME')){
-      const srcMatch = streamUrl.match(/src=["']([^"']+)["']/i);
+      const srcMatch = streamUrl.match(/src=["\']([\^"\']+)["\']/i);
       if(srcMatch && srcMatch[1]) streamUrl = srcMatch[1];
     }
     if(streamUrl.includes('youtube.com/embed')&&!streamUrl.includes('autoplay')){
@@ -1005,38 +1033,40 @@ async function loadStream(m, fr, ph, isLive, isFt){
     streamHtml = `<iframe src="${streamUrl}" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" scrolling="no" style="width:100%;height:100%;border:none"></iframe>`;
   }
 
-  // Priority 2: PPV.to auto stream (if live and no admin stream)
+  // PPV.to auto stream fallback
   if(!streamHtml && isLive){
     const ppvStream = await findPPVStream(m);
     if(ppvStream){
-      if(ppvStream.iframe){
-        // Use iframe embed directly from PPV.to
-        streamHtml = ppvStream.iframe;
-      } else if(ppvStream.uri_name){
-        streamHtml = `<iframe src="https://ppv.to/streams/${ppvStream.uri_name}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" frameborder="0" style="width:100%;height:100%;border:none"></iframe>`;
-      }
+      if(ppvStream.iframe) streamHtml = ppvStream.iframe;
+      else if(ppvStream.uri_name) streamHtml = `<iframe src="https://ppv.to/streams/${ppvStream.uri_name}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" frameborder="0" style="width:100%;height:100%;border:none"></iframe>`;
     }
   }
 
   if(streamHtml){
-    ph.style.display='none';
-    fr.style.display='block';
+    ph.style.display='none'; fr.style.display='block';
     fr.srcdoc = `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>*{margin:0;padding:0}html,body{width:100%;height:100vh;background:#000;overflow:hidden}
 iframe,div{width:100%;height:100vh;border:none;display:block}</style>
 </head><body>${streamHtml}</body></html>`;
   } else {
-    // No stream available
-    ph.style.display='flex';fr.style.display='none';
+    ph.style.display='flex'; fr.style.display='none';
     ph.innerHTML=isLive
       ?`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg>
 <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--live);animation:blink 1s ease-in-out infinite"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--live);font-weight:700">Searching for stream…</span></div>
 <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--t3);text-align:center;padding:0 16px">No stream found yet.<br>Admin can add one manually.</div>
-<button onclick="loadStream(currentMatch,document.getElementById('stream-frame'),document.getElementById('vid-ph'),true,false)" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;cursor:pointer;margin-top:4px">Retry</button>`
+<button onclick="loadStream(currentMatch,document.getElementById('stream-frame'),document.getElementById('vid-ph'),true,false,0)" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;cursor:pointer;margin-top:4px">Retry</button>`
       :`<svg class="pitch-svg" viewBox="0 0 200 130" fill="none"><rect x="1" y="1" width="198" height="128" rx="3" fill="none" stroke="#00e96b" stroke-width="1.5"/><line x1="100" y1="1" x2="100" y2="129" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="18" fill="none" stroke="#00e96b" stroke-width="1"/><circle cx="100" cy="65" r="2" fill="#00e96b"/></svg>
 <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--t3);text-transform:uppercase;text-align:center">${isFt?'No replay available':'⏰ Stream starts at kick-off'}</div>`;
   }
+}
+
+function switchServer(idx){
+  if(!currentMatch) return;
+  const fr=document.getElementById('stream-frame');
+  const ph=document.getElementById('vid-ph');
+  const status=getMatchStatus(currentMatch);
+  loadStream(currentMatch, fr, ph, status==='live', status==='finished', idx);
 }
 
 // =====================================================

@@ -267,26 +267,60 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 </div>
 
 <div class="form-card">
-<div class="form-card-title"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Live Stream Embed</div>
-<div class="form-grid full">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Live Stream Servers</div>
+<div style="font-size:.78rem;color:var(--t2);margin-bottom:14px;line-height:1.7">Add up to <strong style="color:var(--g)">3 stream servers</strong>. Viewers can switch between them if one is down. Paste a URL or full iframe embed code in each slot.</div>
+
+<!-- Server 1 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--g);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:var(--g);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">1</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 1 — Primary</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--g);background:rgba(0,233,107,.1);border:1px solid rgba(0,233,107,.2);border-radius:4px;padding:1px 6px">Main</div>
+</div>
 <div class="field-group full">
-<label>Stream Type</label>
-<select id="f-stream-type" onchange="onStreamTypeChange()">
-<option value="none">No stream</option>
-<option value="iframe">iFrame URL / Embed URL</option>
-<option value="youtube">YouTube Live Embed</option>
-<option value="dailymotion">Dailymotion Embed</option>
-<option value="html">Raw HTML Embed Code</option>
-</select>
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream1" rows="3" placeholder="https://stream-server1.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Paste URL or full &lt;iframe&gt; embed code</div>
 </div>
-<div class="field-group full" id="stream-url-field">
-<label id="stream-url-label">Stream URL / Embed URL</label>
-<input type="url" id="f-stream-url" placeholder="https://...">
-<div class="embed-hint">Paste the full embed URL. This will be loaded in the player iframe on the site.</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 1 Label (shown to viewers)</label>
+  <input type="text" id="f-stream1-label" placeholder="e.g. HD Server 1" value="Server 1">
 </div>
-<div class="field-group full" id="stream-html-field" style="display:none">
-<label>HTML Embed Code</label>
-<textarea id="f-stream-html" placeholder="Paste full &lt;iframe&gt; or embed HTML here…" rows="4"></textarea>
+</div>
+
+<!-- Server 2 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--gold);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:var(--gold);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">2</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 2 — Backup</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--gold);background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.2);border-radius:4px;padding:1px 6px">Backup</div>
+</div>
+<div class="field-group full">
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream2" rows="3" placeholder="https://stream-server2.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Optional — shown if Server 1 fails</div>
+</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 2 Label</label>
+  <input type="text" id="f-stream2-label" placeholder="e.g. HD Server 2" value="Server 2">
+</div>
+</div>
+
+<!-- Server 3 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid #4fc3f7;border-radius:8px;padding:12px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:#4fc3f7;color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">3</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 3 — Extra Backup</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:#4fc3f7;background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.2);border-radius:4px;padding:1px 6px">Backup 2</div>
+</div>
+<div class="field-group full">
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream3" rows="3" placeholder="https://stream-server3.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Optional — shown if Server 1 & 2 fail</div>
+</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 3 Label</label>
+  <input type="text" id="f-stream3-label" placeholder="e.g. SD Server 3" value="Server 3">
 </div>
 </div>
 </div>
@@ -407,7 +441,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <select id="e-status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="finished">Finished</option><option value="draft">Draft</option></select>
 </div>
 <div class="field-group"><label>Minute (if Live)</label><input type="text" id="e-minute" placeholder="e.g. 67'"></div>
-<div class="field-group full"><label>Stream URL / Embed</label><input type="text" id="e-stream" placeholder="https://… or paste HTML"></div>
+<div class="field-group full"><label>Server 1 — Primary Stream URL</label><textarea id="e-stream" rows="2" placeholder="https://... or iframe code"></textarea></div>
+<div class="field-group full"><label>Server 1 Label</label><input type="text" id="e-stream-label" placeholder="Server 1"></div>
+<div class="field-group full"><label>Server 2 — Backup Stream URL</label><textarea id="e-stream2" rows="2" placeholder="https://... or iframe code (optional)"></textarea></div>
+<div class="field-group full"><label>Server 2 Label</label><input type="text" id="e-stream2-label" placeholder="Server 2"></div>
+<div class="field-group full"><label>Server 3 — Extra Backup</label><textarea id="e-stream3" rows="2" placeholder="https://... or iframe code (optional)"></textarea></div>
+<div class="field-group full"><label>Server 3 Label</label><input type="text" id="e-stream3-label" placeholder="Server 3"></div>
 <div class="field-group full"><label>Competition</label><input type="text" id="e-comp"></div>
 <div class="field-group full"><label>Match Date</label><input type="date" id="e-date"></div>
 <div class="field-group full"><label>Kick-off Time (WAT)</label><input type="time" id="e-time"></div>
@@ -496,10 +535,14 @@ async function saveMatch(){
   const away=document.getElementById('f-away').value.trim();
   if(!home||!away){showAlert('upload-alert','Please enter both team names.','error');return;}
 
-  const streamType=document.getElementById('f-stream-type').value;
-  let stream='';
-  if(streamType==='html') stream=document.getElementById('f-stream-html').value.trim();
-  else if(streamType!=='none') stream=document.getElementById('f-stream-url').value.trim();
+  const stream1 = document.getElementById('f-stream1').value.trim();
+  const stream2 = document.getElementById('f-stream2').value.trim();
+  const stream3 = document.getElementById('f-stream3').value.trim();
+  const stream1label = document.getElementById('f-stream1-label').value.trim() || 'Server 1';
+  const stream2label = document.getElementById('f-stream2-label').value.trim() || 'Server 2';
+  const stream3label = document.getElementById('f-stream3-label').value.trim() || 'Server 3';
+  // Keep backward compat — primary stream field
+  const stream = stream1;
 
   const homeLineup=document.getElementById('f-home-lineup').value.trim().split('\n').map(s=>s.trim()).filter(Boolean);
   const awayLineup=document.getElementById('f-away-lineup').value.trim().split('\n').map(s=>s.trim()).filter(Boolean);
@@ -515,7 +558,12 @@ async function saveMatch(){
     ascore:parseInt(document.getElementById('f-ascore').value)||0,
     status:document.getElementById('f-status').value||'upcoming',
     minute:document.getElementById('f-minute').value.trim()||'',
-    stream,
+    stream, // primary (Server 1)
+    streams:[
+      {url:stream1, label:stream1label},
+      {url:stream2, label:stream2label},
+      {url:stream3, label:stream3label},
+    ].filter(s=>s.url), // only save non-empty
     desc:document.getElementById('f-desc').value.trim()||'',
     homeLineup, awayLineup,
     events:[], stats:[],
@@ -557,7 +605,12 @@ function openEdit(id){
   document.getElementById('e-ascore').value=m.ascore||0;
   document.getElementById('e-status').value=m.status||'upcoming';
   document.getElementById('e-minute').value=m.minute||'';
-  document.getElementById('e-stream').value=m.stream||'';
+  document.getElementById('e-stream').value=m.stream||m.streams?.[0]?.url||'';
+  document.getElementById('e-stream-label').value=m.streams?.[0]?.label||'Server 1';
+  document.getElementById('e-stream2').value=m.streams?.[1]?.url||'';
+  document.getElementById('e-stream2-label').value=m.streams?.[1]?.label||'Server 2';
+  document.getElementById('e-stream3').value=m.streams?.[2]?.url||'';
+  document.getElementById('e-stream3-label').value=m.streams?.[2]?.label||'Server 3';
   document.getElementById('e-comp').value=m.comp||'';
   document.getElementById('e-date').value=m.date||'';
   document.getElementById('e-time').value=m.time||'';
@@ -577,6 +630,11 @@ async function saveEdit(){
     status:document.getElementById('e-status').value,
     minute:document.getElementById('e-minute').value.trim(),
     stream:document.getElementById('e-stream').value.trim(),
+    streams:[
+      {url:document.getElementById('e-stream').value.trim(),label:document.getElementById('e-stream-label').value.trim()||'Server 1'},
+      {url:document.getElementById('e-stream2').value.trim(),label:document.getElementById('e-stream2-label').value.trim()||'Server 2'},
+      {url:document.getElementById('e-stream3').value.trim(),label:document.getElementById('e-stream3-label').value.trim()||'Server 3'},
+    ].filter(s=>s.url),
     comp:document.getElementById('e-comp').value.trim(),
     date:document.getElementById('e-date').value,
     time:document.getElementById('e-time').value,
@@ -726,7 +784,10 @@ function onStreamTypeChange(){
 }
 
 function clearForm(){
-  ['f-home','f-away','f-round','f-minute','f-stream-url','f-stream-html','f-desc','f-home-lineup','f-away-lineup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-home','f-away','f-round','f-minute','f-stream1','f-stream2','f-stream3','f-desc','f-home-lineup','f-away-lineup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const s1l=document.getElementById('f-stream1-label');if(s1l)s1l.value='Server 1';
+  const s2l=document.getElementById('f-stream2-label');if(s2l)s2l.value='Server 2';
+  const s3l=document.getElementById('f-stream3-label');if(s3l)s3l.value='Server 3';
   ['f-hscore','f-ascore'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='0';});
   const fComp=document.getElementById('f-comp');if(fComp)fComp.value='';
   const fStatus=document.getElementById('f-status');if(fStatus)fStatus.value='upcoming';
