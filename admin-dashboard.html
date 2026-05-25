@@ -189,6 +189,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 🔥 <strong>Firebase Connected</strong> — All matches are instantly visible to every visitor.
 <span style="margin-left:8px;background:rgba(0,233,107,.15);border:1px solid rgba(0,233,107,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer" onclick="window.open('index.html','_blank')">👁 View Public Site →</span>
 <span style="margin-left:4px;background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:#4fc3f7" onclick="copyPublicLink()">🔗 Copy Link</span>
+<span style="margin-left:4px;background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:var(--gold)" onclick="fixPublishedField()">🔧 Fix Visibility</span>
 </div>
 <div class="stats-strip">
 <div class="stat-card"><div class="stat-label">Live Matches</div><div class="stat-val" style="color:var(--live)" id="stat-live">0</div><div class="stat-sub">Currently live</div></div>
@@ -833,6 +834,31 @@ async function togglePublish(id, currentlyPublished){
     });
     showToast(currentlyPublished ? '🔒 Match hidden from public site' : '✓ Match published — visible to all users');
   }catch(err){alert('Error: '+err.message);}
+}
+
+// Fix: Set published=true on all matches that don't have it set
+// This fixes matches saved before the publish feature was added
+async function fixPublishedField(){
+  try{
+    const snapshot = await db.collection('matches').get();
+    let fixed = 0;
+    const batch = db.batch();
+    snapshot.docs.forEach(doc=>{
+      const data = doc.data();
+      if(data.published === undefined || data.published === null){
+        batch.update(doc.ref, {published: true});
+        fixed++;
+      }
+    });
+    if(fixed > 0){
+      await batch.commit();
+      showToast(`✓ Fixed ${fixed} match${fixed!==1?'es':''} — now visible to public!`);
+    } else {
+      showToast('✓ All matches already have visibility set correctly');
+    }
+  }catch(err){
+    alert('Error: '+err.message);
+  }
 }
 
 function copyPublicLink(){

@@ -591,16 +591,26 @@ try{isSubscribed=localStorage.getItem('ft_subscribed')==='true';}catch(e){}
 // LOAD MATCHES FROM FIREBASE (visible to everyone!)
 // =====================================================
 async function loadMatches(){
-  // Show loading state
   document.getElementById('match-list').innerHTML='<div class="fb-loading"><div class="ls-spinner"></div><span>Connecting to database…</span></div>';
 
-  try {
-    // Test Firebase connection first
-    const snapshot = await db.collection('matches').get();
-    matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))
-      .filter(m => m.published !== false); // hide drafts from public
+  // Timeout after 10 seconds
+  const timeout = setTimeout(()=>{
+    if(!matches.length){
+      document.getElementById('match-list').innerHTML=`
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <p style="color:var(--t2)">Taking too long to load</p>
+        <button onclick="loadMatches()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;margin-top:10px">↻ Retry</button>
+      </div>`;
+    }
+  }, 10000);
 
-    // Sort by createdAt if available
+  try {
+    const snapshot = await db.collection('matches').get();
+    clearTimeout(timeout);
+    matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))
+      .filter(m => m.published !== false);
+
     matches.sort((a,b)=>{
       const at = a.createdAt?.seconds || 0;
       const bt = b.createdAt?.seconds || 0;
@@ -609,10 +619,10 @@ async function loadMatches(){
 
     renderAll();
 
-    // Real-time listener: auto-update when admin changes anything
+    // Real-time listener
     db.collection('matches').onSnapshot(snapshot => {
       matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))
-        .filter(m => m.published !== false); // hide drafts from public
+        .filter(m => m.published !== false);
       matches.sort((a,b)=>{
         const at = a.createdAt?.seconds || 0;
         const bt = b.createdAt?.seconds || 0;
@@ -626,14 +636,14 @@ async function loadMatches(){
     });
 
   } catch(e) {
+    clearTimeout(timeout);
     console.log('Firebase error:', e.message);
-    // Show helpful error
     document.getElementById('match-list').innerHTML=`
     <div class="empty-state">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      <p style="color:var(--red)">Database connection failed</p>
+      <p style="color:var(--red)">Could not load matches</p>
       <p style="font-size:.72rem;margin-top:4px;color:var(--t3)">${e.message}</p>
-      <button onclick="loadMatches()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;margin-top:10px">Retry</button>
+      <button onclick="loadMatches()" style="background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;margin-top:10px">↻ Retry</button>
     </div>`;
   }
 }
