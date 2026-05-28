@@ -60,7 +60,7 @@
   }
 
   // Main player function — override window.loadStreamUrl
-  window.loadStreamUrl = function(url) {
+  window.loadStreamUrl = function(url) {if (window.ftAds) window.ftAds.pause();
     const vidWrap = document.querySelector('.vid-wrap');
     const loading = document.getElementById('vid-loading');
     const ph = document.getElementById('vid-ph');
@@ -215,7 +215,7 @@
 
   // Cleanup when watch modal closes
   const origClose = window.closeWatch;
-  window.closeWatch = function() {
+  window.closeWatch = function() {if (window.ftAds) window.ftAds.resume();
     const video = document.getElementById('ft-video-player');
     if (video) {
       if (video._hls) video._hls.destroy();
