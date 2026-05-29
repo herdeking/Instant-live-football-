@@ -1,81 +1,1099 @@
-{
-  "name": "FullTime — Live Football",
-  "short_name": "FullTime",
-  "description": "Watch live football streams, scores and lineups in real time",
-  "start_url": "/index.html",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "any",
-  "background_color": "#07090a",
-  "theme_color": "#00e96b",
-  "lang": "en",
-  "categories": ["sports", "entertainment"],
-  "icons": [
-    {
-      "src": "icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Live Now",
-      "short_name": "Live",
-      "description": "See all live matches",
-      "url": "/index.html?filter=live",
-      "icons": [{"src": "icon-96.png", "sizes": "96x96"}]
-    },
-    {
-      "name": "Upcoming",
-      "short_name": "Upcoming",
-      "description": "See upcoming matches",
-      "url": "/index.html?filter=upcoming",
-      "icons": [{"src": "icon-96.png", "sizes": "96x96"}]
-    }
-  ],
-  "prefer_related_applications": false
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FullTime — Live Football App</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FullTime">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#e01f1f;--red2:#ff3333;--yellow:#ffcc00;
+  --bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--bg4:#242424;
+  --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
+  --border:#2a2a2a;--green:#00c853;--blue:#2979ff;
+  --live-red:#ff1744;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Source Sans 3',sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  /* Safe area for notch phones */
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
+/* ===== STATUS BAR AREA ===== */
+.status-bar{
+  height:44px;
+  background:var(--bg);
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.app-brand{display:flex;align-items:center;gap:8px}
+.app-logo{
+  width:28px;height:28px;
+  background:var(--red);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;color:#fff;
+}
+.app-name{font-family:'Oswald',sans-serif;font-weight:700;font-size:1rem;letter-spacing:2px;color:#fff}
+.status-right{display:flex;align-items:center;gap:10px}
+.live-badge{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(224,31,31,0.15);
+  border:1px solid rgba(224,31,31,0.4);
+  border-radius:20px;padding:3px 8px;
+}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--live-red);animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-badge span{font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;color:var(--live-red)}
+.notif-btn{background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer;padding:4px}
+
+/* ===== TAB BAR (TOP) ===== */
+.tab-bar{
+  display:flex;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  overflow-x:auto;scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{
+  flex:1;min-width:70px;
+  display:flex;flex-direction:column;align-items:center;
+  padding:8px 4px 6px;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all .2s;
+  font-family:'Oswald',sans-serif;font-weight:600;
+  font-size:.62rem;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text3);white-space:nowrap;
+}
+.tab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:2px}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.tab:hover{color:var(--text)}
+
+/* ===== MAIN CONTENT ===== */
+.app-content{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.app-content::-webkit-scrollbar{display:none}
+
+/* ===== SCREEN PAGES ===== */
+.screen{display:none;height:100%}
+.screen.active{display:block}
+
+/* ===== HOME SCREEN ===== */
+
+/* Featured Live Match */
+.feat-section{padding:12px}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.section-more{font-family:'Oswald',sans-serif;font-size:.65rem;color:var(--red);letter-spacing:1px;cursor:pointer}
+
+.feat-live-card{
+  background:linear-gradient(135deg,#1a0000,#2d0505,#1a0000);
+  border:1px solid rgba(224,31,31,0.3);
+  border-radius:16px;overflow:hidden;
+  cursor:pointer;position:relative;
+}
+.feat-live-card::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='20' cy='20' r='10'/%3E%3C/g%3E%3C/svg%3E");
+}
+.flc-top{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;position:relative}
+.flc-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5)}
+.flc-live{display:flex;align-items:center;gap:4px;background:var(--live-red);border-radius:4px;padding:3px 8px}
+.flc-live span{font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;color:#fff}
+.flc-teams{padding:10px 14px 14px;position:relative}
+.flc-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.flc-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.flc-crest{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.flc-crest img{width:38px;height:38px;object-fit:contain}
+.flc-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.8rem;text-align:center;color:#fff;letter-spacing:.3px}
+.flc-score{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;letter-spacing:4px;color:#fff;line-height:1;text-shadow:0 0 20px rgba(224,31,31,0.5)}
+.flc-sep{font-size:1.6rem;color:rgba(255,255,255,0.2)}
+.flc-min{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;color:var(--live-red);text-align:center;margin-top:4px;letter-spacing:.5px}
+.flc-btn{
+  margin:0 14px 14px;
+  background:var(--live-red);color:#fff;border:none;
+  border-radius:10px;padding:13px;width:calc(100% - 28px);
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;
+  letter-spacing:2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  position:relative;
+}
+.flc-btn::before{
+  content:'';position:absolute;inset:0;border-radius:10px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+}
+
+/* Match Cards - App Style */
+.matches-scroll{padding:0 12px 12px}
+.app-match-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+  margin-bottom:10px;cursor:pointer;
+  transition:transform .15s,border-color .15s;
+  active:transform:scale(0.98);
+}
+.app-match-card:active{transform:scale(0.98)}
+.amc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 13px;background:var(--bg3);
+}
+.amc-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.amc-badge{padding:2px 8px;border-radius:4px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px}
+.amc-badge.live{background:rgba(255,23,68,0.15);color:var(--live-red);border:1px solid rgba(255,23,68,0.3);display:flex;align-items:center;gap:4px}
+.amc-badge.upcoming{background:rgba(255,204,0,0.15);color:var(--yellow);border:1px solid rgba(255,204,0,0.3)}
+.amc-badge.ft{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border)}
+.amc-body{padding:14px 13px}
+.amc-teams{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.amc-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.amc-crest{width:46px;height:46px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.amc-crest img{width:30px;height:30px;object-fit:contain}
+.amc-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.78rem;text-align:center;color:var(--text);line-height:1.2}
+.amc-center{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;min-width:68px}
+.amc-score{font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700;letter-spacing:3px;color:var(--text);line-height:1}
+.amc-time{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:1px;color:var(--text);line-height:1}
+.amc-lbl{font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.amc-min{font-family:'Oswald',sans-serif;font-size:.65rem;color:var(--live-red);font-weight:600}
+.amc-btn{
+  width:100%;border:none;border-radius:8px;padding:10px;
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:.8rem;
+  letter-spacing:2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.amc-btn.live-btn{background:var(--live-red);color:#fff}
+.amc-btn.replay-btn{background:var(--blue);color:#fff}
+.amc-btn.remind-btn{background:var(--bg3);color:var(--yellow);border:1px solid rgba(255,204,0,0.3)}
+
+/* ===== QUICK STATS BAR ===== */
+.quick-stats{
+  display:flex;gap:10px;padding:0 12px 12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.quick-stats::-webkit-scrollbar{display:none}
+.qs-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;
+  flex-shrink:0;min-width:110px;
+  text-align:center;cursor:pointer;
+  transition:border-color .15s;
+}
+.qs-card:hover{border-color:var(--red)}
+.qs-num{font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text);line-height:1}
+.qs-num.live{color:var(--live-red)}
+.qs-num.upcoming{color:var(--yellow)}
+.qs-num.finished{color:var(--text3)}
+.qs-lbl{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-top:3px}
+
+/* ===== SCORES SCREEN ===== */
+.scores-list{padding:12px}
+.score-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:11px 13px;
+  margin-bottom:8px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .15s;
+}
+.score-item:hover{border-color:var(--red)}
+.si-left{flex:1}
+.si-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.si-teams{display:flex;flex-direction:column;gap:3px}
+.si-team{display:flex;align-items:center;justify-content:space-between}
+.si-name{font-family:'Oswald',sans-serif;font-weight:500;font-size:.85rem;color:var(--text)}
+.si-score{font-family:'Oswald',sans-serif;font-weight:700;font-size:.95rem;color:var(--text)}
+.si-score.winning{color:var(--green)}
+.si-right{display:flex;flex-direction:column;align-items:center;gap:3px}
+.si-min{font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;color:var(--live-red)}
+.si-status{font-family:'Oswald',sans-serif;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+
+/* ===== FIXTURES SCREEN ===== */
+.fixtures-list{padding:12px}
+.fix-date-hdr{
+  font-family:'Oswald',sans-serif;font-weight:700;
+  font-size:.7rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--yellow);padding:8px 0 6px;
+  display:flex;align-items:center;gap:8px;
+}
+.fix-date-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
+.fix-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 13px;
+  margin-bottom:8px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+}
+.fi-comp{font-family:'Oswald',sans-serif;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.fi-teams{display:flex;align-items:center;justify-content:space-between;gap:6px;flex:1}
+.fi-team{font-family:'Oswald',sans-serif;font-weight:600;font-size:.85rem;color:var(--text);flex:1}
+.fi-team.away{text-align:right}
+.fi-time{font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;color:var(--yellow);min-width:44px;text-align:center}
+.fi-remind{background:rgba(255,204,0,0.1);border:1px solid rgba(255,204,0,0.2);border-radius:6px;padding:5px 10px;font-family:'Oswald',sans-serif;font-size:.6rem;color:var(--yellow);cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* ===== ACCOUNT SCREEN ===== */
+.account-screen{padding:16px}
+.acc-hero{
+  background:linear-gradient(135deg,#1a0000,#2d0000);
+  border:1px solid rgba(224,31,31,0.2);
+  border-radius:16px;padding:20px;
+  text-align:center;margin-bottom:16px;
+}
+.acc-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--red);margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:1.5rem;color:#fff;
+}
+.acc-title{font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:1px}
+.acc-sub{font-size:.75rem;color:var(--text2);margin-top:4px}
+.acc-plan{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(0,200,83,0.15);border:1px solid rgba(0,200,83,0.3);
+  border-radius:20px;padding:4px 12px;margin-top:8px;
+  font-family:'Oswald',sans-serif;font-size:.65rem;color:var(--green);font-weight:700;letter-spacing:1px;
+}
+.acc-menu{display:flex;flex-direction:column;gap:8px}
+.acc-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:border-color .15s;
+}
+.acc-item:hover{border-color:var(--red)}
+.acc-item-icon{font-size:1.2rem;width:24px;text-align:center;flex-shrink:0}
+.acc-item-text{flex:1}
+.acc-item-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:.88rem;color:var(--text);letter-spacing:.3px}
+.acc-item-sub{font-size:.7rem;color:var(--text3);margin-top:1px}
+.acc-item-arrow{color:var(--text3);font-size:.8rem}
+
+/* ===== SUBSCRIBE OVERLAY ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px)}
+.overlay.open{opacity:1;pointer-events:all}
+.bottom-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:480px;transform:translateY(50px);transition:transform .3s;overflow:hidden;max-height:90vh;overflow-y:auto}
+.overlay.open .bottom-sheet{transform:translateY(0)}
+.sheet-drag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.sheet-hdr{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.sheet-title{font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;color:var(--text)}
+.sheet-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer}
+.sheet-body{padding:16px 18px 22px}
+
+/* Plans */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.plan{background:var(--bg3);border:2px solid var(--border);border-radius:12px;padding:13px;cursor:pointer;transition:all .15s;position:relative}
+.plan:hover,.plan.sel{border-color:var(--red)}
+.plan.sel{background:rgba(224,31,31,0.05)}
+.plan-badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-family:'Oswald',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1.5px;padding:2px 9px;border-radius:10px;white-space:nowrap}
+.plan-period{font-family:'Oswald',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.plan-price{font-family:'Oswald',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text)}
+.plan-price sub{font-size:.75rem;font-family:'Source Sans 3',sans-serif;color:var(--text3)}
+.plan-save{font-size:.68rem;color:var(--red);font-family:'Oswald',sans-serif;font-weight:600;margin-top:1px}
+.plan-features{margin-top:8px;display:flex;flex-direction:column;gap:3px}
+.plan-features li{font-size:.74rem;color:var(--text2);list-style:none;display:flex;align-items:center;gap:5px;font-family:'Oswald',sans-serif}
+.plan-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0}
+.email-wrap{margin-bottom:12px}
+.email-wrap label{font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:1px;color:var(--text2);display:block;margin-bottom:4px}
+.email-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Source Sans 3',sans-serif;font-size:.9rem;color:var(--text);background:var(--bg3);outline:none;transition:border-color .15s}
+.email-input:focus{border-color:var(--red)}
+.pay-btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.pay-note{text-align:center;font-size:.68rem;color:var(--text3);margin-top:8px;font-family:'Oswald',sans-serif}
+
+/* Watch overlay */
+.watch-overlay{position:fixed;inset:0;background:#000;z-index:600;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s}
+.watch-overlay.open{transform:translateY(0)}
+.watch-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.w-info{flex:1}
+.w-teams{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;letter-spacing:1.5px;color:var(--text)}
+.w-meta{font-size:.65rem;color:var(--text3);font-family:'Oswald',sans-serif;margin-top:1px}
+.w-close{background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;padding:4px}
+.vid-area{flex:1;background:#000;position:relative;display:flex;align-items:center;justify-content:center}
+.vid-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(160deg,#0a0000,#1a0000)}
+.play-btn{width:70px;height:70px;border-radius:50%;border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.play-btn:hover{background:rgba(255,204,0,0.1);transform:scale(1.05)}
+.play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 24px;border-color:transparent transparent transparent var(--yellow);margin-left:6px}
+.stream-iframe{width:100%;height:100%;border:none;display:none}
+.vid-loading{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;flex-direction:column;gap:10px}
+.vid-loading.show{display:flex}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vid-lbl{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase}
+
+.watch-controls{background:var(--bg2);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;border-top:1px solid var(--border)}
+.ctrl{background:none;border:none;color:var(--text2);cursor:pointer;padding:4px;font-size:.9rem}
+.prog-wrap{flex:1}
+.prog-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px}
+.prog-fill{height:100%;background:var(--red);border-radius:2px;width:0%}
+.prog-time{display:flex;justify-content:space-between;margin-top:2px}
+.prog-txt{font-family:'Oswald',sans-serif;font-size:.6rem;color:var(--text3)}
+
+.quality-row{background:var(--bg3);padding:6px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ql-lbl{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.ql-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);padding:3px 8px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.6rem;cursor:pointer}
+.ql-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+
+.stream-row{background:var(--bg3);padding:6px 14px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.stream-row::-webkit-scrollbar{display:none}
+.stream-lbl{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.stream-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);padding:3px 10px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.stream-btn.active{background:var(--yellow);border-color:var(--yellow);color:#111}
+
+.w-tabs{display:flex;padding:0 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.w-tab{font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 10px;border-bottom:2px solid transparent;cursor:pointer}
+.w-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.w-content{padding:12px 14px;overflow-y:auto;flex-shrink:0;max-height:180px;background:var(--bg2)}
+.ev-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ev-item:last-child{border:none}
+.ev-min{font-family:'Oswald',sans-serif;font-size:.85rem;color:var(--live-red);min-width:26px;font-weight:700}
+.ev-ico{font-size:.8rem;min-width:16px}
+.ev-player{font-family:'Oswald',sans-serif;font-size:.82rem;color:var(--text)}
+
+/* TOAST */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg3);color:var(--text);border-radius:10px;padding:10px 20px;font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:1px;z-index:700;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid var(--border)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADING */
+.app-loading{display:flex;align-items:center;gap:10px;padding:20px;color:var(--text3);font-family:'Oswald',sans-serif;font-size:.8rem}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div class="app-brand">
+    <div class="app-logo">FT</div>
+    <span class="app-name">FULLTIME</span>
+  </div>
+  <div class="status-right">
+    <div class="live-badge">
+      <div class="ldot"></div>
+      <span id="live-count">0 LIVE</span>
+    </div>
+    <button class="notif-btn" onclick="requestNotifications()">🔔</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('home',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </div>
+  <div class="tab" onclick="switchTab('scores',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Scores
+  </div>
+  <div class="tab" onclick="switchTab('fixtures',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Fixtures
+  </div>
+  <div class="tab" onclick="switchTab('account',this)">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Account
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="app-content">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <!-- Quick Stats -->
+    <div class="quick-stats" style="padding-top:12px">
+      <div class="qs-card" onclick="switchTab('scores',document.querySelector('.tab:nth-child(2)'))">
+        <div class="qs-num live" id="qs-live">0</div>
+        <div class="qs-lbl">Live Now</div>
+      </div>
+      <div class="qs-card" onclick="switchTab('fixtures',document.querySelector('.tab:nth-child(3)'))">
+        <div class="qs-num upcoming" id="qs-upcoming">0</div>
+        <div class="qs-lbl">Upcoming</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-num finished" id="qs-finished">0</div>
+        <div class="qs-lbl">Finished</div>
+      </div>
+      <div class="qs-card" onclick="openSub()">
+        <div class="qs-num" id="qs-sub" style="font-size:1.2rem">⭐</div>
+        <div class="qs-lbl">Go PRO</div>
+      </div>
+    </div>
+
+    <!-- Featured Live Match -->
+    <div class="feat-section" id="feat-section" style="display:none">
+      <div class="section-hdr">
+        <span class="section-title">🔴 Featured Live</span>
+        <span class="section-more" onclick="switchTab('scores',document.querySelector('.tab:nth-child(2)'))">See all →</span>
+      </div>
+      <div class="feat-live-card" id="feat-card" onclick="openFeatWatch()">
+        <div class="flc-top">
+          <span class="flc-comp" id="feat-comp">–</span>
+          <div class="flc-live"><div class="ldot"></div><span>LIVE</span></div>
+        </div>
+        <div class="flc-teams">
+          <div class="flc-row">
+            <div class="flc-team">
+              <div class="flc-crest"><img id="feat-hlogo" src="" onerror="this.style.display='none'" alt=""></div>
+              <div class="flc-name" id="feat-hname">–</div>
+            </div>
+            <div style="text-align:center">
+              <div class="flc-score"><span id="feat-hs">0</span><span class="flc-sep"> : </span><span id="feat-as">0</span></div>
+              <div class="flc-min" id="feat-min"></div>
+            </div>
+            <div class="flc-team">
+              <div class="flc-crest"><img id="feat-alogo" src="" onerror="this.style.display='none'" alt=""></div>
+              <div class="flc-name" id="feat-aname">–</div>
+            </div>
+          </div>
+        </div>
+        <button class="flc-btn">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff"><path d="M8 5v14l11-7z"/></svg>
+          WATCH LIVE NOW
+        </button>
+      </div>
+    </div>
+
+    <!-- All Matches -->
+    <div class="feat-section">
+      <div class="section-hdr">
+        <span class="section-title">📅 Today's Matches</span>
+        <span class="section-more" id="match-count">Loading…</span>
+      </div>
+    </div>
+    <div class="matches-scroll" id="match-list">
+      <div class="app-loading"><div class="spinner"></div><span>Loading matches…</span></div>
+    </div>
+  </div>
+
+  <!-- SCORES SCREEN -->
+  <div class="screen" id="screen-scores">
+    <div class="scores-list" id="scores-list">
+      <div class="app-loading"><div class="spinner"></div><span>Loading live scores…</span></div>
+    </div>
+  </div>
+
+  <!-- FIXTURES SCREEN -->
+  <div class="screen" id="screen-fixtures">
+    <div class="fixtures-list" id="fixtures-list">
+      <div class="app-loading"><div class="spinner"></div><span>Loading fixtures…</span></div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT SCREEN -->
+  <div class="screen" id="screen-account">
+    <div class="account-screen">
+      <div class="acc-hero">
+        <div class="acc-avatar" id="acc-avatar">⚽</div>
+        <div class="acc-title" id="acc-title">Welcome to FullTime</div>
+        <div class="acc-sub" id="acc-sub">Your football companion</div>
+        <div class="acc-plan hidden" id="acc-plan">✅ PRO SUBSCRIBER</div>
+      </div>
+      <div class="acc-menu">
+        <div class="acc-item" onclick="openSub()">
+          <span class="acc-item-icon">⭐</span>
+          <div class="acc-item-text">
+            <div class="acc-item-title">Subscribe — Go Ad-Free</div>
+            <div class="acc-item-sub">From ₦300/week</div>
+          </div>
+          <span class="acc-item-arrow">›</span>
+        </div>
+        <div class="acc-item" onclick="requestNotifications()">
+          <span class="acc-item-icon">🔔</span>
+          <div class="acc-item-text">
+            <div class="acc-item-title">Match Notifications</div>
+            <div class="acc-item-sub">Get alerted when matches go live</div>
+          </div>
+          <span class="acc-item-arrow">›</span>
+        </div>
+        <div class="acc-item" onclick="window.open('index.html','_self')">
+          <span class="acc-item-icon">🌐</span>
+          <div class="acc-item-text">
+            <div class="acc-item-title">Open Website</div>
+            <div class="acc-item-sub">Switch to full website view</div>
+          </div>
+          <span class="acc-item-arrow">›</span>
+        </div>
+        <div class="acc-item" onclick="shareApp()">
+          <span class="acc-item-icon">📤</span>
+          <div class="acc-item-text">
+            <div class="acc-item-title">Share App</div>
+            <div class="acc-item-sub">Invite friends to watch live football</div>
+          </div>
+          <span class="acc-item-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- .app-content -->
+
+<!-- Subscribe Sheet -->
+<div class="overlay" id="sub-overlay" onclick="if(event.target===this)closeSub()">
+  <div class="bottom-sheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title" id="sub-title">GO AD-FREE</span>
+      <button class="sheet-close" onclick="closeSub()">✕</button>
+    </div>
+    <div class="sheet-body" id="sub-body">
+      <div class="plans">
+        <div class="plan" id="plan-w" onclick="selPlan('w',30000)">
+          <div class="plan-period">Weekly</div>
+          <div class="plan-price">₦300<sub>/wk</sub></div>
+          <ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All matches</li></ul>
+        </div>
+        <div class="plan sel" id="plan-m" onclick="selPlan('m',100000)">
+          <div class="plan-badge">BEST VALUE</div>
+          <div class="plan-period">Monthly</div>
+          <div class="plan-price">₦1,000<sub>/mo</sub></div>
+          <div class="plan-save">Save 17%</div>
+          <ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All matches</li><li>Early access</li></ul>
+        </div>
+      </div>
+      <div class="email-wrap">
+        <label>Your Email Address</label>
+        <input type="email" class="email-input" id="pay-email" placeholder="Enter email to continue">
+      </div>
+      <button class="pay-btn" onclick="initiatePaystack()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        PAY WITH PAYSTACK
+      </button>
+      <div class="pay-note">🔒 Secured by Paystack · Cancel anytime</div>
+    </div>
+  </div>
+</div>
+
+<!-- Watch Overlay -->
+<div class="watch-overlay" id="watch-overlay">
+  <div class="watch-hdr">
+    <div class="w-info">
+      <div class="w-teams" id="w-teams">–</div>
+      <div class="w-meta" id="w-meta">–</div>
+    </div>
+    <button class="w-close" onclick="closeWatch()">✕</button>
+  </div>
+  <div class="vid-area">
+    <div class="vid-ph" id="vid-ph">
+      <div class="vid-lbl">LIVE STREAM</div>
+      <div class="play-btn" onclick="startStream()"></div>
+      <div class="vid-lbl" id="vid-lbl">Tap to play</div>
+    </div>
+    <iframe id="stream-iframe" class="stream-iframe" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+    <div class="vid-loading" id="vid-loading">
+      <div class="spinner"></div>
+      <p style="font-family:Oswald,sans-serif;color:#fff;font-size:.8rem;letter-spacing:1px">Loading stream…</p>
+    </div>
+  </div>
+  <div class="watch-controls">
+    <button class="ctrl" id="mute-btn" onclick="toggleMute()">🔊</button>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-time">
+        <span class="prog-txt" id="match-time">LIVE</span>
+        <span class="prog-txt" id="match-min"></span>
+      </div>
+    </div>
+    <button class="ctrl" onclick="openFullscreen()">⛶</button>
+  </div>
+  <div class="quality-row">
+    <span class="ql-lbl">Quality:</span>
+    <button class="ql-btn" onclick="setQuality('auto',this)">AUTO</button>
+    <button class="ql-btn active" onclick="setQuality('hd',this)">HD</button>
+    <button class="ql-btn" onclick="setQuality('fhd',this)">FHD</button>
+    <button class="ql-btn" onclick="setQuality('4k',this)">4K</button>
+  </div>
+  <div class="stream-row" id="stream-row" style="display:none"></div>
+  <div class="w-tabs">
+    <div class="w-tab active" onclick="wTab(this,'events')">Events</div>
+    <div class="w-tab" onclick="wTab(this,'stats')">Stats</div>
+    <div class="w-tab" onclick="wTab(this,'lineup')">Lineup</div>
+  </div>
+  <div class="w-content" id="w-content">
+    <div class="ev-list" id="ev-list"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== FIREBASE =====
+const firebaseConfig = {
+  apiKey:"AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",
+  authDomain:"instantlivefootball.firebaseapp.com",
+  projectId:"instantlivefootball",
+  storageBucket:"instantlivefootball.firebasestorage.app",
+  messagingSenderId:"584488048641",
+  appId:"1:584488048641:web:7adf83799426222a5fc800"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ===== PAYSTACK =====
+const PAYSTACK_KEY = 'pk_live_aaaeaf797281d244172092d578a085a8ab18ae24';
+let selectedPlan = { id:'m', amount:100000, label:'Monthly ₦1,000' };
+
+// ===== STATE =====
+let _matches = [];
+let currentMatch = null;
+let isSubscribed = false;
+let muted = false;
+let progressTimer = null;
+
+try {
+  const d = JSON.parse(localStorage.getItem('ft_sub_data')||'{}');
+  if (d.active && new Date(d.expiresAt) > new Date()) isSubscribed = true;
+} catch(e) {}
+
+// ===== TABS =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const screen = document.getElementById('screen-' + name);
+  if (screen) screen.classList.add('active');
+  if (name === 'scores') renderScores();
+  if (name === 'fixtures') renderFixtures();
+}
+
+// ===== TOAST =====
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ===== NOTIFICATIONS =====
+function requestNotifications() {
+  if (!('Notification' in window)) { showToast('Notifications not supported'); return; }
+  Notification.requestPermission().then(p => {
+    if (p === 'granted') {
+      showToast('🔔 Notifications enabled!');
+      setTimeout(() => new Notification('FullTime ⚽', { body:'You\'ll get alerts when matches go live!', icon:'icon-192.png' }), 500);
+    } else showToast('Notifications blocked in settings');
+  });
+}
+
+// ===== AUTO STATUS =====
+function calcAutoStatus(m) {
+  if (m.status === 'finished') return 'finished';
+  try {
+    const now = new Date();
+    let matchTime = null;
+    if (m.date && m.date.seconds) matchTime = new Date(m.date.seconds * 1000);
+    else if (m.date) {
+      matchTime = new Date(m.date + ' ' + (m.time || '00:00'));
+      if (isNaN(matchTime)) { matchTime = new Date(m.date); if (!isNaN(matchTime) && m.time) { const [h,min] = m.time.split(':').map(Number); matchTime.setHours(h,min,0,0); } }
+    }
+    if (!matchTime || isNaN(matchTime)) return m.status || 'upcoming';
+    const diff = (now - matchTime) / 60000;
+    if (diff < -5) return 'upcoming';
+    if (diff >= -5 && diff < 105) return m.status === 'finished' ? 'finished' : 'live';
+    return 'finished';
+  } catch(e) { return m.status || 'upcoming'; }
+}
+
+function calcAutoMinute(m) {
+  if (m.minute) return m.minute;
+  try {
+    let matchTime = null;
+    if (m.date && m.date.seconds) matchTime = new Date(m.date.seconds * 1000);
+    else if (m.date) matchTime = new Date(m.date + ' ' + (m.time || '00:00'));
+    if (!matchTime || isNaN(matchTime)) return null;
+    const diff = Math.floor((new Date() - matchTime) / 60000);
+    if (diff < 0) return null;
+    if (diff <= 45) return diff;
+    if (diff <= 60) return 45;
+    if (diff <= 105) return diff - 15;
+    return 90;
+  } catch(e) { return null; }
+}
+
+// ===== LOAD MATCHES =====
+function loadMatches() {
+  db.collection('matches').orderBy('date','desc').get()
+    .then(snapshot => {
+      _matches = [];
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (!d.hidden) {
+          const m = { id:doc.id, ...d };
+          if (m.status !== 'finished') m.status = calcAutoStatus(m);
+          if (m.status === 'live' && !m.minute) { const min = calcAutoMinute(m); if (min) m.minute = min; }
+          if (!m.streams || !m.streams.length) {
+            const streams = [];
+            if (m.stream) streams.push({url:m.stream,label:'Server 1'});
+            if (m.stream2) streams.push({url:m.stream2,label:'Server 2'});
+            if (m.stream3) streams.push({url:m.stream3,label:'Server 3'});
+            if (streams.length) m.streams = streams;
+          }
+          _matches.push(m);
+        }
+      });
+      renderHome();
+      updateCounts();
+    })
+    .catch(() => {
+      document.getElementById('match-list').innerHTML = '<div class="app-loading"><span style="color:#e01f1f">Failed to load. <span onclick="loadMatches()" style="cursor:pointer;text-decoration:underline">Retry</span></span></div>';
+    });
+}
+
+// ===== RENDER HOME =====
+function renderHome() {
+  const list = document.getElementById('match-list');
+  const live = _matches.filter(m => m.status === 'live');
+  const all = sortMatches(_matches);
+
+  // Featured
+  const featSection = document.getElementById('feat-section');
+  if (live.length) {
+    featSection.style.display = 'block';
+    const m = live[0];
+    window._featIdx = _matches.indexOf(m);
+    document.getElementById('feat-comp').textContent = m.comp || '';
+    document.getElementById('feat-hname').textContent = m.home;
+    document.getElementById('feat-aname').textContent = m.away;
+    document.getElementById('feat-hs').textContent = m.hscore ?? 0;
+    document.getElementById('feat-as').textContent = m.ascore ?? 0;
+    document.getElementById('feat-min').textContent = m.minute ? m.minute + "' MIN" : 'LIVE';
+    const hl = document.getElementById('feat-hlogo'); if (hl && m.hlogo) hl.src = m.hlogo;
+    const al = document.getElementById('feat-alogo'); if (al && m.alogo) al.src = m.alogo;
+  } else {
+    featSection.style.display = 'none';
+  }
+
+  document.getElementById('match-count').textContent = all.length + ' match' + (all.length !== 1 ? 'es' : '');
+
+  if (!all.length) {
+    list.innerHTML = '<div class="app-loading"><span>No matches today</span></div>';
+    return;
+  }
+
+  list.innerHTML = all.map((m, i) => buildAppCard(m, i)).join('');
+  setTimeout(applyLogos, 200);
+}
+
+function sortMatches(matches) {
+  const order = { live:0, upcoming:1, finished:2 };
+  return [...matches].sort((a,b) => {
+    const sa = order[a.status] ?? 1;
+    const sb = order[b.status] ?? 1;
+    if (sa !== sb) return sa - sb;
+    const getTime = m => {
+      try {
+        if (m.date && m.date.seconds) return m.date.seconds;
+        const t = new Date((m.date||'') + ' ' + (m.time||'00:00'));
+        return isNaN(t) ? 0 : t.getTime()/1000;
+      } catch(e) { return 0; }
+    };
+    return getTime(a) - getTime(b);
+  });
+}
+
+function buildAppCard(m, i) {
+  const idx = _matches.indexOf(m);
+  const isLive = m.status === 'live';
+  const isFt = m.status === 'finished';
+
+  const badge = isLive
+    ? `<div class="amc-badge live"><div class="ldot" style="width:5px;height:5px;background:#ff1744"></div>${m.minute ? m.minute+"'" : 'LIVE'}</div>`
+    : isFt ? `<div class="amc-badge ft">FT</div>`
+    : `<div class="amc-badge upcoming">${m.time || 'TBC'}</div>`;
+
+  const center = isLive || isFt
+    ? `<div class="amc-score">${m.hscore??0} <span style="color:var(--text3);font-size:1.2rem">-</span> ${m.ascore??0}</div>${isLive&&m.minute?`<div class="amc-min">${m.minute}'</div>`:''}`
+    : `<div class="amc-time">${m.time||'TBC'}</div><div class="amc-lbl">Kick off</div>`;
+
+  const btnClass = isLive ? 'live-btn' : isFt ? 'replay-btn' : 'remind-btn';
+  const btnText = isLive ? '▶ WATCH LIVE' : isFt ? '▶ WATCH REPLAY' : '⏰ SET REMINDER';
+
+  return `<div class="app-match-card" onclick="openMatchByIndex(${idx})" style="animation:fadeUp .3s ${i*0.04}s ease both">
+    <div class="amc-header">
+      <span class="amc-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
+      ${badge}
+    </div>
+    <div class="amc-body">
+      <div class="amc-teams">
+        <div class="amc-team">
+          <div class="amc-crest"><img src="${m.hlogo||''}" onerror="this.style.display='none'" data-team="${m.home}" alt=""></div>
+          <div class="amc-name">${m.home}</div>
+        </div>
+        <div class="amc-center">${center}</div>
+        <div class="amc-team">
+          <div class="amc-crest"><img src="${m.alogo||''}" onerror="this.style.display='none'" data-team="${m.away}" alt=""></div>
+          <div class="amc-name">${m.away}</div>
+        </div>
+      </div>
+      <button class="amc-btn ${btnClass}" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
+    </div>
+  </div>`;
+}
+
+// ===== SCORES SCREEN =====
+function renderScores() {
+  const list = document.getElementById('scores-list');
+  const live = _matches.filter(m => m.status === 'live');
+  if (!live.length) {
+    list.innerHTML = '<div class="app-loading"><span>No live matches right now</span></div>';
+    return;
+  }
+  list.innerHTML = live.map(m => {
+    const idx = _matches.indexOf(m);
+    const hWin = (m.hscore ?? 0) > (m.ascore ?? 0);
+    const aWin = (m.ascore ?? 0) > (m.hscore ?? 0);
+    return `<div class="score-item" onclick="openMatchByIndex(${idx})">
+      <div class="si-left">
+        <div class="si-comp">${m.comp||'Football'}</div>
+        <div class="si-teams">
+          <div class="si-team"><span class="si-name">${m.home}</span><span class="si-score ${hWin?'winning':''}">${m.hscore??0}</span></div>
+          <div class="si-team"><span class="si-name">${m.away}</span><span class="si-score ${aWin?'winning':''}">${m.ascore??0}</span></div>
+        </div>
+      </div>
+      <div class="si-right">
+        <span class="si-min">${m.minute?m.minute+"'":'LIVE'}</span>
+        <span class="si-status">LIVE</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== FIXTURES SCREEN =====
+function renderFixtures() {
+  const list = document.getElementById('fixtures-list');
+  const upcoming = sortMatches(_matches.filter(m => m.status === 'upcoming'));
+  if (!upcoming.length) {
+    list.innerHTML = '<div class="app-loading"><span>No upcoming fixtures</span></div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  upcoming.forEach(m => {
+    let dk = 'Today';
+    try {
+      let d;
+      if (m.date && m.date.seconds) d = new Date(m.date.seconds*1000);
+      else if (m.date) d = new Date(m.date);
+      if (d && !isNaN(d)) {
+        const today = new Date(); const tom = new Date(); tom.setDate(tom.getDate()+1);
+        if (d.toDateString()===today.toDateString()) dk='Today';
+        else if (d.toDateString()===tom.toDateString()) dk='Tomorrow';
+        else dk=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+      }
+    } catch(e) {}
+    if (!groups[dk]) groups[dk]=[];
+    groups[dk].push(m);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([date,matches]) =>
+    `<div class="fix-date-hdr">${date.toUpperCase()}</div>` +
+    matches.map(m => {
+      const idx = _matches.indexOf(m);
+      return `<div class="fix-item" onclick="openMatchByIndex(${idx})">
+        <div style="flex:1">
+          <div class="fi-comp">${m.comp||'Football'}</div>
+          <div class="fi-teams">
+            <span class="fi-team">${m.home}</span>
+            <span class="fi-time">${m.time||'TBC'}</span>
+            <span class="fi-team away">${m.away}</span>
+          </div>
+        </div>
+        <button class="fi-remind" onclick="event.stopPropagation();setReminder(${idx})">⏰ Remind</button>
+      </div>`;
+    }).join('')
+  ).join('');
+}
+
+function setReminder(idx) {
+  const m = _matches[idx];
+  if (!m) return;
+  showToast('⏰ Reminder set for ' + m.home + ' vs ' + m.away + '!', 3000);
+  try {
+    const r = JSON.parse(localStorage.getItem('ft_reminders')||'[]');
+    if (!r.find(x=>x.id===m.id)) { r.push({id:m.id,home:m.home,away:m.away,time:m.time}); localStorage.setItem('ft_reminders',JSON.stringify(r)); }
+  } catch(e) {}
+}
+
+// ===== UPDATE COUNTS =====
+function updateCounts() {
+  const live = _matches.filter(m=>m.status==='live').length;
+  const upcoming = _matches.filter(m=>m.status==='upcoming').length;
+  const finished = _matches.filter(m=>m.status==='finished').length;
+  document.getElementById('live-count').textContent = live + ' LIVE';
+  document.getElementById('qs-live').textContent = live;
+  document.getElementById('qs-upcoming').textContent = upcoming;
+  document.getElementById('qs-finished').textContent = finished;
+}
+
+// ===== OPEN MATCH =====
+function openFeatWatch() { if(window._featIdx!==undefined) openMatchByIndex(window._featIdx); }
+function openMatchByIndex(idx) {
+  const m = _matches[idx];
+  if (!m) return;
+  if (m.status === 'upcoming') { setReminder(idx); return; }
+  openWatch(m);
+}
+
+// ===== WATCH =====
+function openWatch(m) {
+  currentMatch = m;
+  document.getElementById('w-teams').textContent = m.home + ' vs ' + m.away;
+  document.getElementById('w-meta').textContent = (m.comp||'') + (m.status==='live'?' · LIVE'+(m.minute?' '+m.minute+"'":''):' · Full Time');
+  const iframe = document.getElementById('stream-iframe');
+  iframe.style.display='none'; iframe.src='';
+  document.getElementById('vid-ph').style.display='flex';
+  document.getElementById('vid-loading').classList.remove('show');
+  document.getElementById('vid-lbl').textContent = m.stream ? 'Tap to play' : 'No stream available';
+  if (progressTimer) { clearInterval(progressTimer); progressTimer=null; }
+  document.getElementById('prog-fill').style.width = m.minute ? Math.min((m.minute/90)*100,100)+'%' : '0%';
+  document.getElementById('match-min').textContent = m.minute ? m.minute+"'" : '';
+
+  const streamRow = document.getElementById('stream-row');
+  if (m.streams && m.streams.length > 1) {
+    streamRow.style.display = 'flex';
+    streamRow.innerHTML = '<span class="stream-lbl">Streams:</span>' +
+      m.streams.map((s,i) => `<button class="stream-btn${i===0?' active':''}" onclick="switchStream('${s.url}',this)">${s.label||'Stream '+(i+1)}</button>`).join('');
+  } else { streamRow.style.display='none'; }
+
+  const evList = document.getElementById('ev-list');
+  evList.innerHTML = m.events&&m.events.length
+    ? m.events.map(e=>`<div class="ev-item"><span class="ev-min">${e.min}'</span><span class="ev-ico">${e.type==='goal'?'⚽':'🟨'}</span><span class="ev-player">${e.player}</span></div>`).join('')
+    : '<div style="padding:12px 0;text-align:center;font-family:Oswald,sans-serif;font-size:.78rem;color:var(--text3)">No events yet</div>';
+
+  document.getElementById('watch-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWatch() {
+  document.getElementById('watch-overlay').classList.remove('open');
+  document.getElementById('stream-iframe').src = '';
+  document.body.style.overflow = '';
+  if (progressTimer) { clearInterval(progressTimer); progressTimer=null; }
+}
+
+function startStream() {
+  if (!currentMatch) return;
+  const url = currentMatch.stream || (currentMatch.streams&&currentMatch.streams[0]?.url);
+  if (!url) { showToast('⚠️ No stream available'); return; }
+  loadStreamUrl(url);
+}
+
+function loadStreamUrl(url) {
+  const iframe = document.getElementById('stream-iframe');
+  const loading = document.getElementById('vid-loading');
+  document.getElementById('vid-ph').style.display='none';
+  loading.classList.add('show');
+  iframe.src=url; iframe.style.display='block';
+  iframe.onload=()=>{
+    loading.classList.remove('show');
+    if (currentMatch&&currentMatch.status==='live') {
+      if (progressTimer) clearInterval(progressTimer);
+      progressTimer=setInterval(()=>{ document.getElementById('prog-fill').style.width=Math.min((++currentMatch.minute/90)*100,100)+'%'; document.getElementById('match-min').textContent=currentMatch.minute+"'"; },60000);
+    }
+  };
+  setTimeout(()=>loading.classList.remove('show'),5000);
+}
+
+function switchStream(url,btn) { document.querySelectorAll('.stream-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadStreamUrl(url); }
+function setQuality(q,btn) { document.querySelectorAll('.ql-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); showToast('Quality: '+q.toUpperCase()); }
+function toggleMute() { muted=!muted; document.getElementById('mute-btn').textContent=muted?'🔇':'🔊'; showToast(muted?'🔇 Muted':'🔊 Unmuted'); }
+function openFullscreen() { const el=document.getElementById('stream-iframe'); if(el.requestFullscreen)el.requestFullscreen(); else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen(); }
+function wTab(el,tab) {
+  document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  const c=document.getElementById('w-content'); const m=currentMatch;
+  if(tab==='events'){c.innerHTML='<div class="ev-list">'+(m&&m.events&&m.events.length?m.events.map(e=>`<div class="ev-item"><span class="ev-min">${e.min}'</span><span class="ev-ico">${e.type==='goal'?'⚽':'🟨'}</span><span class="ev-player">${e.player}</span></div>`).join(''):'<div style="padding:12px 0;text-align:center;font-family:Oswald,sans-serif;font-size:.78rem;color:var(--text3)">No events yet</div>')+'</div>';}
+  else if(tab==='stats'){const s=(m&&m.stats)||[{name:'Possession',h:52,a:48},{name:'Shots',h:7,a:5},{name:'Corners',h:4,a:3}];c.innerHTML=s.map(st=>`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-family:Oswald,sans-serif;font-size:.75rem;margin-bottom:3px"><span style="color:var(--live-red);font-weight:700">${st.h}${st.name==='Possession'?'%':''}</span><span style="color:var(--text3);font-size:.65rem">${st.name}</span><span style="color:var(--text2)">${st.a}${st.name==='Possession'?'%':''}</span></div><div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--live-red);width:${Math.round(st.h/(st.h+st.a)*100)}%"></div></div></div>`).join('');}
+  else{c.innerHTML=`<div style="font-family:Oswald,sans-serif;font-size:.78rem;color:var(--text3);padding:12px 0;text-align:center">${(m&&m.lineup)||'Lineup not available'}</div>`;}
+}
+
+// ===== SUBSCRIPTION =====
+function openSub() { document.getElementById('sub-overlay').classList.add('open'); }
+function closeSub() { document.getElementById('sub-overlay').classList.remove('open'); }
+function selPlan(p,amount) {
+  document.querySelectorAll('.plan').forEach(x=>x.classList.remove('sel'));
+  document.getElementById('plan-'+p).classList.add('sel');
+  const labels={w:'Weekly ₦300',m:'Monthly ₦1,000'};
+  selectedPlan={id:p,amount:amount,label:labels[p]};
+}
+function initiatePaystack() {
+  const email = document.getElementById('pay-email').value.trim();
+  if (!email||!email.includes('@')) { showToast('⚠️ Enter a valid email'); return; }
+  const handler = PaystackPop.setup({
+    key:PAYSTACK_KEY, email:email, amount:selectedPlan.amount, currency:'NGN',
+    ref:'FT_'+Date.now()+'_'+Math.random().toString(36).substr(2,9),
+    callback:function(response){ activateSubscription(response.reference,email); },
+    onClose:function(){ showToast('Payment cancelled'); }
+  });
+  handler.openIframe();
+}
+function activateSubscription(ref,email) {
+  const d={active:true,email:email,plan:selectedPlan.id,reference:ref,activatedAt:new Date().toISOString(),expiresAt:getExpiry(selectedPlan.id)};
+  try{localStorage.setItem('ft_subscribed','true');localStorage.setItem('ft_sub_data',JSON.stringify(d));}catch(e){}
+  isSubscribed=true;
+  document.getElementById('sub-title').textContent='SUBSCRIBED! 🎉';
+  document.getElementById('sub-body').innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-size:3rem;margin-bottom:10px">🎉</div><p style="font-family:Oswald,sans-serif;font-size:1rem;color:var(--green);letter-spacing:1px;margin-bottom:6px">Welcome to FullTime PRO!</p><p style="font-size:.8rem;color:var(--text2);font-family:Oswald,sans-serif">${selectedPlan.label} · ${email}</p><p style="font-size:.65rem;color:var(--text3);margin-top:6px;font-family:monospace">Ref: ${ref}</p><button onclick="closeSub()" style="margin-top:16px;background:var(--green);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-family:Oswald,sans-serif;font-weight:700;font-size:.85rem;letter-spacing:2px;cursor:pointer;width:100%">START WATCHING ▶</button></div>`;
+  document.getElementById('acc-plan').classList.remove('hidden');
+  document.getElementById('acc-title').textContent='FullTime PRO Member';
+  showToast('✅ Welcome to PRO!',3000);
+}
+function getExpiry(plan){const d=new Date();if(plan==='w')d.setDate(d.getDate()+7);else d.setMonth(d.getMonth()+1);return d.toISOString();}
+
+// ===== LOGOS =====
+const LOGOS={
+  'arsenal':'https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg','chelsea':'https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg','manchester city':'https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg','man city':'https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg','manchester united':'https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg','man united':'https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg','liverpool':'https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg','tottenham':'https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg','aston villa':'https://upload.wikimedia.org/wikipedia/en/f/f9/Aston_Villa_FC_crest_%282016%29.svg','newcastle':'https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg','west ham':'https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg','brighton':'https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_FC_logo.svg','crystal palace':'https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg','everton':'https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg','barcelona':'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg','real madrid':'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg','atletico madrid':'https://upload.wikimedia.org/wikipedia/en/f/f4/Atletico_de_Madrid_2017_logo.svg','psg':'https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg','paris saint-germain':'https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg','paris saint germain':'https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg','juventus':'https://upload.wikimedia.org/wikipedia/commons/1/15/Juventus_FC_2017_logo.svg','inter milan':'https://upload.wikimedia.org/wikipedia/commons/0/05/FC_Internazionale_Milano_2021.svg','ac milan':'https://upload.wikimedia.org/wikipedia/commons/d/d0/Logo_of_AC_Milan.svg','napoli':'https://upload.wikimedia.org/wikipedia/commons/2/2d/SSC_Napoli_logo.svg','bayern munich':'https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg','borussia dortmund':'https://upload.wikimedia.org/wikipedia/commons/6/67/Borussia_Dortmund_logo.svg','nigeria':'https://upload.wikimedia.org/wikipedia/en/4/45/Nigeria_national_football_team_crest.png','ghana':'https://upload.wikimedia.org/wikipedia/en/b/b5/Ghana_football_association.png','england':'https://upload.wikimedia.org/wikipedia/en/b/be/Flag_of_England.svg','france':'https://upload.wikimedia.org/wikipedia/en/b/bb/France_football_logo.svg','germany':'https://upload.wikimedia.org/wikipedia/en/0/04/Football_Germany.svg','spain':'https://upload.wikimedia.org/wikipedia/en/2/2a/Football_Spain.svg','brazil':'https://upload.wikimedia.org/wikipedia/en/0/09/Football_Brazil.svg','argentina':'https://upload.wikimedia.org/wikipedia/en/c/c1/Argentina_Football.svg','rayo vallecano':'https://upload.wikimedia.org/wikipedia/en/e/e3/Rayo_Vallecano_logo.svg','sunderland':'https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg','zimbabwe':'https://upload.wikimedia.org/wikipedia/en/5/5f/Zimbabwe_football_association.png'
+};
+function getLogo(name){if(!name)return null;const k=name.toLowerCase().trim();if(LOGOS[k])return LOGOS[k];for(const[n,u]of Object.entries(LOGOS)){if(k.includes(n)||n.includes(k))return u;}return null;}
+function getInitials(name){const w=name.trim().split(' ');return(w.length>=2?w[0][0]+w[1][0]:name.substring(0,2)).toUpperCase();}
+function applyLogos(){
+  document.querySelectorAll('.amc-crest img,.flc-crest img').forEach(img=>{
+    const team=img.getAttribute('data-team')||img.closest('.amc-team,.flc-team')?.querySelector('.amc-name,.flc-name')?.textContent?.trim();
+    if(!team)return;
+    const logo=getLogo(team);
+    if(logo){img.src=logo;img.style.display='block';img.onerror=function(){this.style.display='none';this.parentNode.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:Oswald,sans-serif;font-weight:700;font-size:.75rem;color:var(--text3)">${getInitials(team)}</div>`;};}
+    else{img.style.display='none';if(!img.parentNode.querySelector('.initials'))img.parentNode.innerHTML=`<div class="initials" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:Oswald,sans-serif;font-weight:700;font-size:.75rem;color:var(--text3)">${getInitials(team)}</div>`;}
+  });
+}
+
+// ===== SHARE =====
+function shareApp() {
+  if (navigator.share) {
+    navigator.share({title:'FullTime — Live Football',text:'Watch live football streams for free!',url:'https://instantlivefootball.com.ng'});
+  } else {
+    navigator.clipboard.writeText('https://instantlivefootball.com.ng');
+    showToast('🔗 Link copied!');
+  }
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  loadMatches();
+  setInterval(loadMatches,60000);
+  // Check subscription
+  if (isSubscribed) {
+    document.getElementById('acc-plan').classList.remove('hidden');
+    document.getElementById('acc-title').textContent='FullTime PRO Member';
+  }
+});
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+<style>@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style>
+</body>
+</html>
