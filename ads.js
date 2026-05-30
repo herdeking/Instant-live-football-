@@ -1,9 +1,10 @@
 // ============================================
 // FULLTIME ADS MANAGER
-// - Ads never show during stream playback
-// - Ads show every 2 minutes max
-// - Ads auto-close after 8 seconds
-// - Never blocks the play button
+// - Shows ad immediately on page load
+// - Then every 2 minutes
+// - Never shows during stream playback
+// - Auto-closes after 10 seconds
+// - Subscribers see zero ads
 // ============================================
 
 (function() {
@@ -13,7 +14,7 @@
   let isStreamPlaying = false;
   let isSubscribed = false;
   const AD_INTERVAL = 120000; // 2 minutes between ads
-  const AD_DURATION = 8000;   // auto-close after 8 seconds
+  const AD_DURATION = 10000;  // auto-close after 10 seconds
 
   // Check subscription
   try {
@@ -25,18 +26,16 @@
 
   // Don't run ads for subscribers
   if (isSubscribed) {
-    hideAllAds();
+    hideStaticAds();
     return;
   }
 
-  // ===== HIDE ALL EXISTING ADS =====
-  function hideAllAds() {
+  function hideStaticAds() {
     const adEl = document.getElementById('ad-top');
     if (adEl) adEl.style.display = 'none';
   }
 
-  // ===== SMART AD BANNER =====
-  // Create a non-intrusive floating ad banner
+  // ===== CREATE AD BANNER =====
   function createAdBanner() {
     // Remove existing
     const existing = document.getElementById('ft-smart-ad');
@@ -50,6 +49,7 @@
       left: 0; right: 0;
       background: linear-gradient(135deg, #1a1a2e, #0f3460);
       border-top: 2px solid #ffcc00;
+      border-bottom: 2px solid rgba(255,204,0,0.3);
       padding: 10px 16px;
       display: flex;
       align-items: center;
@@ -57,13 +57,21 @@
       z-index: 300;
       transform: translateY(100px);
       transition: transform 0.4s ease;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
     `;
 
     // Countdown bar
     const bar = document.createElement('div');
+    bar.id = 'ft-ad-bar';
     bar.style.cssText = 'position:absolute;top:0;left:0;height:2px;background:#ffcc00;transition:width linear;width:100%';
     ad.appendChild(bar);
+
+    // Countdown text
+    let countdown = Math.floor(AD_DURATION / 1000);
+    const countEl = document.createElement('span');
+    countEl.id = 'ft-ad-count';
+    countEl.style.cssText = 'font-family:Oswald,sans-serif;font-size:.6rem;color:rgba(255,255,255,0.4);flex-shrink:0;min-width:20px;text-align:center';
+    countEl.textContent = countdown + 's';
 
     ad.innerHTML += `
       <div style="font-size:1.3rem;flex-shrink:0">🎯</div>
@@ -71,10 +79,11 @@
         <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:.82rem;color:#fff;letter-spacing:.5px">Go Ad-Free from ₦300/wk</div>
         <div style="font-size:.68rem;color:#8a8ab0;margin-top:1px">Watch all matches without interruptions</div>
       </div>
-      <button onclick="if(typeof openSub==='function')openSub()" style="background:#ffcc00;color:#111;border:none;border-radius:4px;padding:6px 12px;font-family:Oswald,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;cursor:pointer;flex-shrink:0">SUBSCRIBE</button>
-      <button id="ft-ad-close" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0">✕</button>
+      <button id="ft-ad-sub" style="background:#ffcc00;color:#111;border:none;border-radius:4px;padding:6px 12px;font-family:Oswald,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;cursor:pointer;flex-shrink:0">SUBSCRIBE</button>
+      <button id="ft-ad-close" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:.9rem;padding:4px;flex-shrink:0">✕</button>
     `;
 
+    ad.appendChild(countEl);
     document.body.appendChild(ad);
 
     // Slide in
@@ -86,13 +95,28 @@
       bar.style.width = '0%';
     }, 100);
 
+    // Countdown number
+    const countInterval = setInterval(() => {
+      countdown--;
+      const el = document.getElementById('ft-ad-count');
+      if (el) el.textContent = countdown + 's';
+      if (countdown <= 0) clearInterval(countInterval);
+    }, 1000);
+
+    // Subscribe button
+    document.getElementById('ft-ad-sub').onclick = function(e) {
+      e.stopPropagation();
+      closeAd(ad);
+      if (typeof openSub === 'function') openSub();
+    };
+
     // Close button
     document.getElementById('ft-ad-close').onclick = function(e) {
       e.stopPropagation();
       closeAd(ad);
     };
 
-    // Auto close after AD_DURATION
+    // Auto close
     const autoClose = setTimeout(() => closeAd(ad), AD_DURATION);
     ad.dataset.autoClose = autoClose;
 
@@ -103,11 +127,10 @@
     if (!ad) return;
     clearTimeout(parseInt(ad.dataset.autoClose));
     ad.style.transform = 'translateY(100px)';
-    setTimeout(() => { if (ad.parentNode) ad.remove(); }, 400);
+    setTimeout(() => { if (ad && ad.parentNode) ad.remove(); }, 400);
   }
 
-  // ===== TRACK STREAM PLAYING STATE =====
-  // Watch modal open = no ads
+  // ===== TRACK STREAM STATE =====
   const watchOverlay = document.getElementById('watch-overlay');
   if (watchOverlay) {
     const observer = new MutationObserver(function(mutations) {
@@ -115,7 +138,6 @@
         if (m.type === 'attributes' && m.attributeName === 'class') {
           isStreamPlaying = watchOverlay.classList.contains('open');
           if (isStreamPlaying) {
-            // Hide any showing ad immediately
             const ad = document.getElementById('ft-smart-ad');
             if (ad) closeAd(ad);
           }
@@ -125,55 +147,42 @@
     observer.observe(watchOverlay, { attributes: true });
   }
 
-  // ===== AD SCHEDULER =====
-  function scheduleAds() {
-    // Show first ad after 30 seconds
-    setTimeout(() => {
-      if (!isStreamPlaying && !isSubscribed) showAd();
-    }, 30000);
-
-    // Then every AD_INTERVAL
-    adTimer = setInterval(() => {
-      if (!isStreamPlaying && !isSubscribed) showAd();
-    }, AD_INTERVAL);
-  }
-
+  // ===== SHOW AD =====
   function showAd() {
     const now = Date.now();
-    // Don't show if ad was shown recently
-    if (now - lastAdTime < AD_INTERVAL) return;
-    // Don't show if stream is playing
     if (isStreamPlaying) return;
-    // Don't show if watch overlay is open
+    if (isSubscribed) return;
     const watchOverlay = document.getElementById('watch-overlay');
     if (watchOverlay && watchOverlay.classList.contains('open')) return;
+    if (now - lastAdTime < AD_INTERVAL) return;
     createAdBanner();
   }
 
-  // ===== HIDE THE STATIC TOP AD (replace with smart ads) =====
-  window.addEventListener('DOMContentLoaded', function() {
-    // Hide the always-visible top ad
-    const topAd = document.getElementById('ad-top');
-    if (topAd) topAd.style.display = 'none';
+  // ===== INIT — Show immediately on load =====
+  function init() {
+    // Hide static top ad — replace with smart banner
+    hideStaticAds();
 
-    // Start smart ad system
-    scheduleAds();
-  });
+    // Show ad IMMEDIATELY on page load
+    createAdBanner();
 
-  // Also handle if DOM already loaded
-  if (document.readyState !== 'loading') {
-    const topAd = document.getElementById('ad-top');
-    if (topAd) topAd.style.display = 'none';
-    scheduleAds();
+    // Then show every 2 minutes
+    adTimer = setInterval(showAd, AD_INTERVAL);
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+  } else {
+    // DOM already ready — show after tiny delay so page renders first
+    setTimeout(init, 500);
   }
 
   // ===== EXPOSE FOR EXTERNAL USE =====
   window.ftAds = {
-    pause: () => { isStreamPlaying = true; },
+    pause: () => { isStreamPlaying = true; const ad = document.getElementById('ft-smart-ad'); if (ad) closeAd(ad); },
     resume: () => { isStreamPlaying = false; },
-    hide: () => { isSubscribed = true; hideAllAds(); clearInterval(adTimer); }
+    hide: () => { isSubscribed = true; hideStaticAds(); clearInterval(adTimer); const ad = document.getElementById('ft-smart-ad'); if (ad) closeAd(ad); }
   };
-
-  console.log('✅ FullTime Ads Manager loaded — ads every 2 mins, never during streams');
 
 })();
