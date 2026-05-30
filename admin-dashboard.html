@@ -2,1101 +2,705 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>FULLTIME — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FullTime Admin Dashboard</title>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --g:#00ff87;--g2:#00e5ff;--red:#ff2d55;--gold:#ffcc00;--orange:#ff6b00;
-  --blue:#3b82f6;--purple:#a855f7;
-  --bg:#080c10;--s1:#0e1520;--s2:#141e2b;--s3:#1a2535;
-  --bd:#1f2f42;--bd2:#263548;
-  --t1:#f0f4f8;--t2:#7a90a8;--t3:#3a4f63;
-  --sidebar:240px;--nav-h:64px
+  --bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--bg4:#242424;
+  --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
+  --border:#2a2a2a;--red:#e01f1f;--yellow:#ffcc00;
+  --green:#00c853;--blue:#2979ff;--orange:#ff6d00;
 }
-html{scroll-behavior:smooth}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
-
-/* LAYOUT */
-.app{display:flex;min-height:100vh}
-
-/* SIDEBAR */
-.sidebar{
-  width:var(--sidebar);flex-shrink:0;
-  background:linear-gradient(180deg,#0a1520,#080c10);
-  border-right:1px solid var(--bd);
-  display:flex;flex-direction:column;
-  position:fixed;top:0;left:0;bottom:0;z-index:100;
-  transition:transform .3s cubic-bezier(.4,0,.2,1)
-}
-.sb-brand{padding:20px 18px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(0,255,135,.05),transparent)}
-.sb-ball{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,255,135,.4);flex-shrink:0}
-.sb-ball svg{width:20px;height:20px;fill:none;stroke:#000;stroke-width:2}
-.sb-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;line-height:1}
-.sb-name span{background:linear-gradient(90deg,var(--g),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.sb-badge{margin-left:auto;background:rgba(0,255,135,.1);border:1px solid rgba(0,255,135,.25);border-radius:20px;padding:3px 9px;font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:2px;color:var(--g)}
-.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
-.sb-section{padding:10px 18px 4px;font-family:'Oswald',sans-serif;font-size:.55rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--t3)}
-.sb-item{display:flex;align-items:center;gap:11px;padding:9px 18px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;text-decoration:none;position:relative}
-.sb-item::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,255,135,.07),transparent);opacity:0;transition:opacity .15s}
-.sb-item:hover::before,.sb-item.active::before{opacity:1}
-.sb-item.active{border-left-color:var(--g)}
-.sb-item:hover{border-left-color:rgba(0,255,135,.3)}
-.sb-item-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--s2);transition:background .15s;flex-shrink:0}
-.sb-item.active .sb-item-icon,.sb-item:hover .sb-item-icon{background:rgba(0,255,135,.12)}
-.sb-item-icon svg{width:14px;height:14px;fill:none;stroke:var(--t3);stroke-width:2;transition:stroke .15s}
-.sb-item.active .sb-item-icon svg,.sb-item:hover .sb-item-icon svg{stroke:var(--g)}
-.sb-item-label{font-family:'Oswald',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.5px;color:var(--t3);transition:color .15s}
-.sb-item.active .sb-item-label,.sb-item:hover .sb-item-label{color:var(--t1)}
-.sb-item .sb-badge2{margin-left:auto;background:rgba(255,45,85,.15);color:var(--red);border-radius:10px;padding:1px 7px;font-size:.6rem;font-family:'Oswald',sans-serif;font-weight:700}
-.sb-footer{padding:12px 18px;border-top:1px solid var(--bd)}
-.sb-admin{display:flex;align-items:center;gap:9px}
-.sb-avatar{width:34px;height:34px;border-radius:50%;background:rgba(0,255,135,.1);border:2px solid rgba(0,255,135,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sb-avatar svg{width:15px;height:15px;fill:none;stroke:var(--g);stroke-width:2}
-.sb-admin-info{flex:1;min-width:0}
-.sb-admin-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-admin-role{font-size:.62rem;color:var(--t3);font-family:'Oswald',sans-serif}
-.sb-logout{background:none;border:none;cursor:pointer;color:var(--t3);padding:5px;border-radius:5px;transition:all .15s}
-.sb-logout:hover{color:var(--red);background:rgba(255,45,85,.1)}
-.sb-logout svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
-
-/* MAIN */
-.main{flex:1;margin-left:var(--sidebar);display:flex;flex-direction:column;min-width:0}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* TOPBAR */
-.topbar{background:rgba(8,12,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:0 22px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
-.mob-menu{display:none;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.2);cursor:pointer;color:var(--g);padding:7px;border-radius:7px;transition:all .15s}
-.mob-menu:hover{background:rgba(0,255,135,.15)}
-.mob-menu svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;display:block}
-.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.topbar-date{font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:1px;color:var(--t3)}
-.live-badge{display:flex;align-items:center;gap:5px;background:rgba(255,45,85,.1);border:1px solid rgba(255,45,85,.25);border-radius:20px;padding:3px 9px;font-family:'Oswald',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:1.5px;color:var(--red)}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.btn-add{background:linear-gradient(135deg,var(--g),var(--g2));color:#000;border:none;border-radius:7px;padding:7px 14px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;box-shadow:0 4px 14px rgba(0,255,135,.22)}
-.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,255,135,.35)}
-.btn-add svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.5}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{width:36px;height:36px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;color:#fff}
+.tb-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:2px;color:#fff}
+.tb-date{font-size:.72rem;color:var(--text3);font-family:'Oswald',sans-serif;margin-top:1px}
+.tb-r{display:flex;align-items:center;gap:8px}
+.add-btn{background:var(--green);color:#000;border:none;border-radius:6px;padding:8px 14px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.view-btn{background:rgba(255,255,255,0.08);color:var(--text2);border:none;border-radius:6px;padding:8px 12px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:1px;cursor:pointer}
 
-/* CONTENT */
-.content{flex:1;padding:22px;padding-bottom:24px}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 14px 0}
+@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.live::before{background:var(--red)}
+.stat-card.total::before{background:var(--blue)}
+.stat-card.upcoming::before{background:var(--yellow)}
+.stat-card.finished::before{background:var(--green)}
+.stat-lbl{font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.stat-num{font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700;line-height:1}
+.stat-num.live{color:var(--red)}
+.stat-num.total{color:var(--blue)}
+.stat-num.upcoming{color:var(--yellow)}
+.stat-num.finished{color:var(--green)}
+.stat-sub{font-size:.7rem;color:var(--text3);margin-top:4px}
 
-/* FIREBASE BAR */
-.firebase-bar{background:rgba(0,255,135,.05);border:1px solid rgba(0,255,135,.13);border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.fb-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;box-shadow:0 0 7px rgba(0,255,135,.5)}
-.fb-dot.off{background:var(--red);box-shadow:0 0 7px rgba(255,45,85,.5)}
-.fb-text{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:.3px;color:var(--g);flex:1}
-.fb-text.off{color:var(--red)}
-.fb-actions{display:flex;gap:7px;margin-left:auto;flex-wrap:wrap}
-.fb-btn{background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.18);color:var(--g);border-radius:5px;padding:4px 9px;font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.fb-btn:hover{background:rgba(0,255,135,.16)}
+/* FIREBASE STATUS */
+.firebase-status{margin:12px 14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-family:'Oswald',sans-serif;font-size:.72rem}
+.fs-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fs-dot.connected{background:var(--green);animation:pulse 2s ease-in-out infinite}
+.fs-dot.disconnected{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.fs-text{color:var(--text2)}
+.fs-actions{display:flex;gap:6px;margin-left:auto}
+.fs-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text3);border-radius:4px;padding:3px 8px;font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer}
 
-/* HERO */
-.hero-strip{background:linear-gradient(135deg,#0e1f12,#0a1a2a 50%,#0e0f1a);border:1px solid var(--bd);border-radius:14px;padding:22px;margin-bottom:20px;position:relative;overflow:hidden}
-.hero-strip::before{content:'';position:absolute;top:-40%;right:-5%;width:260px;height:260px;background:radial-gradient(circle,rgba(0,255,135,.1),transparent 70%);pointer-events:none}
-.hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;line-height:1;margin-bottom:4px}
-.hero-title span{background:linear-gradient(90deg,var(--g),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:.78rem;color:var(--t2);font-family:'Oswald',sans-serif;letter-spacing:.3px}
-.hero-stats{display:flex;gap:18px;flex-wrap:wrap}
-.hero-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;line-height:1}
-.hero-stat-label{font-family:'Oswald',sans-serif;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+/* SECTION */
+.section-hdr{padding:16px 14px 10px;display:flex;align-items:center;justify-content:space-between}
+.section-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;color:var(--text)}
+.section-count{font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;color:var(--text3)}
 
-/* STAT CARDS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s;cursor:default}
-.stat-card:hover{transform:translateY(-2px);border-color:var(--bd2)}
-.stat-card-glow{position:absolute;top:0;right:0;width:70px;height:70px;border-radius:50%;opacity:.13;transform:translate(18px,-18px)}
-.stat-card:nth-child(1) .stat-card-glow{background:var(--g)}
-.stat-card:nth-child(2) .stat-card-glow{background:var(--red)}
-.stat-card:nth-child(3) .stat-card-glow{background:var(--gold)}
-.stat-card:nth-child(4) .stat-card-glow{background:var(--g2)}
-.stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
-.stat-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
-.stat-card:nth-child(1) .stat-icon{background:rgba(0,255,135,.1);color:var(--g)}
-.stat-card:nth-child(2) .stat-icon{background:rgba(255,45,85,.1);color:var(--red)}
-.stat-card:nth-child(3) .stat-icon{background:rgba(255,204,0,.1);color:var(--gold)}
-.stat-card:nth-child(4) .stat-icon{background:rgba(0,229,255,.1);color:var(--g2)}
-.stat-val{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:2px;line-height:1;margin-bottom:3px}
-.stat-label{font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
-
-/* SECTION HEADER */
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.section-title-wrap{display:flex;align-items:center;gap:8px}
-.section-accent{width:3px;height:20px;border-radius:2px;background:linear-gradient(180deg,var(--g),var(--g2))}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2.5px}
-
-/* BUTTONS */
-.btn-primary{background:linear-gradient(135deg,var(--g),var(--g2));color:#000;border:none;border-radius:7px;padding:8px 14px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(0,255,135,.18)}
-.btn-primary:hover{box-shadow:0 5px 16px rgba(0,255,135,.3);transform:translateY(-1px)}
-.btn-primary svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.5}
-.btn-secondary{background:transparent;color:var(--t2);border:1px solid var(--bd);border-radius:7px;padding:7px 13px;font-family:'Oswald',sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.5px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
-.btn-secondary:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,135,.04)}
-.btn-secondary svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2}
-.btn-danger{background:rgba(255,45,85,.08);color:var(--red);border:1px solid rgba(255,45,85,.2);border-radius:7px;padding:7px 13px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.7rem;letter-spacing:.5px;cursor:pointer;transition:all .15s}
-.btn-danger:hover{background:rgba(255,45,85,.16);border-color:var(--red)}
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:6px;padding:0 14px 12px;overflow-x:auto;scrollbar-width:none}
+.filter-tabs::-webkit-scrollbar{display:none}
+.ftab{font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;white-space:nowrap}
+.ftab.active{background:var(--red);border-color:var(--red);color:#fff}
 
 /* MATCH CARDS */
-.match-cards{display:flex;flex-direction:column;gap:9px}
-.m-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;position:relative;overflow:hidden;transition:border-color .2s}
-.m-card:hover{border-color:var(--bd2)}
-.m-card-glow{position:absolute;top:0;left:0;right:0;height:2px}
-.m-card.live .m-card-glow{background:linear-gradient(90deg,var(--red),var(--orange))}
-.m-card.finished .m-card-glow{background:linear-gradient(90deg,var(--t3),var(--bd))}
-.m-card.upcoming .m-card-glow{background:linear-gradient(90deg,var(--gold),var(--orange))}
-.m-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.m-comp{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
-.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.pill-live{background:rgba(255,45,85,.1);color:var(--red);border:1px solid rgba(255,45,85,.22)}
-.pill-ft{background:rgba(58,79,99,.15);color:var(--t3);border:1px solid var(--bd)}
-.pill-up{background:rgba(255,204,0,.08);color:var(--gold);border:1px solid rgba(255,204,0,.2)}
-.live-dot-sm{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
-.m-teams{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.m-team{flex:1;min-width:0}
-.m-team-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.m-team.away .m-team-name{text-align:right}
-.m-score{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;min-width:50px;text-align:center;background:var(--s2);border-radius:7px;padding:3px 8px;flex-shrink:0}
-.m-meta{display:flex;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap}
-.m-meta-item{font-family:'Oswald',sans-serif;font-size:.62rem;color:var(--t3)}
-.m-stream-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600}
-.stream-on{background:rgba(0,255,135,.08);color:var(--g);border:1px solid rgba(0,255,135,.18)}
-.stream-off{background:var(--s2);color:var(--t3);border:1px solid var(--bd)}
-.m-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-.m-btn{border:none;border-radius:7px;padding:9px 5px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:.3px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
-.m-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
-.m-btn.edit{background:rgba(59,130,246,.08);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
-.m-btn.edit:hover{background:rgba(59,130,246,.16)}
-.m-btn.stream{background:rgba(0,255,135,.06);color:var(--g);border:1px solid rgba(0,255,135,.16)}
-.m-btn.stream:hover{background:rgba(0,255,135,.13)}
-.m-btn.del{background:rgba(255,45,85,.06);color:var(--red);border:1px solid rgba(255,45,85,.16)}
-.m-btn.del:hover{background:rgba(255,45,85,.13)}
-.m-btn.hide-btn{background:rgba(168,85,247,.06);color:var(--purple);border:1px solid rgba(168,85,247,.16)}
-.m-btn.hide-btn:hover{background:rgba(168,85,247,.13)}
-.m-actions.four{grid-template-columns:1fr 1fr 1fr 1fr}
-.m-empty{text-align:center;padding:44px 18px;color:var(--t3)}
-.m-empty svg{width:42px;height:42px;fill:none;stroke:var(--t3);stroke-width:1.2;margin:0 auto 12px;display:block;opacity:.4}
-.m-empty-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;margin-bottom:5px;color:var(--t2)}
-.m-empty-sub{font-size:.78rem;font-family:'Oswald',sans-serif}
+.matches-list{padding:0 14px;display:flex;flex-direction:column;gap:10px}
+.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.match-card.live-card{border-color:rgba(224,31,31,0.4)}
+.mc-top{background:var(--bg3);padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.mc-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.mc-badge{padding:2px 8px;border-radius:4px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;display:flex;align-items:center;gap:4px}
+.mc-badge.live{background:rgba(224,31,31,0.15);color:var(--red);border:1px solid rgba(224,31,31,0.3)}
+.mc-badge.upcoming{background:rgba(255,204,0,0.1);color:var(--yellow);border:1px solid rgba(255,204,0,0.2)}
+.mc-badge.finished{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border)}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.mc-body{padding:12px 14px}
+.mc-teams{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.mc-team{font-family:'Oswald',sans-serif;font-weight:700;font-size:.95rem;color:var(--text)}
+.mc-score{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:3px}
+.mc-meta{font-size:.7rem;color:var(--text3);font-family:'Oswald',sans-serif;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.stream-indicator{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:.6rem;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:1px}
+.stream-indicator.active{background:rgba(0,200,83,0.1);color:var(--green);border:1px solid rgba(0,200,83,0.2)}
+.stream-indicator.none{background:rgba(255,255,255,0.04);color:var(--text3);border:1px solid var(--border)}
+.mc-actions{display:flex;gap:6px;flex-wrap:wrap}
+.act-btn{border:none;border-radius:6px;padding:7px 12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:4px;flex:1;justify-content:center;min-width:70px}
+.act-btn.edit{background:rgba(41,121,255,0.15);color:var(--blue);border:1px solid rgba(41,121,255,0.2)}
+.act-btn.stream{background:rgba(0,200,83,0.12);color:var(--green);border:1px solid rgba(0,200,83,0.2)}
+.act-btn.hide{background:rgba(255,109,0,0.12);color:var(--orange);border:1px solid rgba(255,109,0,0.2)}
+.act-btn.delete{background:rgba(224,31,31,0.12);color:var(--red);border:1px solid rgba(224,31,31,0.2)}
+.act-btn.mark-live{background:rgba(224,31,31,0.15);color:var(--red);border:1px solid rgba(224,31,31,0.3)}
+.act-btn.mark-ft{background:rgba(0,200,83,0.12);color:var(--green);border:1px solid rgba(0,200,83,0.2)}
+.act-btn.publish{background:rgba(255,204,0,0.1);color:var(--yellow);border:1px solid rgba(255,204,0,0.2)}
 
-/* TABLE */
-.table-wrap{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:20px}
-.table-wrap table{width:100%;border-collapse:collapse}
-.table-wrap th{font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:11px 14px;border-bottom:1px solid var(--bd);text-align:left;background:rgba(14,21,32,.7);white-space:nowrap}
-.table-wrap td{padding:11px 14px;font-size:.82rem;border-bottom:1px solid rgba(31,47,66,.4);vertical-align:middle}
-.table-wrap tr:last-child td{border-bottom:none}
-.table-wrap tr:hover td{background:rgba(255,255,255,.012)}
-.td-team{font-family:'Oswald',sans-serif;font-weight:600;font-size:.85rem}
-.td-score{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px}
-.td-actions{display:flex;gap:5px}
-.action-btn{background:none;border:1px solid var(--bd);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.3px;transition:all .13s;white-space:nowrap}
-.action-btn.edit{color:var(--blue);border-color:rgba(59,130,246,.22)}
-.action-btn.edit:hover{background:rgba(59,130,246,.08)}
-.action-btn.stream{color:var(--g);border-color:rgba(0,255,135,.2)}
-.action-btn.stream:hover{background:rgba(0,255,135,.05)}
-.action-btn.del{color:var(--red);border-color:rgba(255,45,85,.18)}
-.action-btn.del:hover{background:rgba(255,45,85,.07)}
-
-/* PANEL */
-.panel{display:none}
-.panel.active{display:block}
-
-/* FORM */
-.form-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:14px}
-.form-card-title{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px;color:var(--t1)}
-.form-card-title svg{width:15px;height:15px;fill:none;stroke:var(--g);stroke-width:2}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field-group{display:flex;flex-direction:column;gap:4px}
-.field-group.full{grid-column:1/-1}
-.field-group label{font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
-.field-group input,.field-group select,.field-group textarea{background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:9px 12px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.85rem;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
-.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:rgba(0,255,135,.35);box-shadow:0 0 0 2px rgba(0,255,135,.07)}
-.field-group input::placeholder,.field-group textarea::placeholder{color:var(--t3)}
-.field-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233a4f63' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
-.field-group option{background:var(--s2)}
-.field-group textarea{resize:vertical;min-height:72px;line-height:1.5}
-.form-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
-
-/* STREAM SECTION — 3 servers */
-.stream-servers{display:flex;flex-direction:column;gap:10px;margin-top:4px}
-.stream-server-row{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
-.stream-server-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.srv-label{font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
-.srv-badge{background:rgba(0,255,135,.08);color:var(--g);border:1px solid rgba(0,255,135,.15);border-radius:5px;padding:2px 7px;font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:1px}
-.srv-badge.inactive{background:rgba(58,79,99,.15);color:var(--t3);border-color:var(--bd)}
-.stream-server-row input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--bd);border-radius:0;padding:5px 0 5px 0;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.83rem;outline:none;transition:border-color .15s}
-.stream-server-row input:focus{border-bottom-color:rgba(0,255,135,.35)}
-.stream-server-row input::placeholder{color:var(--t3)}
-.stream-label-row{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:8px}
-.stream-label-row input{background:var(--s3);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t2);font-size:.78rem;outline:none}
-.embed-hint{font-size:.65rem;color:var(--t3);font-family:'Oswald',sans-serif;margin-top:5px;line-height:1.4;letter-spacing:.3px}
-
-/* QUICK GRID */
-.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
-.quick-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 14px;cursor:pointer;text-align:center;transition:all .18s}
-.quick-card:hover{border-color:var(--bd2);transform:translateY(-2px);background:var(--s2)}
-.quick-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
-.quick-card-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
-.quick-card-label{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.3px}
-
-/* MOTD */
-.motd-card{background:linear-gradient(135deg,rgba(255,204,0,.05),rgba(255,107,0,.03));border:1px solid rgba(255,204,0,.18);border-radius:12px;padding:16px;margin-bottom:18px}
-.motd-title{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--gold);display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.motd-title svg{width:14px;height:14px;fill:var(--gold)}
-.motd-desc{font-size:.75rem;color:var(--t2);margin-bottom:12px;font-family:'Oswald',sans-serif}
-.motd-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.motd-select{flex:1;min-width:160px;background:var(--s2);border:1px solid rgba(255,204,0,.18);border-radius:7px;padding:8px 11px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.82rem;outline:none;cursor:pointer;appearance:none}
-.motd-current{margin-top:8px;font-family:'Oswald',sans-serif;font-size:.68rem;color:var(--t3)}
-
-/* ALERT / TOAST */
-.alert{padding:10px 14px;border-radius:9px;font-family:'Oswald',sans-serif;font-size:.75rem;margin-bottom:12px;display:none}
-.alert.show{display:block}
-.alert-success{background:rgba(0,255,135,.07);border:1px solid rgba(0,255,135,.18);color:var(--g)}
-.alert-error{background:rgba(255,45,85,.07);border:1px solid rgba(255,45,85,.18);color:var(--red)}
-.toast{position:fixed;bottom:80px;right:14px;background:var(--s2);border:1px solid rgba(0,255,135,.25);color:var(--t1);font-family:'Oswald',sans-serif;font-size:.76rem;font-weight:600;padding:11px 16px;border-radius:9px;z-index:9999;display:flex;align-items:center;gap:7px;animation:slideIn .28s cubic-bezier(.4,0,.2,1);max-width:260px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
-@keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
-.toast svg{width:13px;height:13px;fill:none;stroke:var(--g);stroke-width:2.5;flex-shrink:0}
-.toast.error-toast{border-color:rgba(255,45,85,.25)}
-.toast.error-toast svg{stroke:var(--red)}
+/* SCORE UPDATE PANEL */
+.score-panel{background:var(--bg3);border-top:1px solid var(--border);padding:10px 14px;display:none}
+.score-panel.open{display:block}
+.sp-title{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.sp-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.sp-group{display:flex;flex-direction:column;gap:3px}
+.sp-label{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.sp-input{background:var(--bg4);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-family:'Oswald',sans-serif;font-size:.9rem;width:60px;text-align:center;outline:none}
+.sp-input:focus{border-color:var(--red)}
+.sp-select{background:var(--bg4);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-family:'Oswald',sans-serif;font-size:.8rem;outline:none;cursor:pointer;min-width:100px}
+.sp-push{background:var(--red);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1.5px;cursor:pointer;margin-top:auto}
 
 /* OVERLAY */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(6px)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px)}
 .overlay.open{opacity:1;pointer-events:all}
-.dialog{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:540px;overflow:hidden;transform:scale(.94) translateY(8px);transition:transform .22s;max-height:90vh;overflow-y:auto}
-.overlay.open .dialog{transform:scale(1) translateY(0)}
-.dialog-hdr{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s1);z-index:1}
-.dialog-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px}
-.dialog-close{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--t2);font-size:.85rem;cursor:pointer;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .13s}
-.dialog-close:hover{background:rgba(255,45,85,.1);color:var(--red);border-color:rgba(255,45,85,.25)}
-.dialog-body{padding:18px}
-.dialog-footer{padding:12px 18px;border-top:1px solid var(--bd);display:flex;gap:9px;justify-content:flex-end}
-.confirm-msg{font-size:.85rem;color:var(--t2);line-height:1.5;margin-bottom:5px}
-.confirm-detail{font-size:.78rem;color:var(--t1);font-family:'Oswald',sans-serif;font-weight:600;margin-top:9px;padding:10px;background:rgba(255,45,85,.06);border:1px solid rgba(255,45,85,.14);border-radius:7px}
+@media(min-width:600px){.overlay{align-items:center}}
+.sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;transform:translateY(40px);transition:transform .3s}
+@media(min-width:600px){.sheet{border-radius:16px;transform:scale(.95)}}
+.overlay.open .sheet{transform:translateY(0)}
+@media(min-width:600px){.overlay.open .sheet{transform:scale(1)}}
+.drag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.sheet-hdr{padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.sheet-title{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;color:var(--text)}
+.sheet-close{background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer}
+.sheet-body{padding:16px 18px 24px}
 
-/* SUBS */
-.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px;margin-bottom:20px}
-.sub-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px}
-.sub-card-label{font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
-.sub-card-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px}
-.sub-card-sub{font-size:.68rem;color:var(--t2);font-family:'Oswald',sans-serif;margin-top:2px}
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-full{margin-bottom:10px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+.form-input,.form-select,.form-textarea{background:var(--bg3);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-family:'Source Sans 3',sans-serif;font-size:.88rem;outline:none;transition:border-color .15s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--red)}
+.form-select{cursor:pointer}
+.form-textarea{resize:vertical;min-height:60px}
+.form-section{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);padding:10px 0 6px;border-top:1px solid var(--border);margin-top:6px}
+.stream-fields{display:flex;flex-direction:column;gap:8px}
+.stream-field{display:flex;gap:8px;align-items:center}
+.stream-field .form-input{flex:1}
+.stream-server-lbl{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--text3);flex-shrink:0;min-width:55px}
+.form-submit{width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:2px;cursor:pointer;margin-top:14px;transition:background .15s}
+.form-submit:hover{background:#ff3333}
+.form-note{font-size:.68rem;color:var(--text3);font-family:'Oswald',sans-serif;text-align:center;margin-top:8px}
 
-/* PW */
-.pw-wrap-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:22px;max-width:420px}
-.pw-field{margin-bottom:14px}
-.pw-field label{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2);margin-bottom:5px}
-.pw-wrap{position:relative}
-.pw-wrap input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:9px 38px 9px 12px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .15s,box-shadow .15s}
-.pw-wrap input:focus{border-color:rgba(0,255,135,.35);box-shadow:0 0 0 2px rgba(0,255,135,.07)}
-.pw-toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);padding:4px;transition:color .13s}
-.pw-toggle:hover{color:var(--t1)}
-.pw-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
-.pw-strength{height:2px;background:var(--bd);border-radius:2px;margin-top:5px;overflow:hidden}
-.pw-strength-bar{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
-.pw-strength-txt{font-size:.65rem;color:var(--t3);margin-top:3px;font-family:'Oswald',sans-serif}
-.pw-rules{margin:12px 0;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:9px}
-.pw-rule{display:flex;align-items:center;gap:7px;font-size:.7rem;color:var(--t3);font-family:'Oswald',sans-serif;padding:2px 0;transition:color .15s}
-.pw-rule svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.5;flex-shrink:0}
-.pw-rule.ok{color:var(--g)}
+/* STREAM OVERLAY */
+.stream-sheet .stream-fields{gap:10px}
 
-/* LOADER */
-.loading-state{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--t2);font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:1px}
-.spinner{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);color:var(--text);border-radius:10px;padding:10px 20px;font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:1px;z-index:600;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid var(--border);border-left:3px solid var(--yellow)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* BOTTOM NAV */
-.bottom-nav{display:none}
-.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;backdrop-filter:blur(3px)}
-.sidebar-backdrop.show{display:block}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);position:fixed;z-index:200;width:260px;box-shadow:8px 0 38px rgba(0,0,0,.6)}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0 !important;width:100%}
-  .mob-menu{display:flex}
-  .topbar{padding:0 12px;height:50px}
-  .content{padding:12px;padding-bottom:76px}
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:9px}
-  .form-grid{grid-template-columns:1fr}
-  .dialog{margin:0;max-width:100%}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .table-wrap table{min-width:560px}
-  .quick-grid{grid-template-columns:repeat(3,1fr);gap:9px}
-  .quick-card{padding:12px 8px}
-  .hero-title{font-size:1.6rem}
-  .toast{bottom:72px}
-  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,16,.97);backdrop-filter:blur(20px);border-top:1px solid var(--bd);z-index:150;padding:7px 0 calc(7px + env(safe-area-inset-bottom))}
-  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:3px 2px;position:relative;transition:all .13s;background:none;border:none;color:var(--t3)}
-  .bn-item.active{color:var(--g)}
-  .bn-item-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-  .bn-item.active .bn-item-icon{background:rgba(0,255,135,.1)}
-  .bn-item svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2}
-  .bn-item-label{font-family:'Oswald',sans-serif;font-size:.52rem;font-weight:600;letter-spacing:.5px}
-  .bn-item .bn-badge{position:absolute;top:2px;right:calc(50% - 18px);background:var(--red);color:#fff;border-radius:50%;width:13px;height:13px;font-size:.48rem;font-family:'Oswald',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg)}
-  .bn-add-wrap{flex:1;display:flex;align-items:center;justify-content:center}
-  .bn-add{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,255,135,.38);margin-top:-12px;border:none;cursor:pointer}
-  .bn-add svg{width:21px;height:21px;fill:none;stroke:#000;stroke-width:2.5}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr 1fr}
-  .m-actions.four{grid-template-columns:1fr 1fr}
-}
+.empty{text-align:center;padding:32px 16px;color:var(--text3);font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:1px}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<div class="sidebar-backdrop" id="sb-backdrop" onclick="closeSidebar()"></div>
-<div class="app">
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-brand">
-    <div class="sb-ball"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg></div>
-    <div class="sb-name">FULL<span>TIME</span></div>
-    <div class="sb-badge">Admin</div>
-  </div>
-  <nav class="sb-nav">
-    <div class="sb-section">Main</div>
-    <a class="sb-item active" href="#" onclick="showPanel('dashboard',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-      <span class="sb-item-label">Dashboard</span>
-    </a>
-    <a class="sb-item" href="#" onclick="showPanel('matches',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
-      <span class="sb-item-label">Matches</span>
-      <span class="sb-badge2" id="sb-mc-badge">0</span>
-    </a>
-    <a class="sb-item" href="#" onclick="showPanel('upload',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-      <span class="sb-item-label">Add Match</span>
-    </a>
-    <a class="sb-item" href="#" onclick="showPanel('streams',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
-      <span class="sb-item-label">Live Streams</span>
-    </a>
-    <div class="sb-section">Settings</div>
-    <a class="sb-item" href="#" onclick="showPanel('subs',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-      <span class="sb-item-label">Subscribers</span>
-    </a>
-    <a class="sb-item" href="#" onclick="showPanel('ads',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
-      <span class="sb-item-label">Ad Manager</span>
-    </a>
-    <a class="sb-item" href="#" onclick="showPanel('password',this)">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-      <span class="sb-item-label">Password</span>
-    </a>
-    <a class="sb-item" href="index.html">
-      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-      <span class="sb-item-label">View Site</span>
-    </a>
-  </nav>
-  <div class="sb-footer">
-    <div class="sb-admin">
-      <div class="sb-avatar"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      <div class="sb-admin-info">
-        <div class="sb-admin-name">herdeking</div>
-        <div class="sb-admin-role">Super Admin</div>
-      </div>
-      <button class="sb-logout" onclick="logout()" title="Logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+<!-- Topbar -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">FT</div>
+    <div>
+      <div class="tb-title">DASHBOARD</div>
+      <div class="tb-date" id="topbar-date"></div>
     </div>
   </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px">
-      <button class="mob-menu" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-    </div>
-    <div class="topbar-right">
-      <div class="live-badge" id="topbar-live" style="display:none"><div class="live-dot"></div><span id="topbar-live-n">0</span> LIVE</div>
-      <div class="topbar-date" id="topbar-date"></div>
-      <button class="btn-add" onclick="showPanel('upload',null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Match</button>
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- DASHBOARD -->
-    <div class="panel active" id="panel-dashboard">
-      <div class="firebase-bar" id="fb-bar">
-        <div class="fb-dot off" id="fb-dot"></div>
-        <span class="fb-text off" id="fb-text">Connecting to Firebase…</span>
-        <div class="fb-actions">
-          <button class="fb-btn" onclick="window.open('index.html','_blank')">View Public →</button>
-          <button class="fb-btn" onclick="copyLink()">Copy Link</button>
-        </div>
-      </div>
-      <div class="hero-strip">
-        <div class="hero-inner">
-          <div>
-            <div style="font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:2.5px;color:var(--t2);margin-bottom:3px">WELCOME BACK</div>
-            <div class="hero-title">FULLTIME <span>ADMIN</span></div>
-            <div class="hero-sub" id="hero-date"></div>
-          </div>
-          <div class="hero-stats">
-            <div style="text-align:center"><div class="hero-stat-val" style="color:var(--red)" id="h-live">0</div><div class="hero-stat-label">Live</div></div>
-            <div style="text-align:center"><div class="hero-stat-val" id="h-total">0</div><div class="hero-stat-label">Total</div></div>
-            <div style="text-align:center"><div class="hero-stat-val" style="color:var(--g)" id="h-up">0</div><div class="hero-stat-label">Upcoming</div></div>
-            <div style="text-align:center"><div class="hero-stat-val" style="color:var(--gold)" id="h-ft">0</div><div class="hero-stat-label">Finished</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-card-glow"></div><div class="stat-card-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div></div><div class="stat-val" style="color:var(--red)" id="s-live">0</div><div class="stat-label">Live Now</div></div>
-        <div class="stat-card"><div class="stat-card-glow"></div><div class="stat-card-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div></div><div class="stat-val" id="s-total">0</div><div class="stat-label">Total Matches</div></div>
-        <div class="stat-card"><div class="stat-card-glow"></div><div class="stat-card-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div></div><div class="stat-val" style="color:var(--gold)" id="s-up">0</div><div class="stat-label">Upcoming</div></div>
-        <div class="stat-card"><div class="stat-card-glow"></div><div class="stat-card-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="stat-val" style="color:var(--g2)" id="s-ft">0</div><div class="stat-label">Finished</div></div>
-      </div>
-      <div class="motd-card">
-        <div class="motd-title"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Match of the Day</div>
-        <div class="motd-desc">Select the featured match shown on the public site homepage.</div>
-        <div class="motd-row">
-          <select class="motd-select" id="motd-sel"><option value="">-- Auto (first live match) --</option></select>
-          <button class="btn-primary" onclick="saveMotd()">Set Featured</button>
-          <button class="btn-secondary" onclick="clearMotd()">Clear</button>
-        </div>
-        <div class="motd-current" id="motd-cur"></div>
-      </div>
-      <div class="section-hdr">
-        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Recent Matches</div></div>
-        <button class="btn-secondary" onclick="showPanel('matches',null)">View All</button>
-      </div>
-      <div id="loading-dash" class="loading-state"><div class="spinner"></div>Loading from Firebase…</div>
-      <div class="table-wrap" id="dash-table-wrap" style="display:none">
-        <table><thead><tr><th>Match</th><th>Competition</th><th>Score</th><th>Status</th><th>Streams</th><th>Actions</th></tr></thead>
-        <tbody id="dash-tbody"></tbody></table>
-      </div>
-      <div class="section-hdr" style="margin-top:20px">
-        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Quick Actions</div></div>
-      </div>
-      <div class="quick-grid">
-        <div class="quick-card" onclick="showPanel('upload',null)"><div class="quick-card-icon" style="background:rgba(0,255,135,.09);color:var(--g)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="quick-card-label">Add Match</div></div>
-        <div class="quick-card" onclick="showPanel('streams',null)"><div class="quick-card-icon" style="background:rgba(0,229,255,.09);color:var(--g2)"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="quick-card-label">Streams</div></div>
-        <div class="quick-card" onclick="showPanel('subs',null)"><div class="quick-card-icon" style="background:rgba(255,204,0,.09);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="quick-card-label">Subscribers</div></div>
-        <div class="quick-card" onclick="refreshMatches()"><div class="quick-card-icon" style="background:rgba(59,130,246,.09);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="quick-card-label">Refresh</div></div>
-      </div>
-    </div>
-
-    <!-- MATCHES -->
-    <div class="panel" id="panel-matches">
-      <div class="section-hdr">
-        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">All Matches</div></div>
-        <button class="btn-primary" onclick="showPanel('upload',null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
-      </div>
-      <div id="loading-matches" class="loading-state"><div class="spinner"></div>Loading from Firebase…</div>
-      <div id="matches-list"></div>
-    </div>
-
-    <!-- ADD/EDIT MATCH -->
-    <div class="panel" id="panel-upload">
-      <div class="section-hdr">
-        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title" id="upload-title">Add New Match</div></div>
-      </div>
-      <div id="upload-alert" class="alert alert-success"></div>
-      <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Match Details</div>
-        <div class="form-grid">
-          <div class="field-group"><label>Home Team *</label><input type="text" id="f-home" placeholder="e.g. Arsenal"></div>
-          <div class="field-group"><label>Away Team *</label><input type="text" id="f-away" placeholder="e.g. Chelsea"></div>
-          <div class="field-group"><label>Home Team Logo URL</label><input type="url" id="f-hlogo" placeholder="https://…/logo.png"></div>
-          <div class="field-group"><label>Away Team Logo URL</label><input type="url" id="f-alogo" placeholder="https://…/logo.png"></div>
-          <div class="field-group"><label>Competition</label>
-            <select id="f-comp">
-              <option value="">Select…</option>
-              <option>Premier League</option><option>La Liga</option><option>Serie A</option>
-              <option>Bundesliga</option><option>Ligue 1</option>
-              <option>UEFA Champions League</option><option>UEFA Europa League</option>
-              <option>UEFA Conference League</option><option>FA Cup</option>
-              <option>NPFL</option><option>CAF Champions League</option><option>AFCON</option><option>Other</option>
-            </select>
-          </div>
-          <div class="field-group"><label>Round / Matchday</label><input type="text" id="f-round" placeholder="e.g. Final, Matchday 36"></div>
-          <div class="field-group"><label>Match Date</label><input type="date" id="f-date"></div>
-          <div class="field-group"><label>Kick-off Time</label><input type="time" id="f-time"></div>
-          <div class="field-group"><label>Home Score</label><input type="number" id="f-hs" placeholder="0" min="0"></div>
-          <div class="field-group"><label>Away Score</label><input type="number" id="f-as" placeholder="0" min="0"></div>
-          <div class="field-group"><label>Status</label>
-            <select id="f-status">
-              <option value="upcoming">Upcoming</option><option value="live">Live</option>
-              <option value="finished">Finished (FT)</option>
-            </select>
-          </div>
-          <div class="field-group"><label>Minute (if Live)</label><input type="text" id="f-min" placeholder="e.g. 67'"></div>
-        </div>
-      </div>
-
-      <!-- 3 STREAM SERVERS -->
-      <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Live Streams (up to 3 servers)</div>
-        <div class="embed-hint" style="margin-bottom:12px">Add up to 3 stream servers. Viewers can switch between them if one fails. Use iFrame embed URLs or direct stream links.</div>
-        <div class="stream-servers">
-          <div class="stream-server-row">
-            <div class="stream-server-label"><span class="srv-label">Server 1 (Primary)</span><span class="srv-badge inactive" id="srv1-badge">Empty</span></div>
-            <input type="url" id="f-stream1" placeholder="https://embed.example.com/stream1" oninput="updateSrvBadge(1)">
-            <div class="stream-label-row">
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Label</label><input type="text" id="f-label1" placeholder="Server 1" value="Server 1"></div>
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Type</label>
-                <select id="f-type1" style="background:var(--s3);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t2);font-size:.78rem;outline:none">
-                  <option value="iframe">iFrame / Embed</option><option value="hls">HLS / M3U8</option><option value="youtube">YouTube</option><option value="dailymotion">Dailymotion</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="stream-server-row">
-            <div class="stream-server-label"><span class="srv-label">Server 2 (Backup)</span><span class="srv-badge inactive" id="srv2-badge">Empty</span></div>
-            <input type="url" id="f-stream2" placeholder="https://embed.example.com/stream2 (optional)" oninput="updateSrvBadge(2)">
-            <div class="stream-label-row">
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Label</label><input type="text" id="f-label2" placeholder="Server 2" value="Server 2"></div>
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Type</label>
-                <select id="f-type2" style="background:var(--s3);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t2);font-size:.78rem;outline:none">
-                  <option value="iframe">iFrame / Embed</option><option value="hls">HLS / M3U8</option><option value="youtube">YouTube</option><option value="dailymotion">Dailymotion</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="stream-server-row">
-            <div class="stream-server-label"><span class="srv-label">Server 3 (Extra)</span><span class="srv-badge inactive" id="srv3-badge">Empty</span></div>
-            <input type="url" id="f-stream3" placeholder="https://embed.example.com/stream3 (optional)" oninput="updateSrvBadge(3)">
-            <div class="stream-label-row">
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Label</label><input type="text" id="f-label3" placeholder="Server 3" value="Server 3"></div>
-              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.58rem;color:var(--t3);font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase">Type</label>
-                <select id="f-type3" style="background:var(--s3);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t2);font-size:.78rem;outline:none">
-                  <option value="iframe">iFrame / Embed</option><option value="hls">HLS / M3U8</option><option value="youtube">YouTube</option><option value="dailymotion">Dailymotion</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="embed-hint" style="margin-top:10px">
-          <strong style="color:var(--g)">YouTube:</strong> https://www.youtube.com/embed/VIDEO_ID?autoplay=1 &nbsp;|&nbsp;
-          <strong style="color:var(--g)">Dailymotion:</strong> https://www.dailymotion.com/embed/video/VIDEO_ID
-        </div>
-      </div>
-
-      <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>Notes & Lineups</div>
-        <div class="form-grid full">
-          <div class="field-group full"><label>Match Description</label><textarea id="f-desc" placeholder="Match overview…" rows="3"></textarea></div>
-        </div>
-        <div class="form-grid" style="margin-top:12px">
-          <div class="field-group"><label id="lbl-hl">Home Lineup</label><textarea id="f-hl" placeholder="1. Raya (GK)&#10;2. White…" rows="9" style="font-family:monospace;font-size:.76rem"></textarea></div>
-          <div class="field-group"><label id="lbl-al">Away Lineup</label><textarea id="f-al" placeholder="1. Alisson (GK)&#10;2. Alexander-Arnold…" rows="9" style="font-family:monospace;font-size:.76rem"></textarea></div>
-          <div class="field-group"><label>Home Subs</label><textarea id="f-hs2" placeholder="Substitutes…" rows="4" style="font-family:monospace;font-size:.76rem"></textarea></div>
-          <div class="field-group"><label>Away Subs</label><textarea id="f-as2" placeholder="Substitutes…" rows="4" style="font-family:monospace;font-size:.76rem"></textarea></div>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-secondary" onclick="clearForm()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Clear</button>
-        <button class="btn-danger" onclick="cancelEdit()" id="cancel-edit-btn" style="display:none">Cancel Edit</button>
-        <button class="btn-primary" onclick="saveMatch()" id="save-btn"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg><span id="save-btn-txt">Save to Firebase</span></button>
-      </div>
-    </div>
-
-    <!-- STREAMS -->
-    <div class="panel" id="panel-streams">
-      <div class="section-hdr">
-        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Active Streams</div></div>
-      </div>
-      <div id="loading-streams" class="loading-state"><div class="spinner"></div>Loading…</div>
-      <div id="streams-list"></div>
-    </div>
-
-    <!-- ADS -->
-    <div class="panel" id="panel-ads">
-      <div class="section-hdr"><div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Ad Manager</div></div></div>
-      <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Ad Slots</div>
-        <div style="font-size:.8rem;color:var(--t2);line-height:1.6;font-family:'Oswald',sans-serif;margin-bottom:14px">Free users see ads. Subscribers get ad-free experience.</div>
-        <div class="form-grid">
-          <div class="field-group"><label>Top Banner Title</label><input type="text" id="ad-t1" value="Bet365 — Best Odds"></div>
-          <div class="field-group"><label>Top Banner CTA URL</label><input type="url" id="ad-url" placeholder="https://…"></div>
-          <div class="field-group full"><label>Ad Network Script</label><textarea id="ad-script" placeholder="Paste Google AdSense or other script…" rows="4"></textarea></div>
-        </div>
-        <div class="form-actions"><button class="btn-primary" onclick="saveAds()">Save Ads</button></div>
-      </div>
-    </div>
-
-    <!-- SUBSCRIBERS -->
-    <div class="panel" id="panel-subs">
-      <div class="section-hdr"><div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Subscribers</div></div><button class="btn-secondary" onclick="addSub()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button></div>
-      <div class="sub-grid">
-        <div class="sub-card"><div class="sub-card-label">Total</div><div class="sub-card-val" style="color:var(--g)" id="ss-total">0</div><div class="sub-card-sub">Paying users</div></div>
-        <div class="sub-card"><div class="sub-card-label">Monthly</div><div class="sub-card-val" id="ss-mo">0</div><div class="sub-card-sub">₦1,000/mo</div></div>
-        <div class="sub-card"><div class="sub-card-label">Yearly</div><div class="sub-card-val" id="ss-yr">0</div><div class="sub-card-sub">₦10,000/yr</div></div>
-        <div class="sub-card"><div class="sub-card-label">Revenue</div><div class="sub-card-val" style="color:var(--gold)" id="ss-rev">₦0</div><div class="sub-card-sub">Lifetime</div></div>
-      </div>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>Name/Email</th><th>Plan</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead><tbody id="subs-tbody"></tbody></table></div>
-    </div>
-
-    <!-- PASSWORD -->
-    <div class="panel" id="panel-password">
-      <div class="section-hdr"><div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Change Password</div></div></div>
-      <div class="pw-wrap-card">
-        <div id="pw-alert" class="alert"></div>
-        <div class="pw-field"><label>Current Password</label><div class="pw-wrap"><input type="password" id="pw-cur" placeholder="Current password"><button class="pw-toggle" onclick="togglePw('pw-cur')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
-        <div class="pw-field"><label>New Password</label><div class="pw-wrap"><input type="password" id="pw-new" placeholder="New password" oninput="checkPw()"><button class="pw-toggle" onclick="togglePw('pw-new')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div><div class="pw-strength-txt" id="pw-st-txt">Enter a new password</div></div>
-        <div class="pw-field"><label>Confirm</label><div class="pw-wrap"><input type="password" id="pw-conf" placeholder="Confirm new password"><button class="pw-toggle" onclick="togglePw('pw-conf')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
-        <div class="pw-rules">
-          <div class="pw-rule" id="r-len"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>At least 6 characters</div>
-          <div class="pw-rule" id="r-up"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Contains uppercase</div>
-          <div class="pw-rule" id="r-num"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Contains a number</div>
-          <div class="pw-rule" id="r-match"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Passwords match</div>
-        </div>
-        <button class="btn-primary" style="width:100%;justify-content:center" onclick="changePw()">Update Password</button>
-      </div>
-    </div>
-
-  </div><!-- end content -->
-</div><!-- end main -->
-</div><!-- end app -->
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="bn-item active" onclick="showPanel('dashboard',null);bnActive(this)" data-p="dashboard">
-    <div class="bn-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-    <span class="bn-item-label">Home</span>
-  </button>
-  <button class="bn-item" onclick="showPanel('matches',null);bnActive(this)" data-p="matches">
-    <div class="bn-item-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span class="bn-badge" id="bn-badge">0</span></div>
-    <span class="bn-item-label">Matches</span>
-  </button>
-  <div class="bn-add-wrap"><button class="bn-add" onclick="showPanel('upload',null);bnActive(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
-  <button class="bn-item" onclick="showPanel('streams',null);bnActive(this)" data-p="streams">
-    <div class="bn-item-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
-    <span class="bn-item-label">Streams</span>
-  </button>
-  <button class="bn-item" onclick="showPanel('subs',null);bnActive(this)" data-p="subs">
-    <div class="bn-item-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-    <span class="bn-item-label">Subs</span>
-  </button>
-</nav>
-
-<!-- DELETE DIALOG -->
-<div class="overlay" id="del-overlay" onclick="if(event.target===this)closeDel()">
-  <div class="dialog" style="max-width:360px">
-    <div class="dialog-hdr"><div class="dialog-title" style="color:var(--red)">Delete Match</div><button class="dialog-close" onclick="closeDel()">✕</button></div>
-    <div class="dialog-body">
-      <div class="confirm-msg">This will permanently delete the match from Firebase. This cannot be undone.</div>
-      <div class="confirm-detail" id="del-name"></div>
-    </div>
-    <div class="dialog-footer"><button class="btn-secondary" onclick="closeDel()">Cancel</button><button class="btn-danger" onclick="confirmDel()">Yes, Delete</button></div>
+  <div class="tb-r">
+    <button class="view-btn" onclick="window.open('index.html','_blank')">👁 View Site</button>
+    <button class="add-btn" onclick="openAddMatch()">+ ADD MATCH</button>
   </div>
 </div>
 
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card live">
+    <div class="stat-lbl">Live Matches</div>
+    <div class="stat-num live" id="stat-live">0</div>
+    <div class="stat-sub">Currently live</div>
+  </div>
+  <div class="stat-card total">
+    <div class="stat-lbl">Total Matches</div>
+    <div class="stat-num total" id="stat-total">0</div>
+    <div class="stat-sub">In database</div>
+  </div>
+  <div class="stat-card upcoming">
+    <div class="stat-lbl">Upcoming</div>
+    <div class="stat-num upcoming" id="stat-upcoming">0</div>
+    <div class="stat-sub">Scheduled</div>
+  </div>
+  <div class="stat-card finished">
+    <div class="stat-lbl">Finished</div>
+    <div class="stat-num finished" id="stat-finished">0</div>
+    <div class="stat-sub">Completed</div>
+  </div>
+</div>
+
+<!-- Firebase Status -->
+<div class="firebase-status">
+  <div class="fs-dot connected" id="fs-dot"></div>
+  <span class="fs-text" id="fs-text">🔥 Firebase Connected — All matches visible to every visitor.</span>
+  <div class="fs-actions">
+    <button class="fs-btn" onclick="window.open('index.html','_blank')">View Public Site →</button>
+    <button class="fs-btn" onclick="copyLink()">Copy Link</button>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="section-hdr">
+  <span class="section-title">RECENT MATCHES</span>
+  <span class="section-count" id="match-count">Loading…</span>
+</div>
+<div class="filter-tabs">
+  <button class="ftab active" onclick="filterMatches('all',this)">All</button>
+  <button class="ftab" onclick="filterMatches('live',this)">🔴 Live</button>
+  <button class="ftab" onclick="filterMatches('upcoming',this)">⏰ Upcoming</button>
+  <button class="ftab" onclick="filterMatches('finished',this)">✅ Finished</button>
+  <button class="ftab" onclick="filterMatches('hidden',this)">👁 Hidden</button>
+</div>
+
+<!-- Matches List -->
+<div class="matches-list" id="matches-list">
+  <div class="empty"><div class="spinner"></div> Loading matches…</div>
+</div>
+
+<!-- Add/Edit Match Overlay -->
+<div class="overlay" id="match-overlay" onclick="if(event.target===this)closeMatchForm()">
+  <div class="sheet">
+    <div class="drag"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title" id="form-title">ADD MATCH</span>
+      <button class="sheet-close" onclick="closeMatchForm()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="f-id">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Home Team *</label>
+          <input type="text" class="form-input" id="f-home" placeholder="e.g. Arsenal">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Away Team *</label>
+          <input type="text" class="form-input" id="f-away" placeholder="e.g. Chelsea">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Competition</label>
+          <input type="text" class="form-input" id="f-comp" placeholder="Premier League">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Round</label>
+          <input type="text" class="form-input" id="f-round" placeholder="Matchday 38">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="f-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kick-off Time</label>
+          <input type="time" class="form-input" id="f-time">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="f-status">
+            <option value="upcoming">Upcoming</option>
+            <option value="live">Live</option>
+            <option value="finished">Finished</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Minute (if live)</label>
+          <input type="number" class="form-input" id="f-minute" placeholder="45" min="0" max="120">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Home Score</label>
+          <input type="number" class="form-input" id="f-hscore" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Away Score</label>
+          <input type="number" class="form-input" id="f-ascore" placeholder="0" min="0">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Home Team Logo URL</label>
+          <input type="url" class="form-input" id="f-hlogo" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Away Team Logo URL</label>
+          <input type="url" class="form-input" id="f-alogo" placeholder="https://...">
+        </div>
+      </div>
+
+      <!-- STREAM LINKS — 3 servers -->
+      <div class="form-section">📺 STREAM LINKS</div>
+      <div class="stream-fields">
+        <div class="stream-field">
+          <span class="stream-server-lbl">Server 1</span>
+          <input type="url" class="form-input" id="f-stream1" placeholder="https://... or .m3u8 link">
+        </div>
+        <div class="stream-field">
+          <span class="stream-server-lbl">Server 2</span>
+          <input type="url" class="form-input" id="f-stream2" placeholder="Backup stream URL">
+        </div>
+        <div class="stream-field">
+          <span class="stream-server-lbl">Server 3</span>
+          <input type="url" class="form-input" id="f-stream3" placeholder="Third backup URL">
+        </div>
+        <div class="stream-field">
+          <span class="stream-server-lbl">S1 Label</span>
+          <input type="text" class="form-input" id="f-s1label" placeholder="e.g. beIN Sports HD">
+        </div>
+        <div class="stream-field">
+          <span class="stream-server-lbl">S2 Label</span>
+          <input type="text" class="form-input" id="f-s2label" placeholder="e.g. SuperSport">
+        </div>
+        <div class="stream-field">
+          <span class="stream-server-lbl">S3 Label</span>
+          <input type="text" class="form-input" id="f-s3label" placeholder="e.g. Backup HD">
+        </div>
+      </div>
+
+      <div class="form-section">⚙️ SETTINGS</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Published</label>
+          <select class="form-select" id="f-published">
+            <option value="true">✅ Published (visible)</option>
+            <option value="false">🔒 Hidden</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="f-desc" placeholder="Optional notes">
+        </div>
+      </div>
+
+      <button class="form-submit" id="form-submit-btn" onclick="saveMatch()">SAVE MATCH</button>
+      <div class="form-note">All matches are instantly visible to every visitor via Firebase</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ==================== FIREBASE INIT ====================
+// ===== FIREBASE =====
 const firebaseConfig = {
-  apiKey: "AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",
-  authDomain: "instantlivefootball.firebaseapp.com",
-  projectId: "instantlivefootball",
-  storageBucket: "instantlivefootball.firebasestorage.app",
-  messagingSenderId: "584488048641",
-  appId: "1:584488048641:web:7adf83799426222a5fc800"
+  apiKey:"AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",
+  authDomain:"instantlivefootball.firebaseapp.com",
+  projectId:"instantlivefootball",
+  storageBucket:"instantlivefootball.firebasestorage.app",
+  messagingSenderId:"584488048641",
+  appId:"1:584488048641:web:7adf83799426222a5fc800"
 };
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-let db, allMatches = [], deleteDocId = null, editDocId = null;
-let adminPw = 'Ayolad';
-try{ const s = localStorage.getItem('ft_admin_pw'); if(s) adminPw = s; }catch(e){}
+// ===== STATE =====
+let allMatches = [];
+let activeFilter = 'all';
+let editingId = null;
 
-// ==================== AUTH ====================
-try{ if(localStorage.getItem('ft_admin_auth') !== 'true') window.location.href = 'admin-login.html'; }catch(e){}
-
-// ==================== INIT ====================
-document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-document.getElementById('hero-date').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
-window.addEventListener('load', function(){
-  try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    setFbStatus(true);
-    loadMatches();
-    loadSubs();
-  } catch(e) {
-    setFbStatus(false);
-    console.error('Firebase init error:', e);
-  }
-});
-
-function setFbStatus(ok){
-  const dot = document.getElementById('fb-dot');
-  const txt = document.getElementById('fb-text');
-  if(ok){ dot.className='fb-dot'; txt.className='fb-text'; txt.textContent='Firebase Connected — All matches are instantly visible to every visitor.'; }
-  else { dot.className='fb-dot off'; txt.className='fb-text off'; txt.textContent='Firebase connection failed. Check your internet.'; }
+// ===== TOAST =====
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
 }
 
-// ==================== LOAD MATCHES ====================
-function loadMatches(){
-  if(!db) return;
-  document.getElementById('loading-dash').style.display='flex';
-  document.getElementById('dash-table-wrap').style.display='none';
-  document.getElementById('loading-matches').style.display='flex';
-  document.getElementById('matches-list').innerHTML='';
-  document.getElementById('loading-streams').style.display='flex';
-  document.getElementById('streams-list').innerHTML='';
+// ===== COPY LINK =====
+function copyLink() {
+  navigator.clipboard.writeText('https://instantlivefootball.com.ng').then(() => showToast('🔗 Link copied!'));
+}
 
+// ===== LOAD MATCHES FROM FIREBASE =====
+function loadMatches() {
   db.collection('matches').orderBy('date','desc').get()
-    .then(snap => {
+    .then(snapshot => {
       allMatches = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        // Build streams array from stream/stream2/stream3 fields (your existing structure)
-        const streams = [];
-        if(d.stream) streams.push({ url: d.stream, label: d.streamLabel || 'Server 1', type: d.streamType || 'iframe' });
-        if(d.stream2) streams.push({ url: d.stream2, label: d.streamLabel2 || 'Server 2', type: d.streamType2 || 'iframe' });
-        if(d.stream3) streams.push({ url: d.stream3, label: d.streamLabel3 || 'Server 3', type: d.streamType3 || 'iframe' });
-        // Also support new streams array format
-        if(d.streams && d.streams.length && !streams.length) streams.push(...d.streams);
-        allMatches.push({ id: doc.id, streams, ...d });
+      snapshot.forEach(doc => {
+        allMatches.push({ id: doc.id, ...doc.data() });
       });
-      renderAll();
+      updateStats();
+      renderMatches();
     })
     .catch(err => {
-      console.error(err);
-      showToast('Failed to load matches from Firebase', true);
-      setFbStatus(false);
+      showToast('❌ Firebase error: ' + err.message);
+      document.getElementById('matches-list').innerHTML = '<div class="empty">Failed to load matches. Check Firebase connection.</div>';
     });
 }
 
-function refreshMatches(){ loadMatches(); showToast('Refreshed from Firebase!'); }
-
-// ==================== RENDER ALL ====================
-function renderAll(){
-  const live = allMatches.filter(m=>m.status==='live').length;
-  const up   = allMatches.filter(m=>m.status==='upcoming').length;
-  const ft   = allMatches.filter(m=>m.status==='finished').length;
-  const tot  = allMatches.length;
-
-  ['s-live','h-live'].forEach(id=>setEl(id,live));
-  ['s-total','h-total'].forEach(id=>setEl(id,tot));
-  ['s-up','h-up'].forEach(id=>setEl(id,up));
-  ['s-ft','h-ft'].forEach(id=>setEl(id,ft));
-  setEl('sb-mc-badge', tot);
-  setEl('bn-badge', tot);
-
-  const lb = document.getElementById('topbar-live');
-  if(live > 0){ lb.style.display='flex'; setEl('topbar-live-n', live); } else lb.style.display='none';
-
-  // Dashboard table
-  document.getElementById('loading-dash').style.display='none';
-  document.getElementById('dash-table-wrap').style.display='';
-  const tbody = document.getElementById('dash-tbody');
-  const slice = [...allMatches].slice(0,8);
-  tbody.innerHTML = slice.length ? slice.map(m => `
-    <tr>
-      <td><span class="td-team">${m.home} <span style="color:var(--t3);font-size:.7rem">vs</span> ${m.away}</span></td>
-      <td style="color:var(--t2);font-family:'Oswald',sans-serif;font-size:.78rem">${m.comp||'—'}</td>
-      <td><span class="td-score">${m.status!=='upcoming'?(m.hscore??0)+'–'+(m.ascore??0):'—'}</span></td>
-      <td>${pill(m.status,m.minute)}</td>
-      <td style="font-family:'Oswald',sans-serif;font-size:.75rem;color:${m.streams&&m.streams.length?'var(--g)':'var(--t3)'}">${m.streams&&m.streams.length?'● '+m.streams.length+' server'+(m.streams.length>1?'s':''):'None'}</td>
-      <td><div class="td-actions">
-        <button class="action-btn edit" onclick="openEdit('${m.id}')">Edit</button>
-        <button class="action-btn stream" onclick="openEdit('${m.id}')">Stream</button>
-        <button class="action-btn del" onclick="openDel('${m.id}')">Del</button>
-      </div></td>
-    </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--t3);font-family:'Oswald',sans-serif;padding:20px">No matches yet</td></tr>`;
-
-  // Matches panel
-  document.getElementById('loading-matches').style.display='none';
-  const ml = document.getElementById('matches-list');
-  ml.innerHTML = allMatches.length ? '<div class="match-cards">'+allMatches.map(m => matchCard(m)).join('')+'</div>'
-    : `<div class="m-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><div class="m-empty-title">No Matches</div><div class="m-empty-sub">Add your first match</div></div>`;
-
-  // Streams panel
-  document.getElementById('loading-streams').style.display='none';
-  const active = allMatches.filter(m => m.streams && m.streams.length);
-  const sl = document.getElementById('streams-list');
-  sl.innerHTML = active.length ? '<div class="match-cards">'+active.map(m=>{
-    const srvHtml = m.streams.map((s,si)=>`<div style="margin:4px 0;background:var(--s2);border-radius:7px;padding:7px 10px;border:1px solid ${s.url?'rgba(0,255,135,.12)':'var(--bd)'}">
-      <div style="font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;color:${s.url?'var(--g)':'var(--t3)'};margin-bottom:3px">${s.label||'Server '+(si+1)}</div>
-      <div style="font-size:.72rem;color:var(--t2);word-break:break-all">${s.url||'<em style="color:var(--t3)">Empty</em>'}</div>
-    </div>`).join('');
-    return `<div class="m-card ${m.status}" style="margin-bottom:8px">
-      <div class="m-card-glow"></div>
-      <div class="m-card-head"><span class="m-comp">${m.comp||'Football'}</span>${pill(m.status,m.minute)}</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;margin-bottom:8px">${m.home} vs ${m.away}</div>
-      ${srvHtml}
-      <div class="m-actions" style="margin-top:10px;grid-template-columns:1fr 1fr">
-        <button class="m-btn edit" onclick="openEdit('${m.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Streams</button>
-        <button class="m-btn del" onclick="openDel('${m.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Delete</button>
-      </div>
-    </div>`;
-  }).join('')+'</div>' : `<div class="m-empty"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div class="m-empty-title">No Active Streams</div><div class="m-empty-sub">Add stream URLs to your matches</div></div>`;
-
-  // MOTD
-  const ms = document.getElementById('motd-sel');
-  ms.innerHTML = '<option value="">-- Auto (first live match) --</option>' + allMatches.map(m=>`<option value="${m.id}">${m.home} vs ${m.away} (${m.comp||''})</option>`).join('');
-  try{ const v=localStorage.getItem('ft_motd'); if(v) ms.value=v; }catch(e){}
+// ===== UPDATE STATS =====
+function updateStats() {
+  const live = allMatches.filter(m => m.status === 'live').length;
+  const upcoming = allMatches.filter(m => m.status === 'upcoming').length;
+  const finished = allMatches.filter(m => m.status === 'finished').length;
+  document.getElementById('stat-live').textContent = live;
+  document.getElementById('stat-total').textContent = allMatches.length;
+  document.getElementById('stat-upcoming').textContent = upcoming;
+  document.getElementById('stat-finished').textContent = finished;
 }
 
-function matchCard(m){
-  const hasStreams = m.streams && m.streams.length;
-  const streamInfo = hasStreams ? `<span class="m-stream-tag stream-on">● ${m.streams.length} Stream${m.streams.length>1?'s':''}</span>` : `<span class="m-stream-tag stream-off">○ No Stream</span>`;
-  return `<div class="m-card ${m.status}">
-    <div class="m-card-glow"></div>
-    <div class="m-card-head">
-      <span class="m-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
-      ${pill(m.status,m.minute)}
+// ===== RENDER MATCHES =====
+function renderMatches() {
+  const list = document.getElementById('matches-list');
+  let filtered = allMatches;
+
+  if (activeFilter === 'live') filtered = allMatches.filter(m => m.status === 'live');
+  else if (activeFilter === 'upcoming') filtered = allMatches.filter(m => m.status === 'upcoming');
+  else if (activeFilter === 'finished') filtered = allMatches.filter(m => m.status === 'finished');
+  else if (activeFilter === 'hidden') filtered = allMatches.filter(m => m.hidden);
+
+  document.getElementById('match-count').textContent = filtered.length + ' matches';
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">No matches found</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(m => buildMatchCard(m)).join('');
+}
+
+function buildMatchCard(m) {
+  const isLive = m.status === 'live';
+  const isFt = m.status === 'finished';
+  const isHidden = m.hidden;
+
+  const badge = isLive
+    ? `<div class="mc-badge live"><div class="ldot"></div>LIVE${m.minute?' '+m.minute+"'":''}  </div>`
+    : isFt ? `<div class="mc-badge finished">FT</div>`
+    : `<div class="mc-badge upcoming">UPCOMING</div>`;
+
+  const score = isLive || isFt ? `${m.hscore??0} - ${m.ascore??0}` : 'vs';
+
+  // Count active streams
+  const streamCount = [m.stream, m.stream2, m.stream3].filter(Boolean).length +
+    (m.streams ? m.streams.filter(s => s && s.url).length : 0);
+  const streamBadge = streamCount > 0
+    ? `<span class="stream-indicator active">✓ ${streamCount} Stream${streamCount>1?'s':''}</span>`
+    : `<span class="stream-indicator none">No Stream</span>`;
+
+  const dateStr = m.date ? (m.date.seconds ? new Date(m.date.seconds*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : m.date) : '';
+
+  return `<div class="match-card ${isLive?'live-card':''}" id="card-${m.id}">
+    <div class="mc-top">
+      <span class="mc-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
+      ${badge}
     </div>
-    <div class="m-teams">
-      <div class="m-team home"><div class="m-team-name">${m.home}</div></div>
-      <div class="m-score">${m.status!=='upcoming'?(m.hscore??0)+'–'+(m.ascore??0):'vs'}</div>
-      <div class="m-team away"><div class="m-team-name">${m.away}</div></div>
-    </div>
-    <div class="m-meta">
-      <span class="m-meta-item">${m.date||''} ${m.time||''}</span>
-      ${streamInfo}
-    </div>
-    <div class="m-actions four">
-      <button class="m-btn edit" onclick="openEdit('${m.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
-      <button class="m-btn stream" onclick="openEdit('${m.id}')"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Stream</button>
-      <button class="m-btn hide-btn" onclick="toggleHide('${m.id}',${!!m.hidden})"><svg viewBox="0 0 24 24">${m.hidden?'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>':'<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}</svg>${m.hidden?'Show':'Hide'}</button>
-      <button class="m-btn del" onclick="openDel('${m.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Del</button>
+    <div class="mc-body">
+      <div class="mc-teams">
+        <span class="mc-team">${m.home}</span>
+        <span class="mc-score">${score}</span>
+        <span class="mc-team" style="text-align:right">${m.away}</span>
+      </div>
+      <div class="mc-meta">
+        <span>${dateStr}${m.time?' '+m.time+' WAT':''}</span>
+        ${streamBadge}
+        ${isHidden ? '<span style="color:var(--orange);font-size:.6rem;font-family:Oswald,sans-serif;letter-spacing:1px">👁 HIDDEN</span>' : ''}
+      </div>
+      <div class="mc-actions">
+        <button class="act-btn edit" onclick="openEditMatch('${m.id}')">✏️ EDIT</button>
+        <button class="act-btn stream" onclick="openStreamEdit('${m.id}')">📺 STREAM</button>
+        ${!isLive ? `<button class="act-btn mark-live" onclick="quickStatus('${m.id}','live')">🔴 LIVE</button>` : ''}
+        ${!isFt ? `<button class="act-btn mark-ft" onclick="quickStatus('${m.id}','finished')">✅ FT</button>` : ''}
+        ${isHidden ? `<button class="act-btn publish" onclick="toggleHide('${m.id}',false)">📢 PUBLISH</button>` : `<button class="act-btn hide" onclick="toggleHide('${m.id}',true)">👁 HIDE</button>`}
+        <button class="act-btn delete" onclick="deleteMatch('${m.id}')">🗑 DELETE</button>
+      </div>
     </div>
   </div>`;
 }
 
-function pill(s,min){
-  if(s==='live') return `<span class="status-pill pill-live"><span class="live-dot-sm"></span>LIVE${min?' '+min:''}</span>`;
-  if(s==='finished') return `<span class="status-pill pill-ft">FT</span>`;
-  return `<span class="status-pill pill-up">Upcoming</span>`;
+// ===== FILTER =====
+function filterMatches(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMatches();
 }
 
-// ==================== SAVE MATCH ====================
-function saveMatch(){
-  if(!db){ showToast('Firebase not connected', true); return; }
-  const home = g('f-home').trim(), away = g('f-away').trim();
-  if(!home||!away){ showAlert('upload-alert','error','Enter both team names.'); return; }
+// ===== QUICK STATUS =====
+function quickStatus(id, status) {
+  const update = { status };
+  if (status === 'finished') update.minute = 90;
+  if (status === 'live') update.minute = 1;
+  db.collection('matches').doc(id).update(update)
+    .then(() => {
+      showToast(`✅ Match marked as ${status.toUpperCase()}!`);
+      loadMatches();
+    })
+    .catch(err => showToast('❌ ' + err.message));
+}
 
-  const s1 = g('f-stream1').trim(), s2 = g('f-stream2').trim(), s3 = g('f-stream3').trim();
+// ===== TOGGLE HIDE =====
+function toggleHide(id, hide) {
+  db.collection('matches').doc(id).update({ hidden: hide })
+    .then(() => {
+      showToast(hide ? '👁 Match hidden from public' : '📢 Match published!');
+      loadMatches();
+    });
+}
 
-  const data = {
+// ===== DELETE =====
+function deleteMatch(id) {
+  if (!confirm('Delete this match? This cannot be undone.')) return;
+  db.collection('matches').doc(id).delete()
+    .then(() => {
+      showToast('🗑 Match deleted');
+      loadMatches();
+    });
+}
+
+// ===== CLEAR FORM =====
+function clearForm() {
+  ['f-id','f-home','f-away','f-comp','f-round','f-time','f-minute','f-desc',
+   'f-hlogo','f-alogo','f-stream1','f-stream2','f-stream3',
+   'f-s1label','f-s2label','f-s3label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-hscore').value = '0';
+  document.getElementById('f-ascore').value = '0';
+  document.getElementById('f-status').value = 'upcoming';
+  document.getElementById('f-published').value = 'true';
+  // Set today's date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').value = today;
+  editingId = null;
+}
+
+// ===== OPEN ADD =====
+function openAddMatch() {
+  clearForm();
+  document.getElementById('form-title').textContent = 'ADD MATCH';
+  document.getElementById('form-submit-btn').textContent = 'SAVE MATCH';
+  document.getElementById('match-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ===== OPEN EDIT =====
+function openEditMatch(id) {
+  const m = allMatches.find(x => x.id === id);
+  if (!m) return;
+  clearForm();
+  editingId = id;
+  document.getElementById('form-title').textContent = 'EDIT MATCH';
+  document.getElementById('form-submit-btn').textContent = 'UPDATE MATCH';
+
+  document.getElementById('f-id').value = id;
+  document.getElementById('f-home').value = m.home || '';
+  document.getElementById('f-away').value = m.away || '';
+  document.getElementById('f-comp').value = m.comp || '';
+  document.getElementById('f-round').value = m.round || '';
+  document.getElementById('f-time').value = m.time || '';
+  document.getElementById('f-minute').value = m.minute || '';
+  document.getElementById('f-hscore').value = m.hscore ?? 0;
+  document.getElementById('f-ascore').value = m.ascore ?? 0;
+  document.getElementById('f-status').value = m.status || 'upcoming';
+  document.getElementById('f-hlogo').value = m.hlogo || '';
+  document.getElementById('f-alogo').value = m.alogo || '';
+  document.getElementById('f-desc').value = m.desc || '';
+  document.getElementById('f-published').value = m.hidden ? 'false' : 'true';
+
+  // Handle date
+  if (m.date) {
+    if (m.date.seconds) {
+      const d = new Date(m.date.seconds * 1000);
+      document.getElementById('f-date').value = d.toISOString().split('T')[0];
+    } else {
+      document.getElementById('f-date').value = m.date;
+    }
+  }
+
+  // Handle streams — check both old format and new format
+  const stream1 = m.stream || (m.streams && m.streams[0]?.url) || '';
+  const stream2 = m.stream2 || (m.streams && m.streams[1]?.url) || '';
+  const stream3 = m.stream3 || (m.streams && m.streams[2]?.url) || '';
+  const s1label = (m.streams && m.streams[0]?.label) || 'Server 1';
+  const s2label = (m.streams && m.streams[1]?.label) || 'Server 2';
+  const s3label = (m.streams && m.streams[2]?.label) || 'Server 3';
+
+  document.getElementById('f-stream1').value = stream1;
+  document.getElementById('f-stream2').value = stream2;
+  document.getElementById('f-stream3').value = stream3;
+  document.getElementById('f-s1label').value = s1label;
+  document.getElementById('f-s2label').value = s2label;
+  document.getElementById('f-s3label').value = s3label;
+
+  document.getElementById('match-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ===== STREAM QUICK EDIT =====
+function openStreamEdit(id) {
+  const m = allMatches.find(x => x.id === id);
+  if (!m) return;
+  // Reuse same form but scroll to stream section
+  openEditMatch(id);
+  setTimeout(() => {
+    document.getElementById('f-stream1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 400);
+}
+
+// ===== CLOSE FORM =====
+function closeMatchForm() {
+  document.getElementById('match-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ===== SAVE MATCH =====
+async function saveMatch() {
+  const home = document.getElementById('f-home').value.trim();
+  const away = document.getElementById('f-away').value.trim();
+  if (!home || !away) { showToast('⚠️ Home and Away teams are required'); return; }
+
+  const btn = document.getElementById('form-submit-btn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  const stream1 = document.getElementById('f-stream1').value.trim();
+  const stream2 = document.getElementById('f-stream2').value.trim();
+  const stream3 = document.getElementById('f-stream3').value.trim();
+  const s1label = document.getElementById('f-s1label').value.trim() || 'Server 1';
+  const s2label = document.getElementById('f-s2label').value.trim() || 'Server 2';
+  const s3label = document.getElementById('f-s3label').value.trim() || 'Server 3';
+
+  // Build streams array
+  const streams = [];
+  if (stream1) streams.push({ url: stream1, label: s1label });
+  if (stream2) streams.push({ url: stream2, label: s2label });
+  if (stream3) streams.push({ url: stream3, label: s3label });
+
+  const dateVal = document.getElementById('f-date').value;
+
+  const matchData = {
     home, away,
-    hlogo: g('f-hlogo').trim(),
-    alogo: g('f-alogo').trim(),
-    comp: g('f-comp'),
-    round: g('f-round').trim(),
-    date: g('f-date'),
-    time: g('f-time'),
-    hscore: parseInt(g('f-hs'))||0,
-    ascore: parseInt(g('f-as'))||0,
-    status: g('f-status'),
-    minute: g('f-min').trim(),
-    // Save as stream/stream2/stream3 — compatible with your existing firebase-loader.js
-    stream: s1,
-    streamLabel: g('f-label1').trim()||'Server 1',
-    streamType: g('f-type1'),
-    stream2: s2,
-    streamLabel2: g('f-label2').trim()||'Server 2',
-    streamType2: g('f-type2'),
-    stream3: s3,
-    streamLabel3: g('f-label3').trim()||'Server 3',
-    streamType3: g('f-type3'),
-    desc: g('f-desc').trim(),
-    homeLineup: g('f-hl').trim(),
-    awayLineup: g('f-al').trim(),
-    homeSubs: g('f-hs2').trim(),
-    awaySubs: g('f-as2').trim(),
-    hidden: false,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    comp: document.getElementById('f-comp').value.trim(),
+    round: document.getElementById('f-round').value.trim(),
+    date: dateVal || new Date().toISOString().split('T')[0],
+    time: document.getElementById('f-time').value,
+    status: document.getElementById('f-status').value,
+    minute: parseInt(document.getElementById('f-minute').value) || null,
+    hscore: parseInt(document.getElementById('f-hscore').value) || 0,
+    ascore: parseInt(document.getElementById('f-ascore').value) || 0,
+    hlogo: document.getElementById('f-hlogo').value.trim(),
+    alogo: document.getElementById('f-alogo').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    hidden: document.getElementById('f-published').value === 'false',
+    // Save in both formats for compatibility
+    stream: stream1,
+    stream2: stream2,
+    stream3: stream3,
+    streams: streams,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
 
-  const btn = document.getElementById('save-btn');
-  const txt = document.getElementById('save-btn-txt');
-  btn.disabled = true; txt.textContent = 'Saving…';
-
-  const promise = editDocId
-    ? db.collection('matches').doc(editDocId).update(data)
-    : db.collection('matches').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-
-  promise.then(() => {
-    showAlert('upload-alert','success', editDocId ? 'Match updated in Firebase!' : 'Match saved to Firebase!');
-    showToast(editDocId ? 'Match updated!' : 'Match saved!');
-    clearForm();
-    loadMatches();
-  }).catch(err => {
-    showAlert('upload-alert','error','Save failed: '+err.message);
-  }).finally(() => {
-    btn.disabled = false; txt.textContent = 'Save to Firebase';
+  // Remove null/empty values
+  Object.keys(matchData).forEach(k => {
+    if (matchData[k] === null || matchData[k] === undefined || matchData[k] === '') {
+      delete matchData[k];
+    }
   });
+
+  try {
+    if (editingId) {
+      await db.collection('matches').doc(editingId).update(matchData);
+      showToast('✅ Match updated!');
+    } else {
+      matchData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('matches').add(matchData);
+      showToast('✅ Match added!');
+    }
+    closeMatchForm();
+    loadMatches();
+  } catch(err) {
+    showToast('❌ Error: ' + err.message);
+  } finally {
+    btn.textContent = editingId ? 'UPDATE MATCH' : 'SAVE MATCH';
+    btn.disabled = false;
+  }
 }
 
-// ==================== EDIT ====================
-function openEdit(docId){
-  const m = allMatches.find(x=>x.id===docId); if(!m) return;
-  editDocId = docId;
-  sv('f-home', m.home||''); sv('f-away', m.away||'');
-  sv('f-hlogo', m.hlogo||''); sv('f-alogo', m.alogo||'');
-  sv('f-comp', m.comp||''); sv('f-round', m.round||'');
-  sv('f-date', m.date||''); sv('f-time', m.time||'');
-  sv('f-hs', m.hscore??0); sv('f-as', m.ascore??0);
-  sv('f-status', m.status||'upcoming'); sv('f-min', m.minute||'');
-  // Load stream fields
-  sv('f-stream1', m.stream||''); sv('f-label1', m.streamLabel||'Server 1'); sv('f-type1', m.streamType||'iframe');
-  sv('f-stream2', m.stream2||''); sv('f-label2', m.streamLabel2||'Server 2'); sv('f-type2', m.streamType2||'iframe');
-  sv('f-stream3', m.stream3||''); sv('f-label3', m.streamLabel3||'Server 3'); sv('f-type3', m.streamType3||'iframe');
-  sv('f-desc', m.desc||'');
-  sv('f-hl', m.homeLineup||''); sv('f-al', m.awayLineup||'');
-  sv('f-hs2', m.homeSubs||''); sv('f-as2', m.awaySubs||'');
-  updateSrvBadge(1); updateSrvBadge(2); updateSrvBadge(3);
-  // Update lineup labels
-  document.getElementById('lbl-hl').textContent = (m.home||'Home')+' Lineup';
-  document.getElementById('lbl-al').textContent = (m.away||'Away')+' Lineup';
-  document.getElementById('upload-title').textContent = 'Edit: '+m.home+' vs '+m.away;
-  document.getElementById('save-btn-txt').textContent = 'Update in Firebase';
-  document.getElementById('cancel-edit-btn').style.display='flex';
-  showPanel('upload', null);
-  window.scrollTo(0,0);
-}
-
-function cancelEdit(){ clearForm(); }
-function clearForm(){
-  editDocId = null;
-  ['f-home','f-away','f-hlogo','f-alogo','f-round','f-date','f-time','f-min',
-   'f-stream1','f-stream2','f-stream3','f-desc','f-hl','f-al','f-hs2','f-as2'].forEach(id=>sv(id,''));
-  ['f-hs','f-as'].forEach(id=>sv(id,''));
-  sv('f-label1','Server 1'); sv('f-label2','Server 2'); sv('f-label3','Server 3');
-  ['f-comp','f-status','f-type1','f-type2','f-type3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.selectedIndex=0; });
-  updateSrvBadge(1); updateSrvBadge(2); updateSrvBadge(3);
-  document.getElementById('upload-title').textContent='Add New Match';
-  document.getElementById('save-btn-txt').textContent='Save to Firebase';
-  document.getElementById('cancel-edit-btn').style.display='none';
-  document.getElementById('lbl-hl').textContent='Home Lineup';
-  document.getElementById('lbl-al').textContent='Away Lineup';
-}
-
-// ==================== DELETE ====================
-function openDel(docId){
-  const m = allMatches.find(x=>x.id===docId); if(!m) return;
-  deleteDocId = docId;
-  document.getElementById('del-name').textContent = m.home+' vs '+m.away+' ('+m.comp+')';
-  document.getElementById('del-overlay').classList.add('open');
-}
-function closeDel(){ document.getElementById('del-overlay').classList.remove('open'); deleteDocId=null; }
-function confirmDel(){
-  if(!deleteDocId||!db) return;
-  db.collection('matches').doc(deleteDocId).delete()
-    .then(()=>{ closeDel(); loadMatches(); showToast('Match deleted.'); })
-    .catch(err=>showToast('Delete failed: '+err.message, true));
-}
-
-// ==================== HIDE/SHOW ====================
-function toggleHide(docId, currentlyHidden){
-  if(!db) return;
-  db.collection('matches').doc(docId).update({ hidden: !currentlyHidden })
-    .then(()=>{ loadMatches(); showToast(currentlyHidden?'Match shown.':'Match hidden.'); })
-    .catch(err=>showToast('Error: '+err.message,true));
-}
-
-// ==================== STREAM BADGES ====================
-function updateSrvBadge(n){
-  const val = g('f-stream'+n).trim();
-  const badge = document.getElementById('srv'+n+'-badge');
-  if(badge){ badge.textContent=val?'Active':'Empty'; badge.className='srv-badge'+(val?'':' inactive'); }
-}
-
-// ==================== MOTD ====================
-function saveMotd(){ try{ localStorage.setItem('ft_motd', document.getElementById('motd-sel').value); }catch(e){} showToast('Featured match saved!'); }
-function clearMotd(){ try{ localStorage.removeItem('ft_motd'); }catch(e){} document.getElementById('motd-sel').value=''; showToast('Featured cleared.'); }
-
-// ==================== SUBS ====================
-function loadSubs(){
-  try{
-    const subs = JSON.parse(localStorage.getItem('ft_subs')||'[]');
-    setEl('ss-total', subs.length);
-    const mo=subs.filter(s=>s.plan==='monthly').length, yr=subs.filter(s=>s.plan==='yearly').length;
-    setEl('ss-mo',mo); setEl('ss-yr',yr);
-    setEl('ss-rev','₦'+(mo*1000+yr*10000).toLocaleString());
-    const tb=document.getElementById('subs-tbody');
-    tb.innerHTML = subs.length ? subs.map((s,i)=>`<tr><td style="color:var(--t3);font-family:'Oswald',sans-serif">${i+1}</td><td style="font-family:'Oswald',sans-serif">${s.name}</td><td>${pill(s.plan==='yearly'?'upcoming':'live','')}</td><td style="color:var(--t2);font-size:.78rem;font-family:'Oswald',sans-serif">${s.expires||'—'}</td><td>${pill('live','')}</td><td><button class="action-btn del" onclick="delSub(${i})">Remove</button></td></tr>`).join('')
-      : `<tr><td colspan="6" style="text-align:center;color:var(--t3);font-family:'Oswald',sans-serif;padding:20px">No subscribers yet</td></tr>`;
-  }catch(e){}
-}
-function addSub(){
-  const name=prompt('Subscriber name/email:'); if(!name) return;
-  const plan=prompt('Plan (monthly/yearly):','monthly');
-  try{
-    const subs=JSON.parse(localStorage.getItem('ft_subs')||'[]');
-    const exp=new Date(); exp.setMonth(exp.getMonth()+(plan==='yearly'?12:1));
-    subs.push({name,plan:plan||'monthly',start:new Date().toLocaleDateString('en-GB'),expires:exp.toLocaleDateString('en-GB')});
-    localStorage.setItem('ft_subs',JSON.stringify(subs));
-  }catch(e){}
-  loadSubs(); showToast('Subscriber added!');
-}
-function delSub(i){
-  try{ const s=JSON.parse(localStorage.getItem('ft_subs')||'[]'); s.splice(i,1); localStorage.setItem('ft_subs',JSON.stringify(s)); }catch(e){}
-  loadSubs();
-}
-
-// ==================== ADS ====================
-function saveAds(){ showToast('Ad settings saved!'); }
-
-// ==================== PASSWORD ====================
-function checkPw(){
-  const pw=g('pw-new'), bar=document.getElementById('pw-bar'), conf=g('pw-conf');
-  document.getElementById('r-len').className='pw-rule'+(pw.length>=6?' ok':'');
-  document.getElementById('r-up').className='pw-rule'+(/[A-Z]/.test(pw)?' ok':'');
-  document.getElementById('r-num').className='pw-rule'+(/[0-9]/.test(pw)?' ok':'');
-  document.getElementById('r-match').className='pw-rule'+(pw&&pw===conf?' ok':'');
-  let sc=0; if(pw.length>=6)sc++; if(/[A-Z]/.test(pw))sc++; if(/[0-9]/.test(pw))sc++; if(pw.length>=10)sc++;
-  bar.style.width=(sc*25)+'%';
-  bar.style.background=['','#ff2d55','#ffcc00','#00e5ff','#00ff87'][sc]||'';
-  document.getElementById('pw-st-txt').textContent=['','Weak','Fair','Good','Strong'][sc]||'';
-}
-function togglePw(id){ const el=document.getElementById(id); el.type=el.type==='password'?'text':'password'; }
-function changePw(){
-  const cur=g('pw-cur'),nw=g('pw-new'),conf=g('pw-conf');
-  if(cur!==adminPw){ showAlert('pw-alert','error','Current password incorrect.'); return; }
-  if(nw.length<6){ showAlert('pw-alert','error','Password too short.'); return; }
-  if(nw!==conf){ showAlert('pw-alert','error','Passwords do not match.'); return; }
-  adminPw=nw; try{ localStorage.setItem('ft_admin_pw',nw); }catch(e){}
-  showAlert('pw-alert','success','Password updated!');
-  sv('pw-cur',''); sv('pw-new',''); sv('pw-conf','');
-}
-
-// ==================== NAV ====================
-function showPanel(id, sbEl){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-  if(sbEl && sbEl.classList && sbEl.classList.contains('sb-item')) sbEl.classList.add('active');
-  const titles={dashboard:'Dashboard',matches:'All Matches',upload:editDocId?'Edit Match':'Add Match',streams:'Live Streams',ads:'Ad Manager',subs:'Subscribers',password:'Change Password'};
-  document.getElementById('topbar-title').textContent=titles[id]||id;
-  closeSidebar();
-  if(id==='subs') loadSubs();
-  return false;
-}
-function toggleSidebar(){ const s=document.getElementById('sidebar'),b=document.getElementById('sb-backdrop'); s.classList.toggle('open'); b.classList.toggle('show'); }
-function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sb-backdrop').classList.remove('show'); }
-function bnActive(el){ document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active')); if(el) el.classList.add('active'); }
-function logout(){ if(confirm('Log out?')){ try{ localStorage.removeItem('ft_admin_auth'); }catch(e){} window.location.href='admin-login.html'; } }
-function copyLink(){ try{ navigator.clipboard.writeText(window.location.origin+'/index.html'); showToast('Link copied!'); }catch(e){} }
-
-// ==================== UTILS ====================
-function g(id){ const el=document.getElementById(id); return el?el.value:''; }
-function sv(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
-function setEl(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
-function showAlert(id,type,msg){ const el=document.getElementById(id); if(!el) return; el.className='alert alert-'+(type==='error'?'error':'success')+' show'; el.textContent=msg; setTimeout(()=>el.classList.remove('show'),3500); }
-function showToast(msg, isErr=false){
-  const ex=document.querySelector('.toast'); if(ex) ex.remove();
-  const t=document.createElement('div'); t.className='toast'+(isErr?' error-toast':'');
-  t.innerHTML=`<svg viewBox="0 0 24 24">${isErr?'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>':'<polyline points="20 6 9 17 4 12"/>'}</svg>${msg}`;
-  document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
-}
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  loadMatches();
+  // Auto refresh every 30 seconds
+  setInterval(loadMatches, 30000);
+});
 </script>
 </body>
-</html>
+  </html>
