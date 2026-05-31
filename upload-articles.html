@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FullTime NG — Article Uploader</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0d1219;color:#f0f4f8;min-height:100vh;padding:20px}
+.wrap{max-width:700px;margin:0 auto}
+.header{text-align:center;margin-bottom:28px}
+.header h1{font-size:1.6rem;letter-spacing:2px;margin-bottom:6px}
+.header h1 span{color:#00e676}
+.header p{font-size:.82rem;color:#6d8499}
+.card{background:#121a24;border:1px solid #1e2d3d;border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:.88rem;font-weight:700;letter-spacing:1px;margin-bottom:14px;color:#00e676;display:flex;align-items:center;gap:8px}
+.card-title svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.btn{border:none;border-radius:8px;padding:10px 20px;font-size:.78rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.btn-green{background:linear-gradient(135deg,#00e676,#1de9b6);color:#000}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,230,118,.3)}
+.btn-red{background:rgba(255,23,68,.1);color:#ff1744;border:1px solid rgba(255,23,68,.2)}
+.btn-red:hover{background:rgba(255,23,68,.2)}
+.btn-blue{background:rgba(41,121,255,.1);color:#2979ff;border:1px solid rgba(41,121,255,.2)}
+.btn-blue:hover{background:rgba(41,121,255,.2)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.status-bar{background:#18232f;border:1px solid #1e2d3d;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.78rem;color:#6d8499;max-height:200px;overflow-y:auto}
+.status-bar .log-item{padding:3px 0;border-bottom:1px solid rgba(30,45,61,.5);display:flex;align-items:flex-start;gap:8px}
+.status-bar .log-item:last-child{border-bottom:none}
+.log-ok{color:#00e676}
+.log-err{color:#ff1744}
+.log-info{color:#ffd600}
+.log-time{color:#3a4f63;font-size:.68rem;flex-shrink:0;margin-top:1px}
+.article-preview{background:#18232f;border:1px solid #1e2d3d;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.art-prev-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .13s}
+.art-prev-hdr:hover{background:rgba(255,255,255,.03)}
+.art-prev-title{font-size:.78rem;font-weight:600;color:#f0f4f8;flex:1;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-prev-cat{background:rgba(229,57,53,.1);color:#ff1744;border:1px solid rgba(229,57,53,.18);border-radius:4px;padding:2px 7px;font-size:.58rem;font-weight:700;letter-spacing:1px;flex-shrink:0}
+.art-prev-status{font-size:.62rem;color:#6d8499;flex-shrink:0;margin-left:8px}
+.art-prev-status.uploaded{color:#00e676}
+.progress-wrap{background:#1e2d3d;border-radius:4px;height:4px;overflow:hidden;margin:12px 0 4px}
+.progress-bar{height:100%;background:linear-gradient(90deg,#00e676,#1de9b6);border-radius:4px;transition:width .3s}
+.progress-lbl{font-size:.68rem;color:#6d8499;text-align:center}
+.field-group{margin-bottom:12px}
+.field-group label{display:block;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#6d8499;margin-bottom:5px}
+.field-group input,.field-group select,.field-group textarea{width:100%;background:#18232f;border:1px solid #1e2d3d;border-radius:7px;padding:9px 12px;color:#f0f4f8;font-family:inherit;font-size:.85rem;outline:none;transition:border-color .15s}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:rgba(0,230,118,.35)}
+.field-group textarea{resize:vertical;min-height:120px;line-height:1.5}
+.field-group select option{background:#18232f}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid #1e2d3d}
+.tab{padding:10px 16px;font-size:.72rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#3a4f63;cursor:pointer;border-bottom:2px solid transparent;transition:all .13s}
+.tab.active{color:#00e676;border-bottom-color:#00e676}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.tip{background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.12);border-radius:7px;padding:10px 12px;font-size:.72rem;color:#6d8499;line-height:1.5;margin-bottom:14px}
+.tip strong{color:#00e676}
+.divider{height:1px;background:#1e2d3d;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>FULLTIME NG <span>Article Uploader</span></h1>
+    <p>Upload starter articles to Firebase · Write new articles · Manage content</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('bulk',this)">📦 Upload Starter Articles</div>
+    <div class="tab" onclick="switchTab('write',this)">✏️ Write New Article</div>
+    <div class="tab" onclick="switchTab('manage',this)">📋 Manage Articles</div>
+  </div>
+
+  <!-- BULK UPLOAD TAB -->
+  <div class="tab-content active" id="tab-bulk">
+    <div class="tip"><strong>What this does:</strong> Uploads all 10 pre-written starter articles to your Firebase database. These will immediately appear on your site. You only need to do this once.</div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Starter Articles (10 ready to upload)</div>
+      <div id="articles-preview"></div>
+      <div class="progress-wrap" id="prog-wrap" style="display:none">
+        <div class="progress-bar" id="prog-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-lbl" id="prog-lbl"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="uploadAll()" id="upload-all-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload All 10 Articles</button>
+        <button class="btn btn-red" onclick="deleteAll()" id="delete-all-btn"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Delete All Articles</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>Upload Log</div>
+      <div class="status-bar" id="log-area"><div style="color:#3a4f63;font-size:.75rem">Upload log will appear here…</div></div>
+    </div>
+  </div>
+
+  <!-- WRITE ARTICLE TAB -->
+  <div class="tab-content" id="tab-write">
+    <div class="tip"><strong>Tip:</strong> Write original articles in your own words. Even 300–500 words is enough. Google AdSense rewards original, helpful content. Aim for at least 3 articles per week.</div>
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Write New Article</div>
+      <div id="write-alert" style="display:none;padding:10px;border-radius:7px;font-size:.78rem;margin-bottom:12px"></div>
+      <div class="field-group"><label>Article Title *</label><input type="text" id="w-title" placeholder="e.g. Arsenal vs Chelsea: Five Key Battles to Watch"></div>
+      <div class="grid2">
+        <div class="field-group"><label>Category *</label>
+          <select id="w-cat">
+            <option value="transfers">💸 Transfers</option>
+            <option value="preview">📋 Match Preview</option>
+            <option value="report">📰 Match Report</option>
+            <option value="champions-league">🏆 Champions League</option>
+            <option value="premier-league">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+            <option value="la-liga">🇪🇸 La Liga</option>
+            <option value="npfl">🇳🇬 Nigeria / NPFL</option>
+            <option value="football">⚽ General Football</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Read Time</label><input type="text" id="w-readtime" placeholder="e.g. 3 min read"></div>
+      </div>
+      <div class="field-group"><label>Short Excerpt (shown in card preview)</label><textarea id="w-excerpt" rows="2" placeholder="One or two sentences summarising the article…"></textarea></div>
+      <div class="field-group"><label>Article Body (HTML supported) *</label><textarea id="w-body" rows="10" placeholder="Write your article here. Use &lt;p&gt; tags for paragraphs, &lt;strong&gt; for bold text.&#10;&#10;Example:&#10;&lt;p&gt;Your first paragraph here...&lt;/p&gt;&#10;&lt;p&gt;&lt;strong&gt;Key point&lt;/strong&gt; — more text here...&lt;/p&gt;"></textarea></div>
+      <div class="grid2">
+        <div class="field-group"><label>Image URL (optional)</label><input type="url" id="w-img" placeholder="https://example.com/image.jpg"></div>
+        <div class="field-group"><label>Source / Author</label><input type="text" id="w-author" placeholder="FullTime NG Staff" value="FullTime NG Staff"></div>
+      </div>
+      <div class="grid2">
+        <div class="field-group"><label>Date</label><input type="date" id="w-date"></div>
+        <div class="field-group" style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;font-weight:600;letter-spacing:1px;color:#6d8499;text-transform:uppercase">
+            <input type="checkbox" id="w-featured" style="width:16px;height:16px;accent-color:#00e676"> Set as Featured Article
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="publishArticle()" id="publish-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Publish Article</button>
+        <button class="btn btn-blue" onclick="previewArticle()"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
+        <button class="btn btn-red" onclick="clearForm()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE TAB -->
+  <div class="tab-content" id="tab-manage">
+    <div class="card">
+      <div class="card-title"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>All Articles in Firebase</div>
+      <button class="btn btn-blue" onclick="loadArticles()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh List</button>
+      <div id="manage-list"><div style="color:#3a4f63;font-size:.75rem;text-align:center;padding:20px">Click Refresh to load articles</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE PREVIEW MODAL -->
+<div id="prev-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;overflow-y:auto;padding:20px">
+  <div style="background:#fff;color:#111;max-width:600px;margin:0 auto;border-radius:12px;overflow:hidden">
+    <div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:.75rem;font-weight:700;color:#e53935;font-family:sans-serif">PREVIEW MODE</span>
+      <button onclick="document.getElementById('prev-overlay').style.display='none'" style="background:#f3f4f6;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem">✕ Close</button>
+    </div>
+    <div style="padding:20px">
+      <div id="prev-cat" style="display:inline-block;background:rgba(229,57,53,.08);color:#e53935;font-size:.6rem;font-weight:700;letter-spacing:2px;padding:2px 8px;border-radius:3px;margin-bottom:10px;border:1px solid rgba(229,57,53,.15)"></div>
+      <h2 id="prev-title" style="font-size:1.3rem;line-height:1.25;margin-bottom:10px;font-family:sans-serif"></h2>
+      <div style="font-size:.7rem;color:#9ca3af;margin-bottom:14px;font-family:sans-serif" id="prev-meta"></div>
+      <div id="prev-body" style="font-size:.88rem;line-height:1.7;color:#111827;font-family:sans-serif"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== FIREBASE =====
+const FB={apiKey:"AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",authDomain:"instantlivefootball.firebaseapp.com",projectId:"instantlivefootball",storageBucket:"instantlivefootball.firebasestorage.app",messagingSenderId:"584488048641",appId:"1:584488048641:web:7adf83799426222a5fc800"};
+let db=null;
+
+// ===== STARTER ARTICLES =====
+const ARTICLES=[
+  {id:"art001",title:"Arsenal's Champions League Triumph: How Arteta Built Europe's Best Team",cat:"champions-league",source:"FullTime NG",author:"FullTime NG Staff",date:"2026-05-31",readTime:"4 min read",featured:true,excerpt:"Mikel Arteta's patient project at Arsenal finally reached its peak on Saturday night in Munich. We look at how the Spaniard transformed a club that hadn't won a league title since 2004 into European champions.",image:"",url:"#",body:"<p>When Mikel Arteta arrived at Arsenal in December 2019, the club was in chaos. They sat eighth in the Premier League, the dressing room was fractured, and fan confidence was at an all-time low. Nobody could have predicted that just six years later, he would be lifting the Champions League trophy in Munich.</p><p>Saturday's 2-1 victory over Paris Saint-Germain was not just a football result — it was the culmination of one of the most remarkable rebuilding projects in the history of the game.</p><p><strong>The foundations were built quietly.</strong> Arteta cleared out high-earning underperformers, invested smartly in young hungry players, and instilled a culture of discipline and intensity that had been missing for years.</p><p>Against PSG in the final, Arsenal showed everything Arteta has built — defensive solidity, technical quality, and an unbreakable mentality when Paredes equalised before half-time. The composure with which they responded, eventually winning through Havertz's header, spoke volumes about how far this group has come.</p><p>For Nigerian fans, the journey of Arsenal has been particularly special. The Gunners have one of the largest fanbases on the continent, and scenes of celebration erupted across Lagos, Abuja and Port Harcourt when the final whistle blew in Bavaria.</p>"},
+  {id:"art002",title:"Victor Osimhen: Why Every Top Club in Europe Wants Nigeria's Golden Boot",cat:"transfers",source:"FullTime NG",author:"Transfer Desk",date:"2026-05-30",readTime:"3 min read",featured:false,excerpt:"Victor Osimhen has been linked with a move away from Galatasaray this summer with Chelsea, Bayern Munich and PSG all monitoring the Nigerian striker closely.",image:"",url:"#",body:"<p>Victor Osimhen's journey from Agege in Lagos to becoming one of the most coveted strikers on the planet is a story that should be told in every Nigerian school. The 27-year-old has done what very few African footballers have managed — sustained elite performance at the highest level over multiple seasons.</p><p>After his explosive spell at Napoli where he fired the club to their first Serie A title in 33 years, Osimhen moved to Galatasaray on loan before making the deal permanent. But his time in Turkey now appears to be coming to an end.</p><p><strong>Chelsea</strong> have been the most persistent suitors according to multiple reports. The London club are reportedly willing to pay up to €90 million to secure his signature.</p><p>For Nigeria, Osimhen's club situation matters enormously. When he is happy and playing regularly, the Super Eagles become a completely different team. Whatever happens this summer — Victor Osimhen has made Nigeria proud.</p>"},
+  {id:"art003",title:"Super Eagles AFCON 2027 Qualifying: Nigeria's Path to Morocco",cat:"npfl",source:"FullTime NG",author:"Nigeria Desk",date:"2026-05-29",readTime:"4 min read",featured:false,excerpt:"Nigeria face Libya and Algeria in the upcoming AFCON 2027 qualifying campaign. We analyse the Super Eagles' chances.",image:"",url:"#",body:"<p>The Africa Cup of Nations 2027 will be hosted by Morocco, and the Super Eagles will be desperate to end their trophy drought. The qualifying campaign begins next month with Nigeria drawn against Libya and Algeria.</p><p>Coach Eric Chelle has named a 25-man squad that blends experienced European-based professionals with promising domestic talent. The recall of Victor Osimhen is the headline news.</p><p><strong>Libya</strong> will be the first test, and while they appear straightforward opposition, Nigeria have a poor record of underperforming against lower-ranked African sides.</p><p><strong>Algeria</strong> represents a genuine challenge — technically gifted with dangerous attacking players. What Nigeria need most is consistency. The talent has never been in question.</p>"},
+  {id:"art004",title:"Premier League 2026/27 Preview: Who Will Win the Title?",cat:"premier-league",source:"FullTime NG",author:"Analysis Desk",date:"2026-05-28",readTime:"5 min read",featured:false,excerpt:"With Arsenal crowned champions of Europe, attention turns to who will dominate English football next season.",image:"",url:"#",body:"<p>The Premier League never rests. Here is our assessment of the six teams most likely to challenge for the title in 2026/27.</p><p><strong>Arsenal — Favourites (2/1):</strong> European champions hungry to go one better domestically. The team to beat.</p><p><strong>Liverpool — Strong Challengers (3/1):</strong> Mohamed Salah defies age, Arne Slot's system is devastating. A striker addition makes them favourites.</p><p><strong>Manchester City — Rebuilding (4/1):</strong> Guardiola's rebuild continues. Haaland remains one of the most clinical finishers in history.</p><p><strong>Chelsea — Dark Horses (8/1):</strong> Cole Palmer is world class when fit. Young squad with huge potential.</p><p>Our prediction: <strong>Arsenal to retain the title with Liverpool pushing them all the way.</strong></p>"},
+  {id:"art005",title:"Transfer Gossip: Mbappe, De Bruyne and the Biggest Summer Moves",cat:"transfers",source:"FullTime NG",author:"Transfer Desk",date:"2026-05-27",readTime:"4 min read",featured:false,excerpt:"The summer window is almost here and the rumour mill is already spinning. We round up the biggest transfer stories dominating headlines.",image:"",url:"#",body:"<p>The summer transfer window opens June 1st and the biggest clubs are already manoeuvring. Here are the major stories you need to know.</p><p><strong>Kylian Mbappe — Real Madrid to PSG? (Rating: 6/10):</strong> Reports from France suggest Mbappe is unhappy at the Bernabeu. A return would be staggering but not impossible.</p><p><strong>Kevin De Bruyne — Man City Exit (Rating: 8/10):</strong> Contract expires this summer. MLS clubs offering huge wages. At 35, still one of the most creative midfielders in football.</p><p><strong>Rodri Returns (Rating: 10/10):</strong> Not a transfer — but possibly the biggest news. City's World Player of the Year returns from injury in preseason. His comeback could transform the title race.</p>"},
+  {id:"art006",title:"Match Report: Crystal Palace 1-0 Rayo Vallecano — Eagles Win Conference League",cat:"report",source:"FullTime NG",author:"Match Desk",date:"2026-05-27",readTime:"3 min read",featured:false,excerpt:"Crystal Palace won their first ever European trophy beating Rayo Vallecano 1-0 in the Conference League Final.",image:"",url:"#",body:"<p><strong>Crystal Palace 1-0 Rayo Vallecano</strong> — UEFA Conference League Final, Wroclaw, Poland.</p><p>Crystal Palace Football Club are European trophy winners. Oliver Glasner's extraordinary side made it reality with a disciplined 1-0 victory over Rayo Vallecano.</p><p><strong>The breakthrough came on 67 minutes.</strong> Eberechi Eze drove forward and fired a fierce shot the goalkeeper could only parry. Jean-Philippe Mateta was first to react, stabbing home to send Palace fans into delirium.</p><p>For Nigerian football fans, Eze's performance was a source of particular pride. The midfielder of Nigerian heritage was Palace's best player on the night. When the final whistle blew, tears flowed freely among players and supporters alike.</p>"},
+  {id:"art007",title:"How to Watch Football in Nigeria: Complete Guide to DStv, GOtv and Free Options",cat:"npfl",source:"FullTime NG",author:"FullTime NG Staff",date:"2026-05-26",readTime:"4 min read",featured:false,excerpt:"A complete guide for Nigerian football fans on how to watch the Premier League, Champions League and NPFL legally.",image:"",url:"#",body:"<p>As a football fan in Nigeria, keeping up with all the major leagues can feel overwhelming — and expensive. Here is everything you need to know.</p><p><strong>DStv Premium (₦37,000/month):</strong> Every Premier League match, all Champions League games, La Liga, Serie A, Bundesliga. The gold standard.</p><p><strong>GOtv Jolli/Max (₦5,000-₦9,000/month):</strong> Good selection of Premier League and African football at a much lower price. Best budget option.</p><p><strong>NTA — Free to Air:</strong> AFCON, World Cup qualifiers and some Super Eagles matches broadcast completely free. Just a TV and aerial needed.</p><p><strong>NPFL TV:</strong> Stream Nigerian Professional Football League matches online at very affordable rates. Support your local league!</p>"},
+  {id:"art008",title:"El Clasico Preview: Barcelona vs Real Madrid — Full Breakdown",cat:"preview",source:"FullTime NG",author:"Analysis Desk",date:"2026-05-25",readTime:"4 min read",featured:false,excerpt:"Barcelona host Real Madrid in a title-deciding La Liga showdown. We break down key battles and give our prediction.",image:"",url:"#",body:"<p>There is no fixture in world football quite like El Clasico. This Sunday's encounter at Camp Nou could decide the La Liga title.</p><p><strong>The Situation:</strong> Barcelona sit two points ahead with two games remaining. A win seals the title. A draw keeps Madrid alive. A Madrid win makes the finale a genuine cliffhanger.</p><p><strong>Key Battle:</strong> Lamine Yamal vs Ferland Mendy. The 18-year-old sensation against the experienced French left-back. This duel could decide the match.</p><p><strong>Team News:</strong> Lewandowski returns from suspension for Barcelona. Mbappe is fit for Madrid. Vinicius has 18 goals and 14 assists this season.</p><p><strong>Our Prediction: Barcelona 2-1 Real Madrid.</strong> Camp Nou roaring, Lewandowski back, title on the line — all factors point to a Barcelona victory.</p>"},
+  {id:"art009",title:"Ademola Lookman: The Quiet Nigerian Star Who Has Been Atalanta's Secret Weapon",cat:"npfl",source:"FullTime NG",author:"Nigeria Desk",date:"2026-05-24",readTime:"3 min read",featured:false,excerpt:"While Osimhen grabs headlines, Ademola Lookman has been quietly producing one of the finest seasons of any Nigerian footballer in Europe.",image:"",url:"#",body:"<p>In Nigerian football discourse, Victor Osimhen dominates most conversations. But while attention has been firmly fixed on the Galatasaray striker, another Nigerian has been quietly producing extraordinary football — Ademola Lookman of Atalanta.</p><p>The 28-year-old has been one of Serie A's standout performers this season with 19 goals and 11 assists, playing in a Gasperini system that demands incredible tactical intelligence.</p><p>His hat-trick in last season's Europa League Final against Bayer Leverkusen announced him to a global audience. But those who had watched him week in, week out were not surprised — he had been doing it consistently for two years.</p><p>Ademola Lookman deserves far more recognition. Consider this article a small contribution to correcting that oversight.</p>"},
+  {id:"art010",title:"Five Young Nigerian Footballers Who Could Be the Next Osimhen",cat:"npfl",source:"FullTime NG",author:"Youth Football Desk",date:"2026-05-23",readTime:"4 min read",featured:false,excerpt:"Nigeria has always produced world-class attacking talent. We profile five young Nigerian footballers making waves right now.",image:"",url:"#",body:"<p>Nigeria has a proud tradition of producing exceptional attacking talent. As Osimhen enters the latter stages of his peak years, who is ready to carry that torch?</p><p><strong>1. Emmanuel Ojo (20) — Remo Stars:</strong> 22 goals in 28 NPFL appearances. European clubs are already calling. One for the future.</p><p><strong>2. Chukwuemeka Daniel (19) — Chelsea Academy:</strong> Powerful, two-footed, clinical. Expected to break into Chelsea's first team next season. Nigeria must secure his allegiance.</p><p><strong>3. Fisayo Dele-Bashiru (21) — Lazio:</strong> Already capped at senior level. Physical presence and technical ability give him a very high ceiling in Serie A.</p><p><strong>4. Chisom Egbuchulam (20) — Enugu Rangers:</strong> Raw and unpolished but possesses a natural goal-scoring instinct that cannot be coached. A European move is coming.</p><p>Nigerian football's future is very bright indeed.</p>"}
+];
+
+// ===== INIT =====
+firebase.initializeApp(FB);
+db=firebase.firestore();
+renderArticlesList();
+setTodayDate();
+
+function setTodayDate(){
+  const d=new Date().toISOString().split('T')[0];
+  document.getElementById('w-date').value=d;
+}
+
+// ===== RENDER STARTER LIST =====
+function renderArticlesList(){
+  const ap=document.getElementById('articles-preview');
+  ap.innerHTML=ARTICLES.map((a,i)=>`<div class="article-preview">
+    <div class="art-prev-hdr" onclick="this.nextElementSibling&&(this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block')">
+      <div class="art-prev-title">${a.title}</div>
+      <div class="art-prev-cat">${a.cat}</div>
+      <div class="art-prev-status" id="status-${a.id}">Pending</div>
+    </div>
+    <div style="display:none;padding:10px 14px;border-top:1px solid #1e2d3d;font-size:.72rem;color:#6d8499;line-height:1.5">
+      ${a.excerpt}<br><br>
+      <button class="btn btn-green" style="padding:5px 12px;font-size:.65rem" onclick="uploadSingle('${a.id}')">Upload This Article</button>
+    </div>
+  </div>`).join('');
+}
+
+// ===== UPLOAD ALL =====
+async function uploadAll(){
+  const btn=document.getElementById('upload-all-btn');
+  btn.disabled=true;btn.textContent='Uploading…';
+  document.getElementById('prog-wrap').style.display='';
+  let done=0;
+  for(const a of ARTICLES){
+    try{
+      await db.collection('articles').doc(a.id).set({...a,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      document.getElementById('status-'+a.id).textContent='✓ Uploaded';
+      document.getElementById('status-'+a.id).className='art-prev-status uploaded';
+      done++;
+      const pct=Math.round(done/ARTICLES.length*100);
+      document.getElementById('prog-bar').style.width=pct+'%';
+      document.getElementById('prog-lbl').textContent=done+'/'+ARTICLES.length+' uploaded ('+pct+'%)';
+      addLog('✓ Uploaded: '+a.title,'ok');
+    }catch(e){
+      addLog('✗ Failed: '+a.title+' — '+e.message,'err');
+    }
+  }
+  btn.disabled=false;btn.innerHTML='✓ Upload Complete';
+  addLog('All done! '+done+' articles uploaded to Firebase.','info');
+}
+
+// ===== UPLOAD SINGLE =====
+async function uploadSingle(id){
+  const a=ARTICLES.find(x=>x.id===id);if(!a)return;
+  try{
+    await db.collection('articles').doc(a.id).set({...a,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById('status-'+a.id).textContent='✓ Uploaded';
+    document.getElementById('status-'+a.id).className='art-prev-status uploaded';
+    addLog('✓ Uploaded: '+a.title,'ok');
+  }catch(e){addLog('✗ Failed: '+e.message,'err');}
+}
+
+// ===== DELETE ALL =====
+async function deleteAll(){
+  if(!confirm('Delete ALL articles from Firebase? This cannot be undone.'))return;
+  try{
+    const snap=await db.collection('articles').get();
+    const batch=db.batch();
+    snap.forEach(doc=>batch.delete(doc.ref));
+    await batch.commit();
+    ARTICLES.forEach(a=>{
+      const el=document.getElementById('status-'+a.id);
+      if(el){el.textContent='Deleted';el.className='art-prev-status';}
+    });
+    addLog('All articles deleted from Firebase.','info');
+  }catch(e){addLog('Delete failed: '+e.message,'err');}
+}
+
+// ===== PUBLISH ARTICLE =====
+async function publishArticle(){
+  const title=document.getElementById('w-title').value.trim();
+  const body=document.getElementById('w-body').value.trim();
+  if(!title||!body){showWriteAlert('error','Please enter a title and article body.');return;}
+  const btn=document.getElementById('publish-btn');
+  btn.disabled=true;btn.textContent='Publishing…';
+  const article={
+    title,cat:document.getElementById('w-cat').value,
+    source:'FullTime NG',author:document.getElementById('w-author').value.trim()||'FullTime NG Staff',
+    date:document.getElementById('w-date').value||new Date().toISOString().split('T')[0],
+    readTime:document.getElementById('w-readtime').value.trim()||Math.ceil(body.split(' ').length/200)+' min read',
+    excerpt:document.getElementById('w-excerpt').value.trim(),
+    body,image:document.getElementById('w-img').value.trim(),
+    url:'#',featured:document.getElementById('w-featured').checked,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try{
+    await db.collection('articles').add(article);
+    showWriteAlert('success','✓ Article published successfully! It will appear on your site immediately.');
+    clearForm();
+    addLog('✓ Published: '+title,'ok');
+  }catch(e){showWriteAlert('error','Failed to publish: '+e.message);}
+  btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Publish Article';
+}
+
+// ===== PREVIEW ARTICLE =====
+function previewArticle(){
+  const title=document.getElementById('w-title').value||'Untitled Article';
+  const cat=document.getElementById('w-cat').value;
+  const body=document.getElementById('w-body').value||'<p>No content yet.</p>';
+  const author=document.getElementById('w-author').value||'FullTime NG Staff';
+  const date=document.getElementById('w-date').value||'Today';
+  const catLabels={transfers:'💸 Transfer News',preview:'📋 Match Preview',report:'📰 Match Report','champions-league':'🏆 Champions League','premier-league':'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League','la-liga':'🇪🇸 La Liga',npfl:'🇳🇬 Nigeria'};
+  document.getElementById('prev-cat').textContent=catLabels[cat]||'⚽ Football';
+  document.getElementById('prev-title').textContent=title;
+  document.getElementById('prev-meta').textContent=author+' · '+date;
+  document.getElementById('prev-body').innerHTML=body;
+  document.getElementById('prev-overlay').style.display='';
+}
+
+// ===== LOAD ARTICLES =====
+async function loadArticles(){
+  const ml=document.getElementById('manage-list');
+  ml.innerHTML='<div style="color:#3a4f63;font-size:.75rem;text-align:center;padding:16px">Loading…</div>';
+  try{
+    const snap=await db.collection('articles').orderBy('date','desc').get();
+    if(snap.empty){ml.innerHTML='<div style="color:#3a4f63;font-size:.75rem;text-align:center;padding:16px">No articles found. Upload starter articles first.</div>';return;}
+    ml.innerHTML=snap.docs.map(doc=>{
+      const a=doc.data();
+      return `<div style="background:#18232f;border:1px solid #1e2d3d;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:600;color:#f0f4f8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title||'Untitled'}</div>
+          <div style="font-size:.62rem;color:#3a4f63;margin-top:2px">${a.cat||''} · ${a.date||''} · ${a.source||''}</div>
+        </div>
+        <button onclick="deleteArticle('${doc.id}')" style="background:rgba(255,23,68,.08);color:#ff1744;border:1px solid rgba(255,23,68,.18);border-radius:5px;padding:4px 10px;font-size:.62rem;font-weight:700;cursor:pointer;flex-shrink:0">Delete</button>
+      </div>`;
+    }).join('');
+  }catch(e){ml.innerHTML='<div style="color:#ff1744;font-size:.75rem;padding:12px">Error: '+e.message+'</div>';}
+}
+
+async function deleteArticle(id){
+  if(!confirm('Delete this article?'))return;
+  try{await db.collection('articles').doc(id).delete();loadArticles();addLog('Article deleted.','info');}
+  catch(e){addLog('Delete failed: '+e.message,'err');}
+}
+
+// ===== UTILS =====
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
+  if(id==='manage')loadArticles();
+}
+function clearForm(){
+  ['w-title','w-excerpt','w-body','w-img'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('w-author').value='FullTime NG Staff';
+  document.getElementById('w-featured').checked=false;
+  document.getElementById('w-cat').selectedIndex=0;
+  setTodayDate();
+  document.getElementById('write-alert').style.display='none';
+}
+function showWriteAlert(type,msg){
+  const el=document.getElementById('write-alert');
+  el.style.display='';
+  el.style.background=type==='error'?'rgba(255,23,68,.08)':'rgba(0,230,118,.08)';
+  el.style.border='1px solid '+(type==='error'?'rgba(255,23,68,.2)':'rgba(0,230,118,.2)');
+  el.style.color=type==='error'?'#ff1744':'#00e676';
+  el.textContent=msg;
+  setTimeout(()=>el.style.display='none',5000);
+}
+function addLog(msg,type){
+  const la=document.getElementById('log-area');
+  const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const div=document.createElement('div');div.className='log-item';
+  div.innerHTML=`<span class="log-time">${now}</span><span class="log-${type}">${msg}</span>`;
+  la.insertBefore(div,la.firstChild);
+}
+</script>
+</body>
+</html>
