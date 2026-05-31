@@ -446,6 +446,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
       <span class="sb-item-label">Articles</span>
       <span class="sb-badge2" id="sb-art-badge">0</span>
     </a>
+    <a class="sb-item" href="#" onclick="showPanel('pages',this)">
+      <div class="sb-item-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+      <span class="sb-item-label">Pages</span>
+    </a>
     <a class="sb-item" href="#" onclick="showPanel('password',this)">
       <div class="sb-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
       <span class="sb-item-label">Password</span>
@@ -542,6 +546,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
         <div class="quick-card" onclick="showPanel('subs',null)"><div class="quick-card-icon" style="background:rgba(255,204,0,.09);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="quick-card-label">Subscribers</div></div>
         <div class="quick-card" onclick="refreshMatches()"><div class="quick-card-icon" style="background:rgba(59,130,246,.09);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="quick-card-label">Refresh</div></div>
         <div class="quick-card" onclick="showPanel('articles',null)"><div class="quick-card-icon" style="background:rgba(168,85,247,.09);color:var(--purple)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="quick-card-label">Articles</div></div>
+        <div class="quick-card" onclick="showPanel('pages',null)"><div class="quick-card-icon" style="background:rgba(0,229,255,.09);color:var(--g2)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="quick-card-label">Pages</div></div>
       </div>
     </div>
 
@@ -795,6 +800,88 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
         <button class="btn-secondary" onclick="loadArticles()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh</button>
       </div>
       <div id="articles-list"><div class="loading-state"><div class="spinner"></div>Loading articles…</div></div>
+    </div>
+
+    <!-- PAGES -->
+    <div class="panel" id="panel-pages">
+      <div class="section-hdr">
+        <div class="section-title-wrap"><div class="section-accent"></div><div class="section-title">Page Editor</div></div>
+      </div>
+
+      <!-- PAGE SELECTOR -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="f-btn active" onclick="loadPage('about',this)" id="page-btn-about">About Us</button>
+        <button class="f-btn" onclick="loadPage('privacy',this)" id="page-btn-privacy">Privacy Policy</button>
+        <button class="f-btn" onclick="loadPage('terms',this)" id="page-btn-terms">Terms of Use</button>
+        <button class="f-btn" onclick="loadPage('cookies',this)" id="page-btn-cookies">Cookie Policy</button>
+        <button class="f-btn" onclick="loadPage('contact',this)" id="page-btn-contact">Contact</button>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span id="page-editor-title">Editing: About Us</span>
+        </div>
+        <div id="pages-alert" class="alert alert-success"></div>
+
+        <!-- PREVIEW / EDIT TOGGLE -->
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn-secondary active" onclick="setPageMode('edit',this)" id="mode-edit" style="font-size:.68rem;padding:5px 12px">✏️ Edit HTML</button>
+          <button class="btn-secondary" onclick="setPageMode('preview',this)" id="mode-preview" style="font-size:.68rem;padding:5px 12px">👁 Preview</button>
+        </div>
+
+        <!-- HTML EDITOR -->
+        <div id="page-edit-mode">
+          <div class="field-group full" style="margin-bottom:10px">
+            <label>Page Content (HTML)</label>
+            <textarea id="page-content" rows="18" style="font-family:monospace;font-size:.78rem;line-height:1.6" placeholder="Write your page content here using HTML tags...&#10;&#10;Example:&#10;&lt;p&gt;Your paragraph here...&lt;/p&gt;&#10;&lt;p&gt;&lt;strong&gt;Bold text&lt;/strong&gt; — more content...&lt;/p&gt;&#10;&lt;h3&gt;Subheading&lt;/h3&gt;&#10;&lt;p&gt;Content under heading...&lt;/p&gt;"></textarea>
+          </div>
+
+          <!-- QUICK FORMATTING BUTTONS -->
+          <div style="margin-bottom:12px">
+            <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Quick Format</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertTag('p')">¶ Paragraph</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertTag('strong')"><b>Bold</b></button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertTag('h3')">H3 Heading</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertTag('em')"><i>Italic</i></button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertLink()">🔗 Link</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:.65rem" onclick="insertLineBreak()">— Divider</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PREVIEW MODE -->
+        <div id="page-preview-mode" style="display:none">
+          <div style="background:#fff;border-radius:10px;padding:20px;color:#111;min-height:200px">
+            <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e5e7eb" id="preview-page-label">ABOUT US — Preview</div>
+            <div id="page-preview-content" style="font-family:'Barlow',sans-serif;font-size:.88rem;line-height:1.75;color:#111827"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="resetPage()">
+            <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Reset to Default
+          </button>
+          <button class="btn-primary" onclick="savePage()" id="save-page-btn">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            <span id="save-page-txt">Save Page</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PAGES INFO -->
+      <div style="background:rgba(0,255,135,.04);border:1px solid rgba(0,255,135,.1);border-radius:10px;padding:12px 14px">
+        <div style="font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--g);margin-bottom:6px">📄 How Pages Work</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.7rem;color:var(--t2);line-height:1.6">
+          • <strong style="color:var(--t1)">About Us</strong> — shown when visitors click "About Us" in the footer<br>
+          • <strong style="color:var(--t1)">Privacy Policy</strong> — shown when visitors click "Privacy Policy"<br>
+          • <strong style="color:var(--t1)">Terms of Use</strong> — shown when visitors click "Terms of Use"<br>
+          • <strong style="color:var(--t1)">Cookie Policy</strong> — shown when visitors click "Cookie Policy"<br>
+          • <strong style="color:var(--t1)">Contact</strong> — your contact information page<br><br>
+          All pages are stored in Firebase and update on your site instantly when saved.
+        </div>
+      </div>
     </div>
 
     <!-- PASSWORD -->
@@ -1234,6 +1321,7 @@ function showPanel(id, sbEl){
   closeSidebar();
   if(id==='subs') loadSubs();
   if(id==='articles') loadArticles();
+  if(id==='pages') loadPage('about', document.getElementById('page-btn-about'));
   return false;
 }
 function toggleSidebar(){ const s=document.getElementById('sidebar'),b=document.getElementById('sb-backdrop'); s.classList.toggle('open'); b.classList.toggle('show'); }
@@ -1324,6 +1412,122 @@ function previewMatchCard(){
 }
 function closeMcPrev(){
   document.getElementById('mc-prev-overlay').classList.remove('open');
+}
+
+// ==================== PAGES ====================
+let currentPage = 'about';
+
+const DEFAULT_PAGES = {
+  about: `<p>FullTime NG is Nigeria's home for live football scores, breaking news, transfer updates, and match analysis.</p><p>Founded in 2026 by Ayodeji, we cover the <strong>English Premier League</strong>, <strong>UEFA Champions League</strong>, <strong>La Liga</strong>, <strong>Serie A</strong>, <strong>Bundesliga</strong>, and Nigerian football — from the NPFL to the Super Eagles.</p><p>Our mission is simple: give Nigerian fans fast, accurate football updates straight to their phone. No clickbait, no fake news — just football.</p><p>We also partner with licensed betting brands to bring you safe betting tips and offers. We promote responsible gambling for 18+ only.</p><p>Got a tip or complaint? Reach us at <a href="mailto:support@instantlivefootball.com.ng">support@instantlivefootball.com.ng</a> or via our Contact Us page.</p><p>Built with ❤️ for Nigerian football fans.</p>`,
+
+  privacy: `<h3>Privacy Policy</h3><p>Last updated: June 2026</p><p>FullTime NG ("we", "us", "our") operates instantlivefootball.com.ng. This page explains how we collect and use your information.</p><p><strong>Information We Collect</strong><br>We collect information you provide directly (such as email for subscriptions) and usage data through analytics tools.</p><p><strong>How We Use Your Information</strong><br>We use collected information to improve our service, send newsletters (if subscribed), and display relevant advertising.</p><p><strong>Third-Party Services</strong><br>We use Google Analytics, Google AdSense, and betting affiliate partners. These services may collect data independently under their own privacy policies.</p><p><strong>Cookies</strong><br>We use cookies to improve your experience. You can disable cookies in your browser settings.</p><p><strong>Contact</strong><br>For privacy concerns, email us at support@instantlivefootball.com.ng</p>`,
+
+  terms: `<h3>Terms of Use</h3><p>Last updated: June 2026</p><p>By using instantlivefootball.com.ng, you agree to these terms. Please read them carefully.</p><p><strong>Content</strong><br>All content on FullTime NG is for informational purposes only. We do not guarantee the accuracy of scores, news, or transfer information.</p><p><strong>Betting Content</strong><br>Betting tips and affiliate links are provided for entertainment only. We are not responsible for any financial losses from gambling. Gambling is for 18+ only.</p><p><strong>Intellectual Property</strong><br>All original content on this site is owned by FullTime NG. News articles sourced from third parties remain the property of their respective owners.</p><p><strong>Limitation of Liability</strong><br>FullTime NG shall not be liable for any damages arising from use of this site.</p><p><strong>Changes</strong><br>We reserve the right to update these terms at any time.</p>`,
+
+  cookies: `<h3>Cookie Policy</h3><p>Last updated: June 2026</p><p>FullTime NG uses cookies to enhance your browsing experience.</p><p><strong>What Are Cookies?</strong><br>Cookies are small text files stored on your device when you visit a website.</p><p><strong>Cookies We Use</strong><br>• <strong>Essential cookies</strong> — required for the site to function correctly<br>• <strong>Analytics cookies</strong> — Google Analytics to understand how visitors use our site<br>• <strong>Advertising cookies</strong> — Google AdSense to show relevant advertisements</p><p><strong>Managing Cookies</strong><br>You can control and delete cookies through your browser settings. Note that disabling cookies may affect site functionality.</p><p><strong>Third-Party Cookies</strong><br>Our betting partners (Bet9ja, Sportingbet) may also set cookies when you click their links.</p>`,
+
+  contact: `<h3>Contact Us</h3><p>We'd love to hear from you. Reach out through any of the channels below.</p><p><strong>General Enquiries & Support</strong><br>📧 support@instantlivefootball.com.ng</p><p><strong>Advertising & Partnerships</strong><br>📧 ads@instantlivefootball.com.ng</p><p><strong>Social Media</strong><br>📘 Facebook: facebook.com/instantlivefootball<br>💬 WhatsApp Channel: whatsapp.com/channel/0029VbCSOhy9xVJmdDBAaL2N</p><p><strong>News Tips</strong><br>Have a football story or tip? Email us at support@instantlivefootball.com.ng with the subject line "News Tip".</p><p><strong>Response Time</strong><br>We aim to respond to all enquiries within 24 hours during business days.</p>`
+};
+
+const PAGE_LABELS = {
+  about: 'About Us',
+  privacy: 'Privacy Policy',
+  terms: 'Terms of Use',
+  cookies: 'Cookie Policy',
+  contact: 'Contact'
+};
+
+async function loadPage(pageId, btn){
+  currentPage = pageId;
+  // Update active button
+  document.querySelectorAll('[id^="page-btn-"]').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('page-editor-title').textContent = 'Editing: ' + PAGE_LABELS[pageId];
+  document.getElementById('preview-page-label').textContent = (PAGE_LABELS[pageId]||pageId).toUpperCase() + ' — Preview';
+  // Reset to edit mode
+  setPageMode('edit', document.getElementById('mode-edit'));
+  // Load from Firebase or default
+  let pageContent = DEFAULT_PAGES[pageId] || '';
+  try{
+    if(db){
+      const doc = await db.collection('pages').doc(pageId).get();
+      if(doc.exists && doc.data().content) pageContent = doc.data().content;
+    }
+  }catch(e){}
+  document.getElementById('page-content').value = pageContent;
+}
+
+function setPageMode(mode, btn){
+  document.querySelectorAll('#mode-edit,#mode-preview').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(mode === 'edit'){
+    document.getElementById('page-edit-mode').style.display = '';
+    document.getElementById('page-preview-mode').style.display = 'none';
+  } else {
+    document.getElementById('page-edit-mode').style.display = 'none';
+    document.getElementById('page-preview-mode').style.display = '';
+    document.getElementById('page-preview-content').innerHTML = document.getElementById('page-content').value;
+  }
+}
+
+async function savePage(){
+  if(!db){ showToast('Firebase not connected', true); return; }
+  const content = document.getElementById('page-content').value.trim();
+  if(!content){ showAlert('pages-alert','error','Page content cannot be empty.'); return; }
+  const btn = document.getElementById('save-page-btn');
+  btn.disabled = true;
+  setEl('save-page-txt', 'Saving…');
+  try{
+    await db.collection('pages').doc(currentPage).set({
+      content,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      title: PAGE_LABELS[currentPage] || currentPage
+    });
+    showAlert('pages-alert','success','✓ ' + PAGE_LABELS[currentPage] + ' saved! Visitors will see the updated version immediately.');
+    showToast(PAGE_LABELS[currentPage] + ' saved!');
+  }catch(e){
+    showAlert('pages-alert','error','Save failed: ' + e.message);
+  }
+  btn.disabled = false;
+  setEl('save-page-txt', 'Save Page');
+}
+
+function resetPage(){
+  if(!confirm('Reset to default content? Your changes will be lost.')) return;
+  document.getElementById('page-content').value = DEFAULT_PAGES[currentPage] || '';
+  showToast('Reset to default content.');
+}
+
+function insertTag(tag){
+  const ta = document.getElementById('page-content');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const selected = ta.value.substring(start, end) || 'Your text here';
+  const replacement = `<${tag}>${selected}</${tag}>`;
+  ta.value = ta.value.substring(0, start) + replacement + ta.value.substring(end);
+  ta.focus();
+  ta.selectionStart = start + tag.length + 2;
+  ta.selectionEnd = start + tag.length + 2 + selected.length;
+}
+
+function insertLink(){
+  const url = prompt('Enter URL:', 'https://');
+  if(!url) return;
+  const ta = document.getElementById('page-content');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const text = ta.value.substring(start, end) || 'Click here';
+  const link = `<a href="${url}">${text}</a>`;
+  ta.value = ta.value.substring(0, start) + link + ta.value.substring(end);
+  ta.focus();
+}
+
+function insertLineBreak(){
+  const ta = document.getElementById('page-content');
+  const pos = ta.selectionStart;
+  const divider = '
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
+';
+  ta.value = ta.value.substring(0, pos) + divider + ta.value.substring(pos);
+  ta.focus();
 }
 
 // ==================== ARTICLES ====================

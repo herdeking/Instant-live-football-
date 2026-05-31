@@ -774,13 +774,14 @@ function showToast(msg){const t=document.getElementById('toast');document.getEle
 
     <!-- LINKS -->
     <div style="display:flex;flex-wrap:wrap;gap:0;border-top:1px solid #1e2d3d;padding-top:14px;margin-bottom:14px">
-      <a href="mailto:support@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Contact Us</a>
+      <a href="#" onclick="openPage('contact')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Contact Us</a>
       <a href="mailto:ads@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Advertise</a>
       <a href="#" onclick="openSub()" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Subscribe</a>
-      <a href="#privacy" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Privacy Policy</a>
-      <a href="#cookies" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Cookie Policy</a>
-      <a href="#terms" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Terms of Use</a>
-      <a href="mailto:support@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Careers</a>
+      <a href="#" onclick="openPage('privacy')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Privacy Policy</a>
+      <a href="#" onclick="openPage('cookies')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Cookie Policy</a>
+      <a href="#" onclick="openPage('terms')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Terms of Use</a>
+      <a href="mailto:support@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Careers</a>
+      <a href="#" onclick="openAbout()" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">About Us</a>
     </div>
 
     <!-- SOCIAL LINKS -->
@@ -812,6 +813,62 @@ function showToast(msg){const t=document.getElementById('toast');document.getEle
     </div>
   </div>
 </footer>
+
+
+<!-- ABOUT MODAL -->
+<div class="art-overlay" id="about-overlay" onclick="if(event.target===this)closeAbout()" style="z-index:550">
+  <div class="art-modal">
+    <div class="art-modal-hdr">
+      <div class="art-modal-source">About FullTime NG</div>
+      <button class="art-modal-x" onclick="closeAbout()">✕</button>
+    </div>
+    <div class="art-modal-body">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--bd)">
+        <div style="width:50px;height:50px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+        </div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--t1)">FULLTIME <span style="color:var(--accent)">NG</span></div>
+          <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase">Nigeria's #1 Football News & Scores</div>
+        </div>
+      </div>
+      <div id="about-content" style="font-family:'Barlow',sans-serif;font-size:.9rem;line-height:1.75;color:var(--t1)"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== ABOUT PAGE =====
+const DEFAULT_ABOUT = `<p>FullTime NG is Nigeria's home for live football scores, breaking news, transfer updates, and match analysis.</p><p>Founded in 2026 by Ayodeji, we cover the <strong>English Premier League</strong>, <strong>UEFA Champions League</strong>, <strong>La Liga</strong>, <strong>Serie A</strong>, <strong>Bundesliga</strong>, and Nigerian football — from the NPFL to the Super Eagles.</p><p>Our mission is simple: give Nigerian fans fast, accurate football updates straight to their phone. No clickbait, no fake news — just football.</p><p>We also partner with licensed betting brands to bring you safe betting tips and offers. We promote responsible gambling for 18+ only.</p><p>Got a tip or complaint? Reach us at <a href="mailto:support@instantlivefootball.com.ng" style="color:var(--accent)">support@instantlivefootball.com.ng</a> or via our Contact Us page.</p><p style="margin-top:16px;font-size:.85rem;color:var(--t2)">Built with ❤️ for Nigerian football fans.</p>`;
+
+const PAGE_TITLES = {about:'About Us',privacy:'Privacy Policy',terms:'Terms of Use',cookies:'Cookie Policy',contact:'Contact Us'};
+const DEFAULT_PAGES_PUB = {
+  privacy:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Privacy Policy</h3><p>Last updated: June 2026</p><p>FullTime NG collects minimal data to improve your experience. We use Google Analytics for traffic analysis and Google AdSense for advertising. Our betting partners may set their own cookies.</p><p>For full details, email support@instantlivefootball.com.ng</p>`,
+  terms:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Terms of Use</h3><p>Last updated: June 2026</p><p>By using this site you agree to our terms. Content is for informational purposes only. Betting content is for 18+ only. We are not responsible for gambling losses.</p>`,
+  cookies:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Cookie Policy</h3><p>We use essential, analytics and advertising cookies. You can manage cookies in your browser settings.</p>`,
+  contact:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Contact Us</h3><p>📧 support@instantlivefootball.com.ng</p><p>📘 facebook.com/instantlivefootball</p><p>💬 WhatsApp Channel: whatsapp.com/channel/0029VbCSOhy9xVJmdDBAaL2N</p>`
+};
+
+async function openPage(pageId){
+  const titleEl = document.querySelector('#about-overlay .art-modal-source');
+  if(titleEl) titleEl.textContent = PAGE_TITLES[pageId]||'FullTime NG';
+  let pageContent = pageId==='about' ? DEFAULT_ABOUT : (DEFAULT_PAGES_PUB[pageId]||'');
+  try{
+    if(typeof firebase !== 'undefined' && firebase.firestore){
+      const doc = await firebase.firestore().collection('pages').doc(pageId).get();
+      if(doc.exists && doc.data().content) pageContent = doc.data().content;
+    }
+  }catch(e){}
+  document.getElementById('about-content').innerHTML = pageContent;
+  document.getElementById('about-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function openAbout(){ openPage('about'); }
+function closeAbout(){
+  document.getElementById('about-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
 
 </body>
 </html>
