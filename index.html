@@ -1,1108 +1,874 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>FULLTIME — Live Football</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#bb1919">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="FullTime">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="description" content="Watch live football streams — Premier League, Champions League, La Liga and more">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FullTime NG — Football News, Scores & Transfers</title>
+<meta name="description" content="Latest football news, match previews, transfer rumours, results and live scores. Nigeria's #1 football news site.">
+<meta name="keywords" content="football news nigeria, premier league news, transfer news, champions league, bet9ja, live scores nigeria">
+<meta property="og:title" content="FullTime NG — Football News & Scores">
+<meta property="og:description" content="Latest football news, transfers, previews and live scores from Nigeria's #1 football site.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-/* ===== THEME VARIABLES ===== */
 :root{
-  --red:#bb1919;--red2:#e01f1f;--yellow:#ffcc00;
-  --bg:#f5f5f5;--bg2:#ffffff;--bg3:#ececec;
-  --text:#222222;--text2:#555555;--text3:#888888;
-  --border:#e0e0e0;--dark:#1a1a1a;--darker:#111111;
-  --card-shadow:0 1px 4px rgba(0,0,0,0.08);
-  --nav-bg:#bb1919;--nav-text:#ffffff;
-  --green:#007a3d;--blue:#0047ab;
+  --g:#00c853;--g2:#00e676;--red:#e53935;--gold:#f9a825;
+  --blue:#1565c0;--orange:#ef6c00;
+  --bg:#f5f6f8;--card:#fff;--dark:#0d1219;--dark2:#121a24;
+  --bd:#e0e4ea;--bd2:#cdd2db;
+  --t1:#111827;--t2:#4b5563;--t3:#9ca3af;
+  --nav-h:56px;--r:10px;
+  --accent:#e53935
 }
-[data-theme="dark"]{
-  --bg:#0d0d0d;--bg2:#1a1a1a;--bg3:#252525;
-  --text:#f0f0f0;--text2:#aaaaaa;--text3:#666666;
-  --border:#2a2a2a;--dark:#1a1a1a;--darker:#0d0d0d;
-  --card-shadow:0 1px 4px rgba(0,0,0,0.4);
-}
-
 html{scroll-behavior:smooth}
-body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:66px;transition:background .3s,color .3s}
-@media(min-width:601px){body{padding-bottom:0}}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+img{max-width:100%;display:block}
 
-/* ===== TICKER ===== */
-.ticker{height:28px;background:var(--red);display:flex;align-items:center;overflow:hidden}
-.ticker-lbl{background:var(--darker);height:100%;display:flex;align-items:center;padding:0 12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:2px;color:var(--yellow);flex-shrink:0}
-.ticker-track{flex:1;overflow:hidden}
-.ticker-inner{display:inline-flex;animation:tickerAnim 40s linear infinite;white-space:nowrap}
-.ticker-inner span{font-family:'Oswald',sans-serif;font-weight:500;font-size:.7rem;color:#fff;padding:0 8px}
-.sep{opacity:.5;color:var(--yellow)}
-@keyframes tickerAnim{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:200;background:#fff;border-bottom:3px solid var(--accent);display:flex;align-items:center;padding:0 16px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.nav-logo{display:flex;align-items:center;gap:8px}
+.nav-logo-box{width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-logo-box svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.5}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--t1)}
+.nav-brand span{color:var(--accent)}
+.nav-tagline{font-family:'Oswald',sans-serif;font-size:.58rem;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;display:none}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.live-chip{display:flex;align-items:center;gap:4px;background:var(--accent);border-radius:4px;padding:3px 8px;font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:#fff}
+.ldot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+.nav-sub-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.nav-sub-btn:hover{background:#c62828;transform:translateY(-1px)}
 
-/* ===== NAV ===== */
-nav{position:sticky;top:0;z-index:200;background:var(--nav-bg);height:52px;display:flex;align-items:center;padding:0 14px;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
-.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.nav-logo-icon{width:32px;height:32px;background:var(--yellow);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:.85rem;color:var(--darker)}
-.nav-logo span{font-family:'Oswald',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:2px;color:#fff}
-.nav-links{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;margin-left:4px}
-.nav-links::-webkit-scrollbar{display:none}
-.nav-links a{font-family:'Oswald',sans-serif;font-weight:500;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.75);text-decoration:none;padding:0 10px;height:52px;display:flex;align-items:center;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
-.nav-links a.active,.nav-links a:hover{color:#fff;border-bottom-color:var(--yellow)}
-.nav-r{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
-.live-pill{display:flex;align-items:center;gap:5px;background:var(--darker);border-radius:3px;padding:4px 9px}
-.ldot{width:6px;height:6px;border-radius:50%;background:var(--yellow);animation:blink 1.1s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.live-pill span{font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:1.5px;color:var(--yellow)}
-.sub-btn{background:var(--yellow);color:var(--darker);border:none;border-radius:3px;padding:6px 12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;cursor:pointer;white-space:nowrap}
+/* BREAKING TICKER */
+.ticker{background:var(--dark);overflow:hidden;height:30px;display:flex;align-items:center}
+.ticker-lbl{flex-shrink:0;background:var(--accent);padding:0 12px;height:100%;display:flex;align-items:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:2px;color:#fff;white-space:nowrap}
+.ticker-scroll{flex:1;overflow:hidden}
+.ticker-inner{display:flex;gap:40px;white-space:nowrap;animation:ticker 40s linear infinite;padding:0 20px}
+.ticker-item{font-family:'Oswald',sans-serif;font-size:.68rem;color:#e5e7eb;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ticker-dot{color:var(--gold);font-size:.7rem}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-/* Dark mode toggle */
-.theme-btn{background:none;border:2px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:.8rem;color:#fff;display:flex;align-items:center;gap:4px;transition:all .2s}
-.theme-btn:hover{border-color:#fff}
+/* NAV CATEGORIES */
+.cat-nav{background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:var(--nav-h);z-index:100}
+.cat-nav-inner{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:1100px;margin:0 auto;padding:0 16px}
+.cat-nav-inner::-webkit-scrollbar{display:none}
+.cat-tab{padding:11px 14px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .13s;white-space:nowrap;flex-shrink:0}
+.cat-tab:hover{color:var(--t1)}
+.cat-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* ===== HERO ===== */
-.hero{background:var(--darker);border-bottom:4px solid var(--red)}
-.hero-inner{background:linear-gradient(135deg,#1a0000 0%,#2d0000 40%,#1a0a00 100%);padding:20px 16px 18px;position:relative;overflow:hidden}
-.hero-inner::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
-.hero-tag{font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--yellow);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.hero-tag::before{content:'';width:20px;height:2px;background:var(--yellow)}
-.hero-title{font-family:'Oswald',sans-serif;font-size:clamp(2rem,7vw,3.5rem);font-weight:700;letter-spacing:2px;line-height:.92;margin-bottom:14px;color:#fff}
-.hero-title em{color:var(--yellow);font-style:normal}
-.feat-card{background:#fff;border-radius:8px;padding:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-.feat-card:hover{transform:translateY(-2px)}
-.feat-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.feat-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:#555}
-.feat-live-badge{display:flex;align-items:center;gap:5px;background:var(--red);border-radius:3px;padding:3px 8px}
-.feat-live-badge .ldot{background:#fff}
-.feat-live-badge span{font-family:'Oswald',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1.5px;color:#fff}
-.feat-teams{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.feat-team{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
-.feat-crest{width:52px;height:52px;border-radius:50%;background:#f5f5f5;border:2px solid #eee;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.feat-crest img{width:36px;height:36px;object-fit:contain}
-.feat-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;color:#222}
-.feat-score{font-family:'Oswald',sans-serif;font-size:2.8rem;font-weight:700;letter-spacing:3px;display:flex;align-items:center;gap:4px;color:#222}
-.feat-div{color:#ccc;font-size:1.8rem}
-.feat-play{width:100%;margin-top:14px;background:var(--red);color:#fff;border:none;border-radius:5px;padding:12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
-.feat-play:hover{background:var(--red2)}
+/* HERO / FEATURED */
+.hero-wrap{background:var(--dark);padding:0}
+.hero-article{position:relative;overflow:hidden;cursor:pointer;min-height:280px;display:flex;align-items:flex-end}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
+.hero-img-placeholder{position:absolute;inset:0;background:linear-gradient(135deg,#1a2535,#0d1219)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.3) 60%,transparent 100%)}
+.hero-content{position:relative;z-index:1;padding:20px}
+.hero-cat{display:inline-flex;align-items:center;background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;margin-bottom:8px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,5vw,2.2rem);letter-spacing:1.5px;color:#fff;line-height:1.1;margin-bottom:8px}
+.hero-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hero-meta-item{font-family:'Oswald',sans-serif;font-size:.65rem;color:rgba(255,255,255,.6);letter-spacing:.5px;display:flex;align-items:center;gap:4px}
+.hero-meta-item svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2}
 
-/* ===== SECTION BAR ===== */
-.section-label-bar{background:var(--darker);padding:0 16px;display:flex;align-items:center;border-bottom:3px solid var(--red)}
-.section-label-bar h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:1rem;letter-spacing:2px;text-transform:uppercase;color:#fff;padding:10px 0 7px;border-bottom:3px solid var(--yellow);margin-bottom:-3px}
-.section-label-bar .slb-count{font-family:'Oswald',sans-serif;font-weight:500;font-size:.62rem;letter-spacing:1.5px;color:#aaa;margin-left:10px;padding-bottom:7px}
+/* LAYOUT */
+.page-wrap{max-width:1100px;margin:0 auto;padding:18px 16px;display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+.main-col{}
+.side-col{}
 
-/* ===== FILTERS ===== */
-.filters-wrap{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 14px 8px;overflow-x:auto;scrollbar-width:none}
-.filters-wrap::-webkit-scrollbar{display:none}
-.filters{display:flex;gap:6px;width:max-content}
-.f-btn{font-family:'Oswald',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;padding:6px 13px;border-radius:3px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;white-space:nowrap}
-.f-btn:hover{border-color:var(--red);color:var(--red)}
-.f-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bd)}
+.sec-hdr-left{display:flex;align-items:center;gap:8px}
+.sec-hdr-line{width:3px;height:20px;background:var(--accent);border-radius:2px}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2.5px;color:var(--t1)}
+.sec-more{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.5px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:3px}
+.sec-more svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2}
 
-/* ===== MATCH CARDS ===== */
-.section{padding:10px 14px}
-.match-list{display:flex;flex-direction:column;gap:10px}
-.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:var(--card-shadow);animation:fadeUp .3s ease both}
-.match-card:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 6px 18px rgba(187,25,25,0.15)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.mc-header{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:var(--darker)}
-.mc-league-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:#aaa}
-.mc-status-badge{display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase}
-.mc-status-badge.live{background:var(--red);color:#fff}
-.mc-status-badge.live .ldot{background:#fff;width:5px;height:5px}
-.mc-status-badge.ft{background:rgba(255,255,255,0.1);color:#aaa}
-.mc-status-badge.upcoming{background:var(--yellow);color:var(--darker)}
-.mc-body{padding:14px 13px}
-.mc-teams-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.mc-team{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1}
-.mc-crest-wrap{width:50px;height:50px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.mc-crest-wrap img{width:34px;height:34px;object-fit:contain}
-.mc-team-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.3px;text-align:center;color:var(--text);line-height:1.2}
-.mc-center{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;min-width:72px}
-.mc-score{font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;letter-spacing:3px;color:var(--text);line-height:1}
-.mc-score-sep{font-family:'Oswald',sans-serif;font-size:1.4rem;color:var(--text3);letter-spacing:2px}
-.mc-kickoff{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:1px;color:var(--text);line-height:1}
-.mc-kickoff-lbl{font-family:'Oswald',sans-serif;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
-.mc-minute{font-family:'Oswald',sans-serif;font-weight:600;font-size:.7rem;color:var(--red);letter-spacing:.5px}
-.mc-watch-btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:5px;padding:11px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
-.mc-watch-btn:hover{background:var(--red2)}
-.mc-watch-btn.replay{background:var(--blue)}
-.mc-watch-btn.preview{background:var(--green)}
+/* NEWS GRID */
+.news-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+.news-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column}
+.news-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08);border-color:var(--bd2)}
+.news-card-img{aspect-ratio:16/9;background:linear-gradient(135deg,#e8eaf0,#d5d9e0);position:relative;overflow:hidden;flex-shrink:0}
+.news-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.news-card:hover .news-card-img img{transform:scale(1.04)}
+.news-card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.news-card-img-placeholder svg{width:32px;height:32px;fill:none;stroke:#9ca3af;stroke-width:1.5;opacity:.4}
+.news-card-cat{position:absolute;top:8px;left:8px;background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;font-weight:700;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+.news-card-body{padding:11px;flex:1;display:flex;flex-direction:column}
+.news-card-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.85rem;line-height:1.35;margin-bottom:6px;color:var(--t1);flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.news-card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.news-card-source{font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.5px;color:var(--accent);text-transform:uppercase}
+.news-card-time{font-family:'Oswald',sans-serif;font-size:.58rem;color:var(--t3)}
+.news-card-dot{width:3px;height:3px;border-radius:50%;background:var(--t3)}
 
-/* ===== AD ===== */
-.ad-wrap{margin:0 14px 10px;position:relative}
-.ad-wrap.hidden{display:none!important}
-.ad-box{background:linear-gradient(135deg,#1a1a2e,#0f3460);border:1px solid #2a2a4e;border-radius:8px;padding:11px 14px;display:flex;align-items:center;gap:12px}
-.ad-lbl{position:absolute;top:5px;right:9px;font-size:.5rem;font-family:'Oswald',sans-serif;color:#666;letter-spacing:1px;text-transform:uppercase}
-.ad-text{flex:1}
-.ad-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.88rem;color:#fff}
-.ad-sub{font-size:.72rem;color:#8a8ab0;margin-top:1px}
-.ad-cta{background:var(--yellow);color:var(--darker);border:none;border-radius:4px;padding:6px 12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+/* TOP STORY (wide) */
+.top-story{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .18s;display:grid;grid-template-columns:1fr 1fr;margin-bottom:12px}
+.top-story:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.top-story-img{aspect-ratio:4/3;background:linear-gradient(135deg,#e8eaf0,#d5d9e0);position:relative;overflow:hidden}
+.top-story-img img{width:100%;height:100%;object-fit:cover}
+.top-story-body{padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.top-story-cat{display:inline-flex;align-items:center;background:rgba(229,57,53,.1);color:var(--accent);font-family:'Oswald',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-bottom:8px;border:1px solid rgba(229,57,53,.2)}
+.top-story-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1rem;line-height:1.3;color:var(--t1);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.top-story-excerpt{font-size:.78rem;color:var(--t2);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.top-story-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.top-story-source{font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.5px;color:var(--accent)}
+.top-story-time{font-family:'Oswald',sans-serif;font-size:.6rem;color:var(--t3)}
 
-/* ===== NOTIFY BANNER ===== */
-.notify-bar{background:linear-gradient(135deg,#003d1a,#006b2e);border-bottom:2px solid var(--yellow);padding:10px 16px;display:flex;align-items:center;gap:10px}
-.notify-bar.hidden{display:none}
-.nb-icon{font-size:1.4rem;flex-shrink:0}
-.nb-text{flex:1}
-.nb-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.82rem;color:#fff}
-.nb-sub{font-size:.68rem;color:rgba(255,255,255,0.7)}
-.nb-btn{background:var(--yellow);color:var(--darker);border:none;border-radius:4px;padding:7px 13px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.nb-close{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:1rem;flex-shrink:0}
+/* LIST ARTICLES */
+.article-list{display:flex;flex-direction:column;gap:0}
+.article-row{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .15s;display:flex;gap:0;margin-bottom:8px}
+.article-row:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.article-row-img{width:110px;flex-shrink:0;background:linear-gradient(135deg,#e8eaf0,#d5d9e0);position:relative;overflow:hidden}
+.article-row-img img{width:100%;height:100%;object-fit:cover}
+.article-row-img-pl{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.article-row-img-pl svg{width:22px;height:22px;fill:none;stroke:#9ca3af;stroke-width:1.5;opacity:.4}
+.article-row-cat{position:absolute;top:6px;left:6px;background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px}
+.article-row-body{padding:10px 12px;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.article-row-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.82rem;line-height:1.3;color:var(--t1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px}
+.article-row-meta{display:flex;align-items:center;gap:5px}
+.article-row-source{font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:600;color:var(--accent);letter-spacing:.3px}
+.article-row-time{font-family:'Oswald',sans-serif;font-size:.58rem;color:var(--t3)}
 
-/* ===== EMPTY ===== */
-.empty-state{text-align:center;padding:36px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
-.empty-state p{font-family:'Oswald',sans-serif;font-size:.85rem;color:var(--text3)}
-.ls-loading{display:flex;align-items:center;gap:10px;padding:16px;color:var(--text3);font-family:'Oswald',sans-serif;font-size:.82rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
-.ls-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+/* SCORES STRIP */
+.scores-strip{background:var(--dark);border-radius:var(--r);padding:12px;margin-bottom:16px;overflow:hidden}
+.scores-strip-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.scores-strip-title{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:6px}
+.scores-strip-title .ldot{background:var(--accent)}
+.scores-strip-sub{font-family:'Oswald',sans-serif;font-size:.62rem;color:#6b7280;letter-spacing:.5px}
+.scores-list{display:flex;flex-direction:column;gap:6px}
+.score-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .13s}
+.score-item:hover{background:rgba(255,255,255,.08)}
+.score-item-comp{font-family:'Oswald',sans-serif;font-size:.58rem;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.score-item-row{display:flex;align-items:center;gap:6px}
+.score-item-team{flex:1;font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score-item-sc{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;color:#fff;min-width:28px;text-align:center}
+.score-item-status{font-family:'Oswald',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:1px;min-width:28px;text-align:center}
+.status-live{color:var(--accent)}
+.status-ft{color:#6b7280}
+.status-up{color:var(--gold)}
+.scores-empty{font-family:'Oswald',sans-serif;font-size:.72rem;color:#6b7280;text-align:center;padding:12px}
+
+/* SIDEBAR */
+.widget{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.widget-hdr{padding:10px 14px;border-bottom:1px solid var(--bd);font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:2px;display:flex;align-items:center;gap:7px;background:linear-gradient(90deg,rgba(229,57,53,.04),transparent)}
+.widget-hdr-accent{width:3px;height:16px;background:var(--accent);border-radius:2px}
+
+/* TRENDING */
+.trending-list{padding:8px 0}
+.trending-item{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .13s}
+.trending-item:last-child{border-bottom:none}
+.trending-item:hover{background:rgba(229,57,53,.03)}
+.trending-num{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--bd2);width:20px;flex-shrink:0;line-height:1}
+.trending-num.hot{color:var(--accent)}
+.trending-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;line-height:1.3;color:var(--t1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.trending-cat{font-family:'Oswald',sans-serif;font-size:.58rem;color:var(--t3);margin-top:2px}
+
+/* BET WIDGET */
+.bet-w{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #a5d6a7;border-radius:var(--r);padding:14px;margin-bottom:14px;cursor:pointer;transition:all .18s}
+.bet-w:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,150,57,.12)}
+.bet-w-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bet-w-icon{width:36px;height:36px;border-radius:8px;background:#1b5e20;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bet-w-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2}
+.bet-w-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:#1b5e20}
+.bet-w-tag{font-size:.65rem;color:#388e3c;font-family:'Oswald',sans-serif}
+.bet-w-offer{background:#fff;border:1px solid #c8e6c9;border-radius:7px;padding:8px;margin-bottom:10px}
+.bet-w-offer-t{font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;color:#2e7d32;margin-bottom:2px}
+.bet-w-offer-s{font-size:.65rem;color:#555;font-family:'Oswald',sans-serif}
+.bet-w-btn{width:100%;background:#2e7d32;color:#fff;border:none;border-radius:6px;padding:9px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;cursor:pointer;transition:background .15s}
+.bet-w-btn:hover{background:#1b5e20}
+.bet-disclaimer{font-size:.52rem;color:#999;text-align:center;margin-top:5px;font-family:'Oswald',sans-serif}
+
+/* AD SLOT */
+.ad-slot{background:#f9fafb;border:1px dashed var(--bd2);border-radius:var(--r);padding:18px;text-align:center;margin-bottom:14px;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ad-slot-lbl{font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+
+/* SUB PROMO */
+.sub-promo-w{background:linear-gradient(135deg,#fff3e0,#fff8e1);border:1px solid #ffe082;border-radius:var(--r);padding:14px;margin-bottom:14px;cursor:pointer;transition:all .18s}
+.sub-promo-w:hover{transform:translateY(-1px)}
+.sub-promo-t{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:#e65100;margin-bottom:4px}
+.sub-promo-s{font-size:.7rem;color:#795548;font-family:'Oswald',sans-serif;margin-bottom:10px;line-height:1.4}
+.sub-promo-b{width:100%;background:linear-gradient(135deg,#ef6c00,#f9a825);color:#fff;border:none;border-radius:6px;padding:9px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;cursor:pointer}
+
+/* ARTICLE MODAL */
+.art-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;opacity:0;pointer-events:none;transition:opacity .2s;overflow-y:auto;backdrop-filter:blur(4px)}
+.art-overlay.open{opacity:1;pointer-events:all}
+.art-modal{background:#fff;max-width:720px;margin:60px auto 40px;border-radius:12px;overflow:hidden;transform:translateY(16px);transition:transform .2s}
+.art-overlay.open .art-modal{transform:translateY(0)}
+.art-modal-hdr{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.art-modal-source{font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:1px;color:var(--accent);text-transform:uppercase}
+.art-modal-x{background:#f3f4f6;border:none;color:var(--t2);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .13s}
+.art-modal-x:hover{background:#fee2e2;color:var(--accent)}
+.art-modal-body{padding:20px 22px}
+.art-modal-cat{display:inline-flex;align-items:center;background:rgba(229,57,53,.08);color:var(--accent);font-family:'Oswald',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;margin-bottom:12px;border:1px solid rgba(229,57,53,.15)}
+.art-modal-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.4rem;line-height:1.25;color:var(--t1);margin-bottom:10px}
+.art-modal-meta{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.art-modal-meta-item{font-family:'Oswald',sans-serif;font-size:.65rem;color:var(--t3);display:flex;align-items:center;gap:4px}
+.art-modal-meta-item svg{width:12px;height:12px;fill:none;stroke:var(--t3);stroke-width:2}
+.art-modal-img{width:100%;border-radius:8px;margin-bottom:14px;background:#f3f4f6;min-height:180px;overflow:hidden}
+.art-modal-img img{width:100%;height:auto;display:block}
+.art-modal-content{font-family:'Barlow',sans-serif;font-size:.9rem;line-height:1.75;color:var(--t1)}
+.art-modal-content p{margin-bottom:14px}
+.art-modal-content strong{font-weight:700}
+.art-modal-link{display:block;margin-top:16px;padding:11px;background:var(--accent);color:#fff;text-align:center;border-radius:7px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1px;cursor:pointer;transition:background .15s;text-decoration:none}
+.art-modal-link:hover{background:#c62828}
+/* In-article ad */
+.art-ad{background:#f9fafb;border:1px solid var(--bd);border-radius:7px;padding:12px;margin:16px 0;text-align:center}
+.art-ad-lbl{font-family:'Oswald',sans-serif;font-size:.52rem;letter-spacing:1.5px;color:var(--t3);margin-bottom:4px}
+
+/* SUBSCRIPTION MODAL */
+.sub-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(6px)}
+.sub-ov.open{opacity:1;pointer-events:all}
+.sub-modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:20px 20px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.sub-ov.open .sub-modal{transform:translateY(0)}
+.sub-drag{width:34px;height:3px;border-radius:2px;background:#e5e7eb;margin:0 auto 14px}
+.sub-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;text-align:center;color:var(--t1);margin-bottom:3px}
+.sub-title span{color:var(--accent)}
+.sub-sub{font-size:.78rem;color:var(--t2);text-align:center;font-family:'Oswald',sans-serif;margin-bottom:16px}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.plan-c{background:#f9fafb;border:2px solid var(--bd);border-radius:10px;padding:14px;cursor:pointer;transition:all .18s;text-align:center;position:relative}
+.plan-c:hover,.plan-c.sel{border-color:var(--accent);background:rgba(229,57,53,.03)}
+.plan-c.pop::before{content:'BEST VALUE';position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;font-size:.52rem;font-weight:700;letter-spacing:1.5px;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.plan-n{font-family:'Oswald',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;color:var(--t2);margin-bottom:5px}
+.plan-p{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:2px;line-height:1;color:var(--t1);margin-bottom:1px}
+.plan-p span{font-size:.85rem;letter-spacing:0}
+.plan-per{font-size:.62rem;color:var(--t3);font-family:'Oswald',sans-serif}
+.perks{margin-bottom:14px}
+.perk{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-family:'Oswald',sans-serif;font-size:.72rem;color:var(--t2)}
+.perk:last-child{border-bottom:none}
+.perk svg{width:13px;height:13px;fill:none;stroke:var(--g);stroke-width:2.5;flex-shrink:0}
+.pay-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:1.5px;cursor:pointer;box-shadow:0 4px 14px rgba(229,57,53,.25);margin-bottom:8px;transition:all .2s}
+.pay-btn:hover{background:#c62828;transform:translateY(-1px)}
+.pay-note{font-size:.65rem;color:var(--t3);text-align:center;font-family:'Oswald',sans-serif;line-height:1.4}
+.sub-close{background:none;border:none;color:var(--t3);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:.5px;cursor:pointer;display:block;margin:8px auto 0;transition:color .13s}
+.sub-close:hover{color:var(--t1)}
+
+/* LOADING / EMPTY */
+.loading{display:flex;align-items:center;justify-content:center;gap:9px;padding:40px;color:var(--t2);font-family:'Oswald',sans-serif;font-size:.8rem}
+.spinner{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-state svg{width:40px;height:40px;fill:none;stroke:var(--bd2);stroke-width:1.5;margin:0 auto 12px;display:block}
+.empty-t{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--t2);margin-bottom:4px}
 
-/* ===== LIVE SCORES ===== */
-.ls-grid{display:flex;flex-direction:column;gap:6px}
-.ls-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
-.ls-card:hover{border-color:var(--red)}
-.ls-left{flex:1;display:flex;flex-direction:column;gap:4px}
-.ls-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
-.ls-teams{display:flex;flex-direction:column;gap:2px}
-.ls-team-row{display:flex;align-items:center;justify-content:space-between}
-.ls-team-name{font-family:'Oswald',sans-serif;font-weight:500;font-size:.82rem;color:var(--text)}
-.ls-score{font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;color:var(--text)}
-.ls-right{display:flex;flex-direction:column;align-items:center;gap:3px}
-.ls-min{font-family:'Oswald',sans-serif;font-weight:700;font-size:.7rem;color:var(--red)}
-.ls-status{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;color:var(--text3)}
-
-/* ===== BOTTOM NAV ===== */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:150;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,0.1)}
-@media(max-width:600px){.bottom-nav{display:flex}}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;cursor:pointer;position:relative}
-.bn-item svg{width:22px;height:22px;fill:none;stroke:var(--text3);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s}
-.bn-item span{font-family:'Oswald',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3);transition:color .15s}
-.bn-item.active svg{stroke:var(--red)}
-.bn-item.active span{color:var(--red)}
-.bn-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:3px;background:var(--red);border-radius:0 0 3px 3px}
-
-/* ===== OVERLAYS ===== */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px)}
-.overlay.open{opacity:1;pointer-events:all}
-@media(min-width:600px){.overlay{align-items:center}}
-.modal{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;max-width:460px;transform:translateY(40px);transition:transform .3s;overflow:hidden}
-@media(min-width:600px){.modal{border-radius:12px;transform:scale(.95)}}
-.overlay.open .modal{transform:translateY(0)}
-@media(min-width:600px){.overlay.open .modal{transform:scale(1)}}
-.drag{width:34px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0}
-.modal-hdr{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--darker)}
-.modal-title{font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:2px;color:#fff}
-.modal-close{background:none;border:none;color:#aaa;font-size:1.1rem;cursor:pointer}
-.modal-body{padding:16px 18px 22px}
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.plan{background:var(--bg3);border:2px solid var(--border);border-radius:8px;padding:13px;cursor:pointer;transition:all .15s;position:relative}
-.plan:hover,.plan.sel{border-color:var(--red)}
-.plan.sel{background:var(--bg2)}
-.plan-badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-family:'Oswald',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;padding:2px 9px;border-radius:10px;white-space:nowrap}
-.plan-period{font-family:'Oswald',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:3px}
-.plan-price{font-family:'Oswald',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text)}
-.plan-price sub{font-size:.75rem;font-family:'Source Sans 3',sans-serif;color:var(--text2)}
-.plan-save{font-size:.68rem;color:var(--red);font-family:'Oswald',sans-serif;font-weight:600;margin-top:1px}
-.plan-features{margin-top:8px;display:flex;flex-direction:column;gap:3px}
-.plan-features li{font-size:.74rem;color:var(--text2);list-style:none;display:flex;align-items:center;gap:5px;font-family:'Oswald',sans-serif}
-.plan-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0}
-.sub-cta{width:100%;background:var(--red);color:#fff;border:none;border-radius:6px;padding:13px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .15s}
-.sub-cta:hover{background:var(--red2)}
-.sub-note{text-align:center;font-size:.68rem;color:var(--text3);margin-top:7px;font-family:'Oswald',sans-serif}
-
-/* ===== WATCH MODAL ===== */
-.watch-modal{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;max-width:680px;overflow:hidden;transform:translateY(40px);transition:transform .3s;max-height:94vh;overflow-y:auto}
-@media(min-width:600px){.watch-modal{border-radius:12px;transform:scale(.95);max-height:88vh}}
-.overlay.open .watch-modal{transform:translateY(0)}
-@media(min-width:600px){.overlay.open .watch-modal{transform:scale(1)}}
-.w-hdr{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--darker);z-index:10}
-.w-teams{font-family:'Oswald',sans-serif;font-size:1.15rem;letter-spacing:2px;font-weight:700;color:#fff}
-.w-meta{font-size:.65rem;color:#aaa;font-family:'Oswald',sans-serif;margin-top:1px}
-.w-close{background:none;border:none;color:#aaa;font-size:1.1rem;cursor:pointer}
-
-/* ===== VIDEO PLAYER ===== */
-.vid-wrap{position:relative;background:#000;aspect-ratio:16/9}
-.vid-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(160deg,#1a0000,#2d0000)}
-.play-ring{width:64px;height:64px;border-radius:50%;border:2.5px solid var(--yellow);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 0 20px rgba(255,204,0,0.3)}
-.play-ring:hover{background:rgba(255,204,0,0.15);transform:scale(1.08)}
-.play-ring::after{content:'';width:0;height:0;border-style:solid;border-width:11px 0 11px 22px;border-color:transparent transparent transparent var(--yellow);margin-left:6px}
-.stream-iframe{width:100%;aspect-ratio:16/9;border:none;display:none}
-.vid-lbl{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase}
-.vid-loading{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;flex-direction:column;gap:12px}
-.vid-loading.show{display:flex}
-.vid-loading .ls-spinner{width:36px;height:36px;border-width:3px;border-top-color:var(--yellow)}
-.vid-loading p{font-family:'Oswald',sans-serif;color:#fff;letter-spacing:1px;font-size:.8rem}
-
-/* Player controls */
-.player-controls{background:#111;padding:8px 14px;display:flex;align-items:center;gap:8px}
-.ctrl-btn{background:none;border:none;color:#aaa;cursor:pointer;padding:4px;font-size:.95rem;transition:color .15s;flex-shrink:0}
-.ctrl-btn:hover{color:#fff}
-.ctrl-btn.active{color:var(--yellow)}
-.progress-wrap{flex:1;display:flex;flex-direction:column;gap:3px}
-.progress{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;cursor:pointer;position:relative}
-.prog-fill{height:100%;background:var(--red);border-radius:2px;transition:width .3s}
-.time-row{display:flex;justify-content:space-between}
-.time-txt{font-family:'Oswald',sans-serif;font-size:.65rem;color:#666;letter-spacing:.5px}
-
-/* Quality selector */
-.quality-bar{background:#1a1a1a;padding:6px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid #2a2a2a}
-.ql-label{font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1.5px;color:#666;text-transform:uppercase;margin-right:4px}
-.ql-btn{background:none;border:1px solid #333;border-radius:3px;color:#888;padding:3px 9px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:1px;cursor:pointer;transition:all .15s}
-.ql-btn:hover{border-color:#aaa;color:#fff}
-.ql-btn.active{background:var(--red);border-color:var(--red);color:#fff}
-
-/* Stream selector */
-.stream-selector{background:#1a1a1a;padding:8px 14px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;border-top:1px solid #2a2a2a}
-.stream-selector::-webkit-scrollbar{display:none}
-.stream-label{font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1.5px;color:#666;text-transform:uppercase;flex-shrink:0}
-.stream-btn{background:none;border:1px solid #333;border-radius:3px;color:#888;padding:4px 10px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.65rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.stream-btn:hover{border-color:#aaa;color:#fff}
-.stream-btn.active{background:var(--yellow);border-color:var(--yellow);color:#111}
-
-.w-tabs{display:flex;padding:0 14px;border-bottom:1px solid var(--border);background:var(--bg2)}
-.w-tab{font-family:'Oswald',sans-serif;font-weight:600;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:9px 10px;border-bottom:3px solid transparent;cursor:pointer;transition:all .15s}
-.w-tab:hover{color:var(--text)}
-.w-tab.active{color:var(--red);border-bottom-color:var(--red)}
-.w-content{padding:12px 14px;background:var(--bg2)}
-.ev-list{display:flex;flex-direction:column}
-.ev-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
-.ev-item:last-child{border-bottom:none}
-.ev-min{font-family:'Oswald',sans-serif;font-size:.9rem;color:var(--red);min-width:28px;font-weight:700}
-.ev-ico{font-size:.85rem;min-width:18px;text-align:center}
-.ev-player{font-family:'Oswald',sans-serif;font-size:.86rem;font-weight:500;color:var(--text)}
-.ev-detail{font-size:.7rem;color:var(--text3)}
-.stat-row{margin-bottom:10px}
-.stat-labels{display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:.76rem;margin-bottom:3px}
-.stat-home{color:var(--red);font-weight:700}
-.stat-lname{color:var(--text3);font-size:.68rem;letter-spacing:1px;text-transform:uppercase}
-.stat-away{color:var(--text2)}
-.stat-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.stat-prog{height:100%;background:var(--red);border-radius:2px}
-
-/* ===== INSTALL BANNER ===== */
-.install-banner{position:fixed;bottom:76px;left:14px;right:14px;background:var(--darker);color:#fff;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:400;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none}
-.install-banner.show{transform:translateY(0);opacity:1;pointer-events:all}
-@media(min-width:601px){.install-banner{bottom:14px}}
-.ib-icon{width:36px;height:36px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:.9rem;color:var(--darker);flex-shrink:0}
-.ib-text{flex:1}
-.ib-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:.85rem;color:#fff}
-.ib-sub{font-size:.7rem;color:#aaa}
-.ib-btn{background:var(--yellow);color:var(--darker);border:none;border-radius:5px;padding:7px 13px;font-family:'Oswald',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap}
-.ib-close{background:none;border:none;color:#aaa;cursor:pointer;font-size:1rem;flex-shrink:0}
-
-/* ===== RESPONSIVE ===== */
-@media(min-width:900px){
-  .page-wrap{display:grid;grid-template-columns:1fr 290px;max-width:1180px;margin:0 auto}
-  .main-col{border-right:1px solid var(--border)}
-  .sidebar{display:block!important}
-  body{padding-bottom:0}
-  .bottom-nav{display:none!important}
-}
-.sidebar{display:none;padding:14px;background:var(--bg)}
-.sb-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px}
-.sb-hdr{background:var(--darker);padding:9px 12px;font-family:'Oswald',sans-serif;font-size:.88rem;letter-spacing:2.5px;color:#fff}
-.std-table{width:100%;border-collapse:collapse}
-.std-table th{font-family:'Oswald',sans-serif;font-size:.56rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:7px 8px;border-bottom:1px solid var(--border);text-align:left}
-.std-table td{padding:6px 8px;font-size:.78rem;border-bottom:1px solid var(--border);color:var(--text)}
-.std-table tr:last-child td{border-bottom:none}
-.std-table tr:hover td{background:var(--bg3)}
-.pos{font-family:'Oswald',sans-serif;font-weight:700;color:var(--text3);width:16px}
-.pos.top{color:var(--red)}
-.tm-cell{display:flex;align-items:center;gap:6px;font-family:'Oswald',sans-serif;font-weight:600;font-size:.78rem}
-.pts{font-family:'Oswald',sans-serif;font-size:.95rem;font-weight:700;text-align:right}
-.hidden{display:none!important}
-
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--darker);color:#fff;border-radius:8px;padding:10px 20px;font-family:'Oswald',sans-serif;font-size:.82rem;letter-spacing:1px;z-index:600;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;border-left:3px solid var(--yellow)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--dark);color:#fff;font-family:'Oswald',sans-serif;font-size:.73rem;font-weight:600;padding:10px 16px;border-radius:7px;z-index:9999;display:flex;align-items:center;gap:6px;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 26px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(min-width:601px){.toast{bottom:20px}}
+.toast svg{width:12px;height:12px;fill:none;stroke:var(--g);stroke-width:2.5;flex-shrink:0}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .page-wrap{grid-template-columns:1fr;padding:12px}
+  .side-col{display:none}
+  .news-grid{grid-template-columns:1fr}
+  .top-story{grid-template-columns:1fr}
+  .top-story-img{aspect-ratio:16/9}
+  .plan-grid{grid-template-columns:1fr}
+  .art-modal{margin:0;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh;overflow-y:auto}
+}
+@media(min-width:701px){
+  .nav-tagline{display:block}
+}
 </style>
 </head>
 <body>
 
-<!-- Ticker -->
-<div class="ticker">
-  <div class="ticker-lbl">⚽ LIVE</div>
-  <div class="ticker-track">
-    <div class="ticker-inner">
-      <span>Premier League</span><span class="sep">•</span>
-      <span>Champions League</span><span class="sep">•</span>
-      <span>La Liga</span><span class="sep">•</span>
-      <span>Serie A</span><span class="sep">•</span>
-      <span>Bundesliga</span><span class="sep">•</span>
-      <span>Ligue 1</span><span class="sep">•</span>
-      <span>AFCON</span><span class="sep">•</span>
-      <span>World Cup Qualifiers</span><span class="sep">•</span>
-      <span>Premier League</span><span class="sep">•</span>
-      <span>Champions League</span><span class="sep">•</span>
-      <span>La Liga</span><span class="sep">•</span>
-      <span>Serie A</span><span class="sep">•</span>
-      <span>Bundesliga</span><span class="sep">•</span>
-      <span>Ligue 1</span><span class="sep">•</span>
-      <span>AFCON</span><span class="sep">•</span>
-      <span>World Cup Qualifiers</span><span class="sep">•</span>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg></div>
+    <div>
+      <div class="nav-brand">FULL<span>TIME</span> NG</div>
+      <div class="nav-tagline">Football News & Scores</div>
     </div>
   </div>
-</div>
-
-<!-- Nav -->
-<nav>
-  <a class="nav-logo" href="index.html">
-    <div class="nav-logo-icon">FT</div>
-    <span>FULLTIME</span>
-  </a>
-  <div class="nav-links">
-    <a href="index.html" class="active">Matches</a>
-    <a href="livescores.html">Live Scores</a>
-    <a href="fixtures.html">Fixtures</a>
-    <a href="standings.html">Tables</a>
-  </div>
-  <div class="nav-r">
-    <div class="live-pill">
-      <div class="ldot"></div>
-      <span id="live-count">0 Live</span>
-    </div>
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
-    <button class="sub-btn" onclick="openSub()">Subscribe</button>
+  <div class="nav-right">
+    <div class="live-chip" id="nav-live" style="display:none"><div class="ldot"></div><span id="nav-live-n">0</span> LIVE</div>
+    <button class="nav-sub-btn" onclick="openSub()">⚡ Go Ad-Free</button>
   </div>
 </nav>
 
-<!-- Push Notification Banner -->
-<div class="notify-bar" id="notify-bar">
-  <div class="nb-icon">🔔</div>
-  <div class="nb-text">
-    <div class="nb-title">Get notified when matches go LIVE!</div>
-    <div class="nb-sub">Never miss a kick-off again</div>
-  </div>
-  <button class="nb-btn" onclick="requestNotifications()">ENABLE</button>
-  <button class="nb-close" onclick="dismissNotify()">✕</button>
+<!-- BREAKING TICKER -->
+<div class="ticker" id="ticker">
+  <div class="ticker-lbl">🔴 BREAKING</div>
+  <div class="ticker-scroll"><div class="ticker-inner" id="ticker-inner">
+    <span class="ticker-item"><span class="ticker-dot">●</span>Loading latest headlines…</span>
+  </div></div>
 </div>
 
+<!-- CATEGORY NAV -->
+<div class="cat-nav">
+  <div class="cat-nav-inner">
+    <div class="cat-tab active" onclick="filterCat('all',this)">All News</div>
+    <div class="cat-tab" onclick="filterCat('transfers',this)">💸 Transfers</div>
+    <div class="cat-tab" onclick="filterCat('preview',this)">📋 Previews</div>
+    <div class="cat-tab" onclick="filterCat('report',this)">📰 Reports</div>
+    <div class="cat-tab" onclick="filterCat('champions-league',this)">🏆 UCL</div>
+    <div class="cat-tab" onclick="filterCat('premier-league',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
+    <div class="cat-tab" onclick="filterCat('la-liga',this)">🇪🇸 La Liga</div>
+    <div class="cat-tab" onclick="filterCat('npfl',this)">🇳🇬 NPFL</div>
+    <div class="cat-tab" onclick="filterCat('scores',this)">⚽ Scores</div>
+  </div>
+</div>
+
+<!-- MAIN -->
 <div class="page-wrap">
-<div class="main-col">
+  <div class="main-col" id="main-col">
+    <!-- Content rendered by JS -->
+    <div id="loading-news" class="loading"><div class="spinner"></div>Loading latest news…</div>
+    <div id="news-content" style="display:none"></div>
+  </div>
 
-<!-- Hero -->
-<div class="hero">
-  <div class="hero-inner">
-    <div class="hero-tag">Today's Football</div>
-    <div class="hero-title">WATCH<br><em>LIVE</em><br>FOOTBALL</div>
-    <div class="feat-card" id="feat-card" style="display:none" onclick="openFeatWatch()">
-      <div class="feat-row1">
-        <span class="feat-comp" id="feat-comp">–</span>
-        <div class="feat-live-badge"><div class="ldot"></div><span>LIVE</span></div>
+  <!-- SIDEBAR -->
+  <div class="side-col">
+    <!-- LIVE SCORES WIDGET -->
+    <div class="scores-strip" id="scores-strip">
+      <div class="scores-strip-hdr">
+        <div class="scores-strip-title"><div class="ldot"></div>Live Scores</div>
+        <div class="scores-strip-sub" id="scores-sub">Loading…</div>
       </div>
-      <div class="feat-teams">
-        <div class="feat-team">
-          <div class="feat-crest"><img id="feat-hlogo" src="" onerror="this.style.display='none'" alt=""></div>
-          <div class="feat-name" id="feat-hname">–</div>
-        </div>
-        <div>
-          <div class="feat-score">
-            <span id="feat-hs">0</span><span class="feat-div">:</span><span id="feat-as">0</span>
-          </div>
-        </div>
-        <div class="feat-team">
-          <div class="feat-crest"><img id="feat-alogo" src="" onerror="this.style.display='none'" alt=""></div>
-          <div class="feat-name" id="feat-aname">–</div>
-        </div>
+      <div id="scores-list"><div class="scores-empty">Loading…</div></div>
+    </div>
+
+    <!-- BET9JA -->
+    <div class="bet-w" onclick="window.open('https://www.bet9ja.com','_blank')">
+      <div class="bet-w-top">
+        <div class="bet-w-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div><div class="bet-w-name">BET9JA</div><div class="bet-w-tag">Nigeria's #1 Betting Site</div></div>
       </div>
-      <button class="feat-play">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff"><path d="M8 5v14l11-7z"/></svg>
-        WATCH LIVE NOW
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Ad banner -->
-<div class="ad-wrap" id="ad-top">
-  <div class="ad-lbl">AD</div>
-  <div class="ad-box">
-    <div style="font-size:1.6rem">🎯</div>
-    <div class="ad-text">
-      <div class="ad-title">Go Ad-Free from ₦1,000/mo</div>
-      <div class="ad-sub">Watch without interruptions. Cancel anytime.</div>
-    </div>
-    <button class="ad-cta" onclick="openSub()">SUBSCRIBE</button>
-  </div>
-</div>
-
-<!-- Section label -->
-<div class="section-label-bar">
-  <h2>TODAY'S MATCHES</h2>
-  <span class="slb-count" id="mc">Loading…</span>
-</div>
-
-<!-- Filters -->
-<div class="filters-wrap">
-  <div class="filters">
-    <button class="f-btn active" onclick="filterMatches('all',this)">All</button>
-    <button class="f-btn" onclick="filterMatches('live',this)">🔴 Live</button>
-    <button class="f-btn" onclick="filterMatches('upcoming',this)">⏰ Upcoming</button>
-    <button class="f-btn" onclick="filterMatches('finished',this)">✅ Finished</button>
-    <button class="f-btn" onclick="filterMatches('pl',this)">Premier League</button>
-    <button class="f-btn" onclick="filterMatches('ucl',this)">Champions League</button>
-    <button class="f-btn" onclick="filterMatches('laliga',this)">La Liga</button>
-  </div>
-</div>
-
-<!-- Match list -->
-<div class="section">
-  <div class="match-list" id="match-list">
-    <div class="ls-loading"><div class="ls-spinner"></div><span>Loading matches…</span></div>
-  </div>
-</div>
-
-<!-- Live scores -->
-<div class="section-label-bar" style="margin-top:8px">
-  <h2>LIVE SCORES</h2>
-  <span class="slb-count" id="ls-count">Loading…</span>
-</div>
-<div class="section">
-  <div id="livescores-list">
-    <div class="ls-loading"><div class="ls-spinner"></div><span>Fetching live scores…</span></div>
-  </div>
-</div>
-
-</div><!-- .main-col -->
-
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="sb-card">
-    <div class="sb-hdr">PREMIER LEAGUE</div>
-    <table class="std-table">
-      <thead><tr><th>#</th><th>Team</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
-      <tbody>
-        <tr><td class="pos top">1</td><td><div class="tm-cell">Man City</div></td><td>38</td><td>+62</td><td class="pts">91</td></tr>
-        <tr><td class="pos top">2</td><td><div class="tm-cell">Arsenal</div></td><td>38</td><td>+57</td><td class="pts">89</td></tr>
-        <tr><td class="pos top">3</td><td><div class="tm-cell">Liverpool</div></td><td>38</td><td>+53</td><td class="pts">82</td></tr>
-        <tr><td class="pos top">4</td><td><div class="tm-cell">Aston Villa</div></td><td>38</td><td>+26</td><td class="pts">68</td></tr>
-        <tr><td class="pos">5</td><td><div class="tm-cell">Tottenham</div></td><td>38</td><td>+19</td><td class="pts">63</td></tr>
-        <tr><td class="pos">6</td><td><div class="tm-cell">Chelsea</div></td><td>38</td><td>+12</td><td class="pts">60</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-</div><!-- .page-wrap -->
-
-<!-- Bottom Nav -->
-<nav class="bottom-nav">
-  <div class="bn-item active" onclick="location.href='index.html'">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Home</span>
-  </div>
-  <div class="bn-item" onclick="location.href='livescores.html'">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>Scores</span>
-  </div>
-  <div class="bn-item" style="position:relative" onclick="location.href='index.html'">
-    <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:46px;height:46px;background:var(--red);border-radius:50%;border:3px solid var(--bg2);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(187,25,25,0.4)">
-      <svg viewBox="0 0 24 24" style="stroke:#fff;width:22px;height:22px"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" style="fill:#fff;stroke:none"/></svg>
-    </div>
-    <span style="margin-top:14px">Live</span>
-  </div>
-  <div class="bn-item" onclick="location.href='fixtures.html'">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Fixtures</span>
-  </div>
-  <div class="bn-item" onclick="openSub()">
-    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    <span>Account</span>
-  </div>
-</nav>
-
-<!-- Subscribe Modal -->
-<div class="overlay" id="sub-overlay" onclick="if(event.target===this)closeSub()">
-  <div class="modal">
-    <div class="drag"></div>
-    <div class="modal-hdr">
-      <span class="modal-title">GO AD-FREE</span>
-      <button class="modal-close" onclick="closeSub()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="plans">
-        <div class="plan" id="plan-w" onclick="selPlan('w')">
-          <div class="plan-period">Weekly</div>
-          <div class="plan-price">₦300<sub>/wk</sub></div>
-          <ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All matches</li></ul>
-        </div>
-        <div class="plan sel" id="plan-m" onclick="selPlan('m')">
-          <div class="plan-badge">BEST VALUE</div>
-          <div class="plan-period">Monthly</div>
-          <div class="plan-price">₦1,000<sub>/mo</sub></div>
-          <div class="plan-save">Save 17%</div>
-          <ul class="plan-features"><li>No ads</li><li>HD streams</li><li>All matches</li><li>Early access</li></ul>
-        </div>
+      <div class="bet-w-offer">
+        <div class="bet-w-offer-t">🎁 200% Welcome Bonus</div>
+        <div class="bet-w-offer-s">Up to ₦100,000 on first deposit</div>
       </div>
-      <button class="sub-cta" onclick="doSubscribe()">SUBSCRIBE NOW</button>
-      <div class="sub-note">Cancel anytime · Secure payment</div>
-    </div>
-  </div>
-</div>
-
-<!-- Watch Modal -->
-<div class="overlay" id="watch-overlay" onclick="if(event.target===this)closeWatch()">
-  <div class="watch-modal">
-    <div class="drag"></div>
-    <div class="w-hdr">
-      <div>
-        <div class="w-teams" id="w-teams">–</div>
-        <div class="w-meta" id="w-meta">–</div>
-      </div>
-      <button class="w-close" onclick="closeWatch()">✕</button>
+      <button class="bet-w-btn">Claim Bonus — Register Free</button>
+      <div class="bet-disclaimer">18+ · Gamble responsibly · T&Cs apply</div>
     </div>
 
-    <!-- Video player -->
-    <div class="vid-wrap">
-      <div class="vid-ph" id="vid-ph">
-        <div class="vid-lbl" id="vid-top-lbl">LIVE STREAM</div>
-        <div class="play-ring" onclick="startStream()"></div>
-        <div class="vid-lbl" id="vid-sub-lbl">Tap to play</div>
-      </div>
-      <iframe id="stream-iframe" class="stream-iframe" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
-      <div class="vid-loading" id="vid-loading">
-        <div class="ls-spinner" style="width:36px;height:36px;border-width:3px;border-top-color:var(--yellow)"></div>
-        <p>Loading stream…</p>
+    <!-- TRENDING -->
+    <div class="widget">
+      <div class="widget-hdr"><div class="widget-hdr-accent"></div>Trending Now</div>
+      <div class="trending-list" id="trending-list">
+        <div class="loading"><div class="spinner"></div></div>
       </div>
     </div>
 
-    <!-- Player controls -->
-    <div class="player-controls">
-      <button class="ctrl-btn" onclick="toggleMute()" id="mute-btn" title="Mute">🔊</button>
-      <div class="progress-wrap">
-        <div class="progress" onclick="seekStream(event)">
-          <div class="prog-fill" id="prog-fill" style="width:0%"></div>
-        </div>
-        <div class="time-row">
-          <span class="time-txt" id="match-time">LIVE</span>
-          <span class="time-txt" id="match-min"></span>
-        </div>
+    <!-- ADSENSE SLOT -->
+    <div class="ad-slot">
+      <div class="ad-slot-lbl">Advertisement</div>
+      <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXX" data-ad-slot="XXXX" data-ad-format="auto"></ins> -->
+      <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:var(--t3)">AdSense slot — add your publisher code</div>
+    </div>
+
+    <!-- SUB PROMO -->
+    <div class="sub-promo-w" onclick="openSub()">
+      <div class="sub-promo-t">⚡ GO AD-FREE</div>
+      <div class="sub-promo-s">Subscribe for ₦1,000/month. No ads, full access, exclusive content.</div>
+      <button class="sub-promo-b">Subscribe Now</button>
+    </div>
+
+    <!-- SPORTINGBET -->
+    <div class="bet-w" onclick="window.open('https://www.sportingbet.com/ng','_blank')" style="background:linear-gradient(135deg,#e3f2fd,#e8eaf6);border-color:#90caf9">
+      <div class="bet-w-top">
+        <div class="bet-w-icon" style="background:#1565c0"><svg viewBox="0 0 24 24" style="stroke:#fff"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/></svg></div>
+        <div><div class="bet-w-name" style="color:#1565c0">SPORTINGBET</div><div class="bet-w-tag" style="color:#1976d2">Bet on all leagues</div></div>
       </div>
-      <button class="ctrl-btn" onclick="togglePiP()" title="Picture in Picture">⧉</button>
-      <button class="ctrl-btn" onclick="openFullscreen()" title="Fullscreen">⛶</button>
+      <div class="bet-w-offer" style="border-color:#bbdefb">
+        <div class="bet-w-offer-t" style="color:#1565c0">⚡ Free ₦10,000 Bet</div>
+        <div class="bet-w-offer-s">New customers only. Register & bet.</div>
+      </div>
+      <button class="bet-w-btn" style="background:#1565c0">Get Free Bet Now</button>
+      <div class="bet-disclaimer">18+ · Gamble responsibly · T&Cs apply</div>
     </div>
 
-    <!-- Quality selector -->
-    <div class="quality-bar">
-      <span class="ql-label">Quality:</span>
-      <button class="ql-btn" onclick="setQuality('auto',this)">AUTO</button>
-      <button class="ql-btn active" onclick="setQuality('hd',this)">HD</button>
-      <button class="ql-btn" onclick="setQuality('fhd',this)">FHD</button>
-      <button class="ql-btn" onclick="setQuality('4k',this)">4K</button>
-    </div>
-
-    <!-- Stream selector (multiple streams) -->
-    <div class="stream-selector" id="stream-selector" style="display:none">
-      <span class="stream-label">Streams:</span>
-    </div>
-
-    <!-- Tabs -->
-    <div class="w-tabs">
-      <div class="w-tab active" onclick="wTab(this,'events')">Events</div>
-      <div class="w-tab" onclick="wTab(this,'stats')">Stats</div>
-      <div class="w-tab" onclick="wTab(this,'lineup')">Lineup</div>
-    </div>
-    <div class="w-content" id="w-content">
-      <div class="ev-list" id="ev-list"></div>
+    <!-- ADSENSE SLOT 2 -->
+    <div class="ad-slot">
+      <div class="ad-slot-lbl">Advertisement</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:var(--t3)">AdSense slot 2</div>
     </div>
   </div>
 </div>
 
-<!-- Install Banner -->
-<div class="install-banner" id="install-banner">
-  <div class="ib-icon">FT</div>
-  <div class="ib-text">
-    <div class="ib-title">Add to Home Screen</div>
-    <div class="ib-sub">Get instant access to live football</div>
+<!-- ARTICLE MODAL -->
+<div class="art-overlay" id="art-overlay" onclick="if(event.target===this)closeArticle()">
+  <div class="art-modal">
+    <div class="art-modal-hdr">
+      <div class="art-modal-source" id="art-source"></div>
+      <button class="art-modal-x" onclick="closeArticle()">✕</button>
+    </div>
+    <div class="art-modal-body">
+      <div class="art-modal-cat" id="art-cat"></div>
+      <h1 class="art-modal-title" id="art-title"></h1>
+      <div class="art-modal-meta">
+        <div class="art-modal-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="art-date"></span></div>
+        <div class="art-modal-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span id="art-read"></span></div>
+      </div>
+      <div class="art-modal-img" id="art-img-wrap"></div>
+      <div class="art-modal-content" id="art-body"></div>
+      <!-- IN-ARTICLE AD -->
+      <div class="art-ad" id="art-ad">
+        <div class="art-ad-lbl">Advertisement</div>
+        <!-- AdSense in-article slot here -->
+        <div style="font-family:'Oswald',sans-serif;font-size:.65rem;color:var(--t3);padding:4px">In-article AdSense slot</div>
+      </div>
+      <a class="art-modal-link" id="art-ext-link" target="_blank" rel="noopener">Read Full Article on Source →</a>
+    </div>
   </div>
-  <button class="ib-btn" id="install-btn">INSTALL</button>
-  <button class="ib-close" onclick="dismissInstall()">✕</button>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<!-- SUBSCRIPTION MODAL -->
+<div class="sub-ov" id="sub-ov" onclick="if(event.target===this)closeSub()">
+  <div class="sub-modal">
+    <div class="sub-drag"></div>
+    <div class="sub-title">GO <span>PREMIUM</span></div>
+    <div class="sub-sub">Read everything ad-free with exclusive content</div>
+    <div class="plan-grid">
+      <div class="plan-c sel" onclick="selPlan(this,'monthly')" id="pl-m">
+        <div class="plan-n">Monthly</div>
+        <div class="plan-p">₦<span>1,000</span></div>
+        <div class="plan-per">per month</div>
+      </div>
+      <div class="plan-c pop" onclick="selPlan(this,'yearly')" id="pl-y">
+        <div class="plan-n">Yearly</div>
+        <div class="plan-p">₦<span>10,000</span></div>
+        <div class="plan-per">per year · save 2 months</div>
+      </div>
+    </div>
+    <div class="perks">
+      <div class="perk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>100% ad-free reading</div>
+      <div class="perk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Exclusive transfer news first</div>
+      <div class="perk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full match lineups & stats</div>
+      <div class="perk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Live score notifications</div>
+      <div class="perk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</div>
+    </div>
+    <button class="pay-btn" onclick="handlePay()">Pay Now — Activate Instantly</button>
+    <div class="pay-note" id="pay-note">Pay via GTBank: Acc <strong>1234567890</strong> · Send proof to <strong>support@instantlivefootball.com.ng</strong></div>
+    <button class="sub-close" onclick="closeSub()">Maybe later</button>
+  </div>
+</div>
 
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+
+<script src="firebase-loader.js"></script>
 <script>
 // ===== FIREBASE =====
-const firebaseConfig = {
-  apiKey: "AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",
-  authDomain: "instantlivefootball.firebaseapp.com",
-  projectId: "instantlivefootball",
-  storageBucket: "instantlivefootball.firebasestorage.app",
-  messagingSenderId: "584488048641",
-  appId: "1:584488048641:web:7adf83799426222a5fc800"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const FB={apiKey:"AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",authDomain:"instantlivefootball.firebaseapp.com",projectId:"instantlivefootball",storageBucket:"instantlivefootball.firebasestorage.app",messagingSenderId:"584488048641",appId:"1:584488048641:web:7adf83799426222a5fc800"};
+
+// ===== FREE NEWS API (NewsAPI.org — get free key at newsapi.org) =====
+// Replace YOUR_API_KEY with your key from newsapi.org (free plan = 100 requests/day)
+const NEWS_API_KEY = 'adf1b30fb4cd4c2abbedbf1985a97929';
+const NEWS_API_URL = `https://newsapi.org/v2/everything?q=football+soccer&language=en&sortBy=publishedAt&pageSize=30&apiKey=${NEWS_API_KEY}`;
 
 // ===== STATE =====
-let _matches = [];
-let currentMatch = null;
-let activeFilter = 'all';
-let isSubscribed = false;
-let deferredPrompt = null;
-let muted = false;
-let currentQuality = 'hd';
-let progressTimer = null;
-let matchSeconds = 0;
+let allArticles=[], allMatches=[], currentCat='all', selPlanId='monthly';
+let db=null;
 
-try { isSubscribed = localStorage.getItem('ft_subscribed') === 'true'; } catch(e) {}
+// ===== SAMPLE ARTICLES (shown when no API key yet) =====
+const SAMPLE_ARTICLES=[
+  {id:'s1',title:'Arsenal crowned Champions League winners after historic final victory over PSG',cat:'champions-league',source:'FullTime NG',author:'Staff Reporter',date:'2026-05-31',readTime:'3 min read',excerpt:'Arsenal became European champions for the first time in their history after a dramatic 2-1 victory over Paris Saint-Germain in the Champions League Final at the Allianz Arena in Munich.',body:`<p>Arsenal became European champions for the first time in their history after a dramatic 2-1 victory over Paris Saint-Germain in the Champions League Final at the Allianz Arena in Munich on Saturday evening.</p><p>Bukayo Saka opened the scoring with a stunning long-range effort in the 23rd minute before Leandro Paredes levelled for PSG shortly before half-time.</p><p>The decisive moment came in the 78th minute when substitute Kai Havertz headed home from a corner to seal a historic triumph for Mikel Arteta's side.</p><p><strong>It was Arsenal's first European Cup in their 138-year history</strong>, and the scenes of celebration in north London were unlike anything the club had witnessed before.</p>`,image:'',url:'#',featured:true},
+  {id:'s2',title:'Mbappe set for shock return to PSG as Real Madrid prepare €200m sale',cat:'transfers',source:'Transfer Daily',author:'Transfer Desk',date:'2026-05-30',readTime:'2 min read',excerpt:'Kylian Mbappe could be heading back to Paris Saint-Germain in a stunning €200 million deal this summer according to reports from France.',body:`<p>Kylian Mbappe is reportedly set for a shock return to Paris Saint-Germain just one year after joining Real Madrid, with the French giants preparing a stunning €200 million offer.</p><p>The French superstar has struggled at the Bernabeu despite scoring regularly, and sources close to the player suggest he is open to a return to Paris.</p><p><strong>PSG president Nasser Al-Khelaifi</strong> is believed to have held talks with Mbappe's representatives during the Champions League Final week in Munich.</p>`,image:'',url:'#',featured:false},
+  {id:'s3',title:'Premier League 2026/27 fixtures released — Arsenal open at Man City',cat:'premier-league',source:'FullTime NG',author:'Sports Desk',date:'2026-05-29',readTime:'2 min read',excerpt:'The Premier League have released the fixtures for the 2026/27 season with champions Arsenal facing a tough opener at Manchester City.',body:`<p>The Premier League have released the full fixture list for the 2026/27 season, with reigning champions Arsenal handed a tough opener away at Manchester City on August 15th.</p><p>Liverpool begin their campaign against Newcastle United at Anfield, while Chelsea host Tottenham Hotspur in a London derby on the opening weekend.</p><p>The season concludes on May 24th, 2027 with all 20 clubs playing simultaneously on the final day.</p>`,image:'',url:'#',featured:false},
+  {id:'s4',title:'Super Eagles call-up: Osimhen returns as coach names 25-man squad for AFCON qualifier',cat:'npfl',source:'NFF Updates',author:'Nigeria Desk',date:'2026-05-28',readTime:'3 min read',excerpt:'Victor Osimhen has been recalled to the Super Eagles squad for next month\'s AFCON qualifiers against Libya and Algeria.',body:`<p>Nigeria head coach Eric Chelle has named a 25-man squad for the upcoming Africa Cup of Nations qualifying matches against Libya and Algeria, with Victor Osimhen making his return after missing the last two international windows through injury.</p><p>The Galatasaray striker last featured for Nigeria in October 2025 and his return will be a major boost for the Super Eagles' qualifying campaign.</p><p><strong>Key inclusions</strong> also include Samuel Chukwueze, Ademola Lookman and Calvin Bassey, while there are debut call-ups for NPFL stars Emmanuel Ojo and Chisom Egbuchulam.</p>`,image:'',url:'#',featured:false},
+  {id:'s5',title:'Match Preview: El Clasico — Barcelona vs Real Madrid, La Liga Matchday 38',cat:'preview',source:'FullTime NG',author:'Analysis Desk',date:'2026-05-27',readTime:'4 min read',excerpt:'Barcelona host Real Madrid in a title-deciding El Clasico at Camp Nou on Sunday evening. Here is our full preview.',body:`<p>The most eagerly anticipated El Clasico of the season arrives on Sunday evening as Barcelona host Real Madrid at Camp Nou in what could prove to be a title-decider with just one match remaining in the La Liga season.</p><p><strong>Barcelona</strong> go into the match knowing a win will seal their first league title since 2023, while Real Madrid need nothing less than three points to keep their slim hopes alive.</p><p>Lewandowski has been in outstanding form with 26 goals this season, while Vinicius Jr. will be looking to terrorise the Barcelona backline once more.</p><p>Our prediction: <strong>Barcelona 2-1 Real Madrid</strong> — a tight match but the home advantage and title motivation gives Barca the edge.</p>`,image:'',url:'#',featured:false},
+  {id:'s6',title:'REPORT: Crystal Palace beat Rayo Vallecano in Conference League Final',cat:'report',source:'Match Reports',author:'Match Desk',date:'2026-05-27',readTime:'2 min read',excerpt:'Crystal Palace won the UEFA Conference League for the first time after beating Rayo Vallecano 1-0 in the final.',body:`<p>Crystal Palace claimed their first ever European trophy on Wednesday evening, beating Rayo Vallecano 1-0 in the UEFA Conference League Final to complete a remarkable journey to continental glory.</p><p>The only goal of the game came in the second half when Jean-Philippe Mateta converted from close range after Eberechi Eze's shot had been parried by the goalkeeper.</p><p><strong>Palace manager Oliver Glasner</strong> became emotional after the final whistle, dedicating the win to the club's supporters who had waited decades for a moment like this.</p>`,image:'',url:'#',featured:false}
+];
 
-// ===== DARK MODE =====
-function initTheme() {
-  const saved = localStorage.getItem('ft_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
-  updateThemeBtn(saved);
-}
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  try { localStorage.setItem('ft_theme', next); } catch(e) {}
-  updateThemeBtn(next);
-  showToast(next === 'dark' ? '🌙 Dark mode on' : '☀️ Light mode on');
-}
-function updateThemeBtn(theme) {
-  const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-}
-
-// ===== TOAST =====
-function showToast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
-
-// ===== PUSH NOTIFICATIONS =====
-function initNotifications() {
-  try {
-    const dismissed = localStorage.getItem('ft_notify_dismissed');
-    const granted = localStorage.getItem('ft_notify_granted');
-    if (dismissed || granted || Notification.permission === 'granted') {
-      document.getElementById('notify-bar').classList.add('hidden');
-      if (Notification.permission === 'granted') localStorage.setItem('ft_notify_granted','1');
-    }
-  } catch(e) {}
-}
-
-function requestNotifications() {
-  if (!('Notification' in window)) {
-    showToast('❌ Notifications not supported on this browser');
-    dismissNotify();
-    return;
-  }
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      try { localStorage.setItem('ft_notify_granted','1'); } catch(e) {}
-      dismissNotify();
-      showToast('🔔 Notifications enabled! We\'ll alert you when matches go live.');
-      // Send a test notification
-      setTimeout(() => {
-        new Notification('FullTime Football ⚽', {
-          body: 'Notifications enabled! You\'ll be alerted when matches go live.',
-          icon: 'icon-192.png',
-          badge: 'icon-72.png'
-        });
-      }, 1000);
-    } else {
-      showToast('Notifications blocked. You can enable them in browser settings.');
-      dismissNotify();
-    }
+// ===== INIT =====
+function wfb(cb){if(typeof firebase!=='undefined'&&firebase.firestore)cb();else setTimeout(()=>wfb(cb),100);}
+window.addEventListener('load',()=>{
+  wfb(()=>{
+    try{if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(FB);}catch(e){}
+    db=firebase.firestore();
+    loadMatchesFromFirebase();
   });
-}
+  loadNews();
+});
 
-function dismissNotify() {
-  document.getElementById('notify-bar').classList.add('hidden');
-  try { localStorage.setItem('ft_notify_dismissed','1'); } catch(e) {}
-}
+// ===== LOAD NEWS =====
+async function loadNews(){
+  // Try Firebase custom articles first
+  let fbArticles=[];
+  try{
+    if(db){
+      const snap=await db.collection('articles').orderBy('date','desc').limit(20).get();
+      snap.forEach(doc=>fbArticles.push({id:doc.id,...doc.data()}));
+    }
+  }catch(e){}
 
-function sendLiveNotification(match) {
-  if (Notification.permission === 'granted') {
-    new Notification(`⚽ ${match.home} vs ${match.away} is LIVE!`, {
-      body: `${match.comp || 'Football'} — Watch now on FullTime`,
-      icon: 'icon-192.png',
-      badge: 'icon-72.png',
-      tag: match.id,
-      requireInteraction: true
-    });
+  // Try free news API
+  let apiArticles=[];
+  if(NEWS_API_KEY&&NEWS_API_KEY!=='YOUR_NEWSAPI_KEY'){
+    try{
+      const r=await fetch(NEWS_API_URL);
+      const data=await r.json();
+      if(data.articles){
+        apiArticles=data.articles.filter(a=>a.title&&a.title!=='[Removed]').map((a,i)=>({
+          id:'api_'+i,title:a.title,cat:guessCategory(a.title+' '+(a.description||'')),
+          source:a.source.name,author:a.author||a.source.name,
+          date:a.publishedAt?a.publishedAt.split('T')[0]:'',
+          readTime:Math.ceil((a.content||a.description||'').split(' ').length/200)+' min read',
+          excerpt:a.description||'',body:`<p>${(a.content||a.description||'').replace(/\[\+\d+ chars\]/,'')}</p>`,
+          image:a.urlToImage||'',url:a.url||'#',featured:i===0
+        }));
+      }
+    }catch(e){}
   }
+
+  // Merge: Firebase articles + API articles + samples
+  allArticles=[...fbArticles,...apiArticles];
+  if(!allArticles.length) allArticles=[...SAMPLE_ARTICLES];
+
+  renderNews();
+  renderTicker();
+  renderTrending();
 }
 
-// ===== LOAD MATCHES =====
-function loadMatches() {
-  const list = document.getElementById('match-list');
-  list.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><span>Loading matches…</span></div>';
-
-  db.collection('matches').orderBy('date','desc').get()
-    .then(snapshot => {
-      const prev = _matches.map(m => m.id);
-      _matches = [];
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        if (!d.hidden) _matches.push({ id: doc.id, ...d });
-      });
-
-      // Check for newly live matches → send notification
-      _matches.filter(m => m.status === 'live').forEach(m => {
-        if (!prev.includes(m.id)) sendLiveNotification(m);
-      });
-
-      renderAll();
-      updateFeatured();
-      updateLiveCount();
-      updateLiveScores();
-    })
-    .catch(err => {
-      list.innerHTML = '<div class="ls-loading"><span style="color:var(--red)">Failed to load. <span onclick="loadMatches()" style="cursor:pointer;text-decoration:underline">Retry</span></span></div>';
-    });
+function guessCategory(text){
+  const t=text.toLowerCase();
+  if(t.includes('transfer')||t.includes('sign')||t.includes('deal')||t.includes('move')||t.includes('fee')) return 'transfers';
+  if(t.includes('preview')||t.includes('prediction')||t.includes('ahead of')||t.includes('facing')) return 'preview';
+  if(t.includes('report')||t.includes('beat')||t.includes('win')||t.includes('lost')||t.includes('draw')) return 'report';
+  if(t.includes('champions league')||t.includes('ucl')||t.includes('european')) return 'champions-league';
+  if(t.includes('premier league')||t.includes('epl')) return 'premier-league';
+  if(t.includes('la liga')||t.includes('barcelona')||t.includes('real madrid')) return 'la-liga';
+  if(t.includes('nigeria')||t.includes('super eagles')||t.includes('npfl')) return 'npfl';
+  return 'football';
 }
 
-// ===== RENDER =====
-function renderAll() {
-  const list = document.getElementById('match-list');
-  let filtered = [..._matches];
-  if (activeFilter === 'live') filtered = _matches.filter(m => m.status === 'live');
-  else if (activeFilter === 'upcoming') filtered = _matches.filter(m => m.status === 'upcoming');
-  else if (activeFilter === 'finished') filtered = _matches.filter(m => m.status === 'finished');
-  else if (activeFilter === 'pl') filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('premier'));
-  else if (activeFilter === 'ucl') filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('champion'));
-  else if (activeFilter === 'laliga') filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('liga'));
-
-  const mc = document.getElementById('mc');
-  mc.textContent = filtered.length + ' match' + (filtered.length !== 1 ? 'es' : '');
-
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><p>No matches found</p></div>';
+// ===== RENDER NEWS =====
+function renderNews(){
+  document.getElementById('loading-news').style.display='none';
+  document.getElementById('news-content').style.display='';
+  const filtered=currentCat==='all'?allArticles:allArticles.filter(a=>a.cat===currentCat);
+  if(!filtered.length){
+    document.getElementById('news-content').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><div class="empty-t">No Articles Found</div></div>`;
     return;
   }
+  const feat=filtered.find(a=>a.featured)||filtered[0];
+  const rest=filtered.filter(a=>a.id!==feat.id);
+  const catLabel=a=>({transfers:'Transfer',preview:'Preview',report:'Match Report','champions-league':'UCL','premier-league':'Premier League','la-liga':'La Liga',npfl:'Nigeria',football:'Football'}[a.cat]||'Football');
+  const timeAgo=d=>{
+    try{const diff=(new Date()-new Date(d))/1000/60;if(diff<60)return Math.floor(diff)+'m ago';if(diff<1440)return Math.floor(diff/60)+'h ago';return Math.floor(diff/1440)+'d ago';}catch(e){return d;}
+  };
+  const imgHtml=url=>url?`<img src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div class="news-card-img-placeholder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
 
-  const order = { live:0, upcoming:1, finished:2 };
-  filtered.sort((a,b) => (order[a.status]??1) - (order[b.status]??1));
-  list.innerHTML = filtered.map((m,i) => buildCard(m,i)).join('');
-}
-
-function buildCard(m, i) {
-  const idx = _matches.indexOf(m);
-  const isLive = m.status === 'live';
-  const isFt = m.status === 'finished';
-
-  const badge = isLive
-    ? `<div class="mc-status-badge live"><div class="ldot"></div>${m.minute?m.minute+"'":'LIVE'}</div>`
-    : isFt ? `<div class="mc-status-badge ft">FT</div>`
-    : `<div class="mc-status-badge upcoming">${m.time||'TBC'}</div>`;
-
-  const center = isLive || isFt
-    ? `<div class="mc-score">${m.hscore??0}<span class="mc-score-sep"> - </span>${m.ascore??0}</div>${isLive&&m.minute?`<div class="mc-minute">${m.minute}'</div>`:''}`
-    : `<div class="mc-kickoff">${m.time||'TBC'}</div><div class="mc-kickoff-lbl">Kick off</div>`;
-
-  const btnClass = isLive ? '' : isFt ? 'replay' : 'preview';
-  const btnText = isLive ? '▶ WATCH LIVE' : isFt ? '▶ WATCH REPLAY' : '⏰ SET REMINDER';
-
-  return `<div class="match-card" style="animation-delay:${i*0.04}s" onclick="openMatchByIndex(${idx})">
-    <div class="mc-header">
-      <span class="mc-league-name">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
-      ${badge}
-    </div>
-    <div class="mc-body">
-      <div class="mc-teams-row">
-        <div class="mc-team">
-          <div class="mc-crest-wrap"><img src="${m.hlogo||''}" onerror="this.style.display='none'" alt=""></div>
-          <div class="mc-team-name">${m.home}</div>
-        </div>
-        <div class="mc-center">${center}</div>
-        <div class="mc-team">
-          <div class="mc-crest-wrap"><img src="${m.alogo||''}" onerror="this.style.display='none'" alt=""></div>
-          <div class="mc-team-name">${m.away}</div>
+  // Hero
+  const heroHtml=`<div class="hero-wrap" style="margin-bottom:16px;border-radius:var(--r);overflow:hidden">
+    <div class="hero-article" onclick="openArticle('${feat.id}')">
+      ${feat.image?`<img class="hero-img" src="${feat.image}" alt="" onerror="this.style.display='none'">`:''}
+      <div class="hero-img-placeholder"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-cat">${catLabel(feat)}</div>
+        <div class="hero-title">${feat.title}</div>
+        <div class="hero-meta">
+          <div class="hero-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${timeAgo(feat.date)}</div>
+          <div class="hero-meta-item">${feat.source||'FullTime NG'}</div>
+          <div class="hero-meta-item">${feat.readTime||'2 min read'}</div>
         </div>
       </div>
-      <button class="mc-watch-btn ${btnClass}" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
     </div>
   </div>`;
+
+  // Top stories
+  const top=rest.slice(0,4);
+  const topHtml=top.map(a=>`<div class="news-card" onclick="openArticle('${a.id}')">
+    <div class="news-card-img">${imgHtml(a.image)}<div class="news-card-cat">${catLabel(a)}</div></div>
+    <div class="news-card-body">
+      <div class="news-card-title">${a.title}</div>
+      <div class="news-card-meta">
+        <span class="news-card-source">${a.source||'FullTime NG'}</span>
+        <span class="news-card-dot"></span>
+        <span class="news-card-time">${timeAgo(a.date)}</span>
+      </div>
+    </div>
+  </div>`).join('');
+
+  // Latest articles list
+  const latest=rest.slice(4);
+  const latestHtml=latest.length?`
+    <div class="sec-hdr"><div class="sec-hdr-left"><div class="sec-hdr-line"></div><div class="sec-title">Latest News</div></div></div>
+    ${latest.map(a=>`<div class="article-row" onclick="openArticle('${a.id}')">
+      <div class="article-row-img">${a.image?`<img src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` :`<div class="article-row-img-pl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="21 15 16 10 5 21"/></svg></div>`}<div class="article-row-cat">${catLabel(a)}</div></div>
+      <div class="article-row-body">
+        <div class="article-row-title">${a.title}</div>
+        <div class="article-row-meta"><span class="article-row-source">${a.source||'FullTime NG'}</span><span class="news-card-dot" style="margin:0 4px"></span><span class="article-row-time">${timeAgo(a.date)}</span></div>
+      </div>
+    </div>`).join('')}`:'';
+
+  document.getElementById('news-content').innerHTML=heroHtml+
+    `<div class="sec-hdr"><div class="sec-hdr-left"><div class="sec-hdr-line"></div><div class="sec-title">Top Stories</div></div></div>`+
+    `<div class="news-grid">${topHtml}</div>`+
+    latestHtml;
 }
 
-function openMatchByIndex(idx) {
-  const m = _matches[idx];
-  if (m) openWatch(m);
+// ===== OPEN ARTICLE =====
+function openArticle(id){
+  const a=allArticles.find(x=>x.id===id);if(!a)return;
+  document.getElementById('art-source').textContent=a.source||'FullTime NG';
+  document.getElementById('art-cat').textContent=({transfers:'💸 Transfer News',preview:'📋 Match Preview',report:'📰 Match Report','champions-league':'🏆 Champions League','premier-league':'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League','la-liga':'🇪🇸 La Liga',npfl:'🇳🇬 Nigeria'}[a.cat]||'⚽ Football');
+  document.getElementById('art-title').textContent=a.title;
+  document.getElementById('art-date').textContent=a.date||'';
+  document.getElementById('art-read').textContent=a.readTime||'2 min read';
+  document.getElementById('art-img-wrap').innerHTML=a.image?`<img src="${a.image}" alt="${a.title}" style="width:100%;border-radius:8px" onerror="this.parentElement.style.display='none'">`:'';
+  if(!a.image)document.getElementById('art-img-wrap').style.display='none';
+  else document.getElementById('art-img-wrap').style.display='';
+  document.getElementById('art-body').innerHTML=a.body||`<p>${a.excerpt||''}</p>`;
+  const extLink=document.getElementById('art-ext-link');
+  if(a.url&&a.url!=='#'){extLink.href=a.url;extLink.style.display='';}
+  else extLink.style.display='none';
+  document.getElementById('art-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeArticle(){
+  document.getElementById('art-overlay').classList.remove('open');
+  document.body.style.overflow='';
 }
 
-// ===== FEATURED =====
-function updateFeatured() {
-  const live = _matches.filter(m => m.status === 'live');
-  if (!live.length) return;
-  const m = live[0];
-  const card = document.getElementById('feat-card');
-  if (card) { card.style.display = 'block'; window._featIdx = _matches.indexOf(m); }
-  const set = (id,val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
-  set('feat-comp', m.comp||'');
-  set('feat-hname', m.home);
-  set('feat-aname', m.away);
-  set('feat-hs', m.hscore??0);
-  set('feat-as', m.ascore??0);
-  const hl = document.getElementById('feat-hlogo'); if(hl&&m.hlogo) hl.src=m.hlogo;
-  const al = document.getElementById('feat-alogo'); if(al&&m.alogo) al.src=m.alogo;
+// ===== TICKER =====
+function renderTicker(){
+  const items=allArticles.slice(0,8).map(a=>`<span class="ticker-item"><span class="ticker-dot">●</span>${a.title}</span>`).join('');
+  document.getElementById('ticker-inner').innerHTML=items+items;
 }
-function openFeatWatch() { if(window._featIdx!==undefined) openMatchByIndex(window._featIdx); }
 
-// ===== LIVE COUNT =====
-function updateLiveCount() {
-  const n = _matches.filter(m => m.status === 'live').length;
-  document.getElementById('live-count').textContent = n + ' Live';
+// ===== TRENDING =====
+function renderTrending(){
+  const tl=document.getElementById('trending-list');
+  tl.innerHTML=allArticles.slice(0,8).map((a,i)=>`<div class="trending-item" onclick="openArticle('${a.id}')">
+    <div class="trending-num${i<3?' hot':''}">${i+1}</div>
+    <div><div class="trending-title">${a.title}</div><div class="trending-cat">${a.source||'FullTime NG'}</div></div>
+  </div>`).join('');
 }
 
 // ===== FILTER =====
-function filterMatches(f, btn) {
-  activeFilter = f;
-  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAll();
+function filterCat(cat,el){
+  currentCat=cat;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(cat==='scores'){
+    document.getElementById('main-col').innerHTML=`<div id="loading-news" class="loading" style="display:none"></div><div id="news-content"></div>`;
+    renderScoresPage();
+  } else {
+    if(!document.getElementById('news-content')){
+      document.getElementById('main-col').innerHTML=`<div id="loading-news" class="loading" style="display:none"></div><div id="news-content"></div>`;
+    }
+    renderNews();
+  }
 }
 
-// ===== LIVE SCORES =====
-function updateLiveScores() {
-  const list = document.getElementById('livescores-list');
-  const count = document.getElementById('ls-count');
-  const live = _matches.filter(m => m.status === 'live');
-  if (!live.length) {
-    count.textContent = 'None';
-    list.innerHTML = '<div class="ls-loading"><span>No live matches right now</span></div>';
-    return;
-  }
-  count.textContent = live.length + ' live';
-  list.innerHTML = '<div class="ls-grid">' + live.map(m => {
-    const idx = _matches.indexOf(m);
-    return `<div class="ls-card" onclick="openMatchByIndex(${idx})">
-      <div class="ls-left">
-        <div class="ls-comp">${m.comp||'Football'}</div>
-        <div class="ls-teams">
-          <div class="ls-team-row"><span class="ls-team-name">${m.home}</span><span class="ls-score">${m.hscore??0}</span></div>
-          <div class="ls-team-row"><span class="ls-team-name">${m.away}</span><span class="ls-score">${m.ascore??0}</span></div>
+// ===== SCORES PAGE =====
+function renderScoresPage(){
+  const nc=document.getElementById('news-content');
+  nc.style.display='';
+  if(!allMatches.length){nc.innerHTML=`<div class="loading"><div class="spinner"></div>Loading scores…</div>`;return;}
+  const order={live:0,upcoming:1,finished:2};
+  const sorted=[...allMatches].sort((a,b)=>(order[a.status]??1)-(order[b.status]??1));
+  nc.innerHTML=`<div class="sec-hdr"><div class="sec-hdr-left"><div class="sec-hdr-line"></div><div class="sec-title">Today's Scores</div></div></div>`+
+    sorted.map(m=>`<div class="article-row" style="cursor:default">
+      <div style="padding:12px 14px;flex:1">
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">${m.comp||'Football'}${m.round?' · '+m.round:''}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Oswald',sans-serif;font-weight:600;font-size:.85rem;flex:1">${m.home}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;min-width:50px;text-align:center;background:#f3f4f6;border-radius:5px;padding:2px 8px">${m.status!=='upcoming'?(m.hscore??0)+' – '+(m.ascore??0):m.time||'TBC'}</span>
+          <span style="font-family:'Oswald',sans-serif;font-weight:600;font-size:.85rem;flex:1;text-align:right">${m.away}</span>
         </div>
+        ${m.status==='live'?`<div style="font-family:'Oswald',sans-serif;font-size:.6rem;color:var(--accent);font-weight:700;margin-top:4px;display:flex;align-items:center;gap:4px"><span class="ldot" style="background:var(--accent)"></span>LIVE ${m.minute?m.minute+"'":''}</div>`:''}
       </div>
-      <div class="ls-right"><span class="ls-min">${m.minute?m.minute+"'":'LIVE'}</span><span class="ls-status">LIVE</span></div>
-    </div>`;
-  }).join('') + '</div>';
+    </div>`).join('');
 }
 
-// ===== WATCH MODAL =====
-function openWatch(m) {
-  currentMatch = m;
-  document.getElementById('w-teams').textContent = m.home + ' vs ' + m.away;
-  document.getElementById('w-meta').textContent = (m.comp||'') + (m.status==='live' ? ' · LIVE'+(m.minute?' '+m.minute+"'":'') : m.status==='finished' ? ' · Full Time' : ' · '+(m.time||'Upcoming'));
-
-  // Reset player
-  const iframe = document.getElementById('stream-iframe');
-  iframe.style.display = 'none';
-  iframe.src = '';
-  document.getElementById('vid-ph').style.display = 'flex';
-  document.getElementById('vid-loading').classList.remove('show');
-  document.getElementById('vid-top-lbl').textContent = m.status === 'finished' ? 'REPLAY' : 'LIVE STREAM';
-  document.getElementById('vid-sub-lbl').textContent = m.stream ? 'Tap to play' : 'No stream available';
-  if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
-  matchSeconds = m.minute ? m.minute * 60 : 0;
-  document.getElementById('prog-fill').style.width = m.minute ? Math.min((m.minute/90)*100,100)+'%' : '0%';
-  document.getElementById('match-min').textContent = m.minute ? m.minute+"'" : '';
-
-  // Multiple streams
-  const selector = document.getElementById('stream-selector');
-  if (m.streams && m.streams.length > 1) {
-    selector.style.display = 'flex';
-    selector.innerHTML = '<span class="stream-label">Streams:</span>' +
-      m.streams.map((s,i) => `<button class="stream-btn${i===0?' active':''}" onclick="switchStream('${s.url}',this)">${s.label||'Stream '+(i+1)}</button>`).join('');
-  } else {
-    selector.style.display = 'none';
-  }
-
-  // Events
-  const evList = document.getElementById('ev-list');
-  evList.innerHTML = m.events && m.events.length
-    ? m.events.map(e => `<div class="ev-item"><span class="ev-min">${e.min}'</span><span class="ev-ico">${e.type==='goal'?'⚽':e.type==='yellow'?'🟨':e.type==='red'?'🟥':'↔️'}</span><div><div class="ev-player">${e.player}</div><div class="ev-detail">${e.detail||''}</div></div></div>`).join('')
-    : '<div style="padding:16px 0;text-align:center;font-family:Oswald,sans-serif;font-size:.8rem;color:var(--text3)">No events yet</div>';
-
-  document.getElementById('watch-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeWatch() {
-  document.getElementById('watch-overlay').classList.remove('open');
-  document.getElementById('stream-iframe').src = '';
-  document.body.style.overflow = '';
-  if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
-}
-
-function startStream() {
-  if (!currentMatch) return;
-  if (!currentMatch.stream && !(currentMatch.streams && currentMatch.streams.length)) {
-    showToast('⚠️ No stream available for this match');
-    return;
-  }
-  const url = currentMatch.stream || (currentMatch.streams && currentMatch.streams[0].url);
-  loadStreamUrl(url);
-}
-
-function loadStreamUrl(url) {
-  const iframe = document.getElementById('stream-iframe');
-  const loading = document.getElementById('vid-loading');
-  document.getElementById('vid-ph').style.display = 'none';
-  loading.classList.add('show');
-  iframe.src = url;
-  iframe.style.display = 'block';
-  iframe.onload = () => {
-    loading.classList.remove('show');
-    // Start progress timer for live matches
-    if (currentMatch && currentMatch.status === 'live') {
-      if (progressTimer) clearInterval(progressTimer);
-      progressTimer = setInterval(() => {
-        matchSeconds++;
-        const min = Math.floor(matchSeconds / 60);
-        const pct = Math.min((min/90)*100, 100);
-        document.getElementById('prog-fill').style.width = pct + '%';
-        document.getElementById('match-min').textContent = min + "'";
-        document.getElementById('match-time').textContent = 'LIVE';
-      }, 1000);
-    }
-  };
-}
-
-function switchStream(url, btn) {
-  document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  loadStreamUrl(url);
-}
-
-function setQuality(q, btn) {
-  currentQuality = q;
-  document.querySelectorAll('.ql-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  showToast('Quality: ' + q.toUpperCase());
-}
-
-function toggleMute() {
-  muted = !muted;
-  document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
-  const iframe = document.getElementById('stream-iframe');
-  try { iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:muted?'mute':'unMute'}),'*'); } catch(e) {}
-  showToast(muted ? '🔇 Muted' : '🔊 Unmuted');
-}
-
-function openFullscreen() {
-  const iframe = document.getElementById('stream-iframe');
-  const el = iframe.style.display === 'block' ? iframe : document.querySelector('.vid-wrap');
-  if (el.requestFullscreen) el.requestFullscreen();
-  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-}
-
-function togglePiP() {
-  const iframe = document.getElementById('stream-iframe');
-  if (document.pictureInPictureEnabled && iframe.style.display === 'block') {
-    try {
-      if (document.pictureInPictureElement) document.exitPictureInPicture();
-      showToast('⧉ Picture-in-Picture activated');
-    } catch(e) { showToast('PiP not available for this stream'); }
-  } else {
-    showToast('⧉ Start the stream first');
-  }
-}
-
-function seekStream(e) {
-  const bar = e.currentTarget;
-  const pct = e.offsetX / bar.offsetWidth;
-  document.getElementById('prog-fill').style.width = (pct*100)+'%';
-  matchSeconds = Math.floor(pct * 90 * 60);
-}
-
-// ===== WATCH TABS =====
-function wTab(el, tab) {
-  document.querySelectorAll('.w-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  const content = document.getElementById('w-content');
-  const m = currentMatch;
-  if (tab === 'events') {
-    content.innerHTML = '<div class="ev-list">' + (m&&m.events&&m.events.length
-      ? m.events.map(e => `<div class="ev-item"><span class="ev-min">${e.min}'</span><span class="ev-ico">${e.type==='goal'?'⚽':'🟨'}</span><div class="ev-player">${e.player}</div></div>`).join('')
-      : '<div style="padding:16px 0;text-align:center;font-family:Oswald,sans-serif;font-size:.8rem;color:var(--text3)">No events yet</div>') + '</div>';
-  } else if (tab === 'stats') {
-    const stats = (m&&m.stats) || [{name:'Possession',h:52,a:48},{name:'Shots',h:7,a:5},{name:'Corners',h:4,a:3},{name:'Fouls',h:8,a:10}];
-    content.innerHTML = stats.map(s => {
-      const total = (s.h||0)+(s.a||0)||1;
-      return `<div class="stat-row"><div class="stat-labels"><span class="stat-home">${s.h||0}${s.name==='Possession'?'%':''}</span><span class="stat-lname">${s.name}</span><span class="stat-away">${s.a||0}${s.name==='Possession'?'%':''}</span></div><div class="stat-bar"><div class="stat-prog" style="width:${Math.round((s.h||0)/total*100)}%"></div></div></div>`;
-    }).join('');
-  } else {
-    content.innerHTML = `<div style="font-family:Oswald,sans-serif;font-size:.8rem;color:var(--text3);padding:16px 0;text-align:center">${(m&&m.lineup)||'Lineup not available'}</div>`;
-  }
-}
-
-// ===== REMINDER =====
-function showReminder(m) {
-  showToast(`⏰ Reminder set for ${m.home} vs ${m.away}!`, 3500);
-  try {
-    const reminders = JSON.parse(localStorage.getItem('ft_reminders')||'[]');
-    if (!reminders.find(r => r.id===m.id)) {
-      reminders.push({id:m.id,home:m.home,away:m.away,time:m.time});
-      localStorage.setItem('ft_reminders', JSON.stringify(reminders));
-    }
-  } catch(e) {}
-  if (Notification.permission === 'granted') {
-    new Notification(`⏰ Reminder: ${m.home} vs ${m.away}`, {
-      body: `Kick-off: ${m.time||'Today'} — ${m.comp||'Football'}`,
-      icon: 'icon-192.png'
+// ===== FIREBASE MATCHES =====
+function loadMatchesFromFirebase(){
+  if(!db)return;
+  db.collection('matches').orderBy('date','desc').get().then(snap=>{
+    allMatches=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      if(!d.hidden){
+        const m={id:doc.id,...d};
+        m.status=calcStatus(m);
+        if(m.status==='live'&&!m.minute)m.minute=calcMin(m);
+        allMatches.push(m);
+      }
     });
-  }
+    renderScoresWidget();
+    updateNavLive();
+    setTimeout(loadMatchesFromFirebase,60000);
+  }).catch(()=>{});
+}
+function calcStatus(m){
+  if(m.status==='finished')return 'finished';
+  try{let t=null;if(m.date&&m.date.seconds)t=new Date(m.date.seconds*1000);else if(m.date)t=new Date(m.date+' '+(m.time||'00:00'));if(!t||isNaN(t))return m.status||'upcoming';const d=(new Date()-t)/60000;if(d<-5)return 'upcoming';if(d<105)return 'live';return 'finished';}catch(e){return m.status||'upcoming';}
+}
+function calcMin(m){
+  try{let t=null;if(m.date&&m.date.seconds)t=new Date(m.date.seconds*1000);else if(m.date)t=new Date(m.date+' '+(m.time||'00:00'));if(!t||isNaN(t))return null;const d=Math.floor((new Date()-t)/60000);if(d<0)return null;if(d<=45)return d;if(d<=60)return'45+';if(d<=105)return d-15;return 90;}catch(e){return null;}
+}
+function updateNavLive(){
+  const live=allMatches.filter(m=>m.status==='live').length;
+  const nl=document.getElementById('nav-live');
+  if(live>0){nl.style.display='flex';document.getElementById('nav-live-n').textContent=live;}
+  else nl.style.display='none';
+}
+function renderScoresWidget(){
+  const sl=document.getElementById('scores-list');
+  const ss=document.getElementById('scores-sub');
+  const live=allMatches.filter(m=>m.status==='live').length;
+  ss.textContent=live?live+' live':'All results';
+  if(!allMatches.length){sl.innerHTML=`<div class="scores-empty">No matches today</div>`;return;}
+  const sorted=[...allMatches].sort((a,b)=>({live:0,upcoming:1,finished:2}[a.status]??1)-({live:0,upcoming:1,finished:2}[b.status]??1));
+  sl.innerHTML=sorted.slice(0,6).map(m=>`<div class="score-item">
+    <div class="score-item-comp">${m.comp||'Football'}</div>
+    <div class="score-item-row">
+      <span class="score-item-team">${m.home}</span>
+      <span class="score-item-sc">${m.status!=='upcoming'?(m.hscore??0)+'-'+(m.ascore??0):'–'}</span>
+      <span class="score-item-status ${m.status==='live'?'status-live':m.status==='finished'?'status-ft':'status-up'}">${m.status==='live'?'LIVE':m.status==='finished'?'FT':m.time||'TBC'}</span>
+      <span class="score-item-team" style="text-align:right">${m.away}</span>
+    </div>
+    ${m.status==='live'&&m.minute?`<div style="font-family:'Oswald',sans-serif;font-size:.58rem;color:var(--accent);font-weight:700;margin-top:2px">${m.minute}'</div>`:''}
+  </div>`).join('');
 }
 
 // ===== SUBSCRIPTION =====
-function openSub() { document.getElementById('sub-overlay').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeSub() { document.getElementById('sub-overlay').classList.remove('open'); document.body.style.overflow=''; }
-function selPlan(p) { document.querySelectorAll('.plan').forEach(x=>x.classList.remove('sel')); document.getElementById('plan-'+p).classList.add('sel'); }
-function doSubscribe() {
-  try { localStorage.setItem('ft_subscribed','true'); } catch(e) {}
-  closeSub();
-  document.getElementById('ad-top').style.display = 'none';
-  isSubscribed = true;
-  showToast('✅ Subscribed! Enjoy ad-free football.');
-}
-function checkSubscription() {
-  if (isSubscribed) {
-    try { document.getElementById('ad-top').style.display='none'; } catch(e) {}
-  }
+function openSub(){document.getElementById('sub-ov').classList.add('open');document.body.style.overflow='hidden';}
+function closeSub(){document.getElementById('sub-ov').classList.remove('open');document.body.style.overflow='';}
+function selPlan(el,id){selPlanId=id;document.querySelectorAll('.plan-c').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function handlePay(){
+  const p=selPlanId==='yearly'?'₦10,000':'₦1,000';
+  document.getElementById('pay-note').innerHTML=`Pay <strong>${p}</strong> to GTBank Acc: <strong>1234567890</strong><br>Send proof to <strong>support@instantlivefootball.com.ng</strong><br><small style="color:green">✓ Activates within 1 hour</small>`;
+  showToast('Payment details updated below!');
 }
 
-// ===== PWA =====
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  try { if (!localStorage.getItem('ft_installed')) document.getElementById('install-banner').classList.add('show'); } catch(e) {}
-});
-document.getElementById('install-btn').addEventListener('click', () => {
-  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(r => { if(r.outcome==='accepted') dismissInstall(); deferredPrompt=null; }); }
-});
-function dismissInstall() {
-  document.getElementById('install-banner').classList.remove('show');
-  try { localStorage.setItem('ft_installed','1'); } catch(e) {}
-}
-window.addEventListener('appinstalled', dismissInstall);
-
-// ===== INIT =====
-window.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  initNotifications();
-  checkSubscription();
-  loadMatches();
-  // Auto-refresh every 60 seconds
-  setInterval(loadMatches, 60000);
-});
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+// ===== UTILS =====
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 </script>
+
+<!-- FOOTER -->
+<footer style="background:#0d1219;border-top:1px solid #1e2d3d;margin-top:32px;padding:28px 16px 20px">
+  <div style="max-width:1100px;margin:0 auto">
+
+    <!-- LOGO & TAGLINE -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+      </div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:#f0f4f8">FULLTIME <span style="color:var(--accent)">NG</span></div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.58rem;color:#3a4f63;letter-spacing:1.5px;text-transform:uppercase">Football News & Live Scores</div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <p style="font-family:'Oswald',sans-serif;font-size:.72rem;color:#4b5563;line-height:1.6;margin-bottom:18px;max-width:600px">
+      Get the latest live football scores, match results, league standings, transfer news and match previews for the
+      <a href="#" onclick="filterCat('premier-league',null)" style="color:var(--accent)">English Premier League</a>,
+      <a href="#" onclick="filterCat('champions-league',null)" style="color:var(--accent)">Champions League</a>,
+      <a href="#" onclick="filterCat('la-liga',null)" style="color:var(--accent)">La Liga</a>,
+      Serie A, Bundesliga and
+      <a href="#" onclick="filterCat('npfl',null)" style="color:var(--accent)">Nigerian football</a>.
+      Nigeria's #1 football scores and news service, direct to your mobile device.
+    </p>
+
+    <!-- LINKS -->
+    <div style="display:flex;flex-wrap:wrap;gap:0;border-top:1px solid #1e2d3d;padding-top:14px;margin-bottom:14px">
+      <a href="#" onclick="openPage('contact')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Contact Us</a>
+      <a href="mailto:ads@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Advertise</a>
+      <a href="#" onclick="openSub()" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Subscribe</a>
+      <a href="#" onclick="openPage('privacy')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Privacy Policy</a>
+      <a href="#" onclick="openPage('cookies')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Cookie Policy</a>
+      <a href="#" onclick="openPage('terms')" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Terms of Use</a>
+      <a href="mailto:support@instantlivefootball.com.ng" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;border-right:1px solid #1e2d3d;margin-right:12px;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">Careers</a>
+      <a href="#" onclick="openAbout()" style="font-family:'Oswald',sans-serif;font-size:.68rem;color:#4b5563;padding:4px 12px 4px 0;margin-bottom:8px;transition:color .13s;text-decoration:none" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#4b5563'">About Us</a>
+    </div>
+
+    <!-- SOCIAL LINKS -->
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <a href="https://m.facebook.com/instantlivefootball" target="_blank" rel="noopener" style="width:32px;height:32px;border-radius:7px;background:#1e2d3d;display:flex;align-items:center;justify-content:center;transition:background .13s;text-decoration:none" onmouseover="this.style.background='#e53935'" onmouseout="this.style.background='#1e2d3d'" title="Facebook">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+      </a>
+      <a href="#" style="width:32px;height:32px;border-radius:7px;background:#1e2d3d;display:flex;align-items:center;justify-content:center;transition:background .13s;text-decoration:none" onmouseover="this.style.background='#1da1f2'" onmouseout="this.style.background='#1e2d3d'" title="Twitter/X">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+      </a>
+      <a href="https://whatsapp.com/channel/0029VbCSOhy9xVJmdDBAaL2N" target="_blank" rel="noopener" style="width:32px;height:32px;border-radius:7px;background:#1e2d3d;display:flex;align-items:center;justify-content:center;transition:background .13s;text-decoration:none" onmouseover="this.style.background='#25d366'" onmouseout="this.style.background='#1e2d3d'" title="WhatsApp">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      </a>
+      <a href="#" style="width:32px;height:32px;border-radius:7px;background:#1e2d3d;display:flex;align-items:center;justify-content:center;transition:background .13s;text-decoration:none" onmouseover="this.style.background='#c13584'" onmouseout="this.style.background='#1e2d3d'" title="Instagram">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      </a>
+    </div>
+
+    <!-- BETTING DISCLAIMER -->
+    <div style="background:#18232f;border:1px solid #1e2d3d;border-radius:7px;padding:10px 12px;margin-bottom:14px">
+      <div style="font-family:'Oswald',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;color:#4b5563;text-transform:uppercase;margin-bottom:3px">⚠️ Responsible Gambling</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:#3a4f63;line-height:1.5">This site contains links to betting partners. Gambling should be done responsibly. 18+ only. If you have a gambling problem, call the National Problem Gambling Helpline. We do not take responsibility for third-party sites.</div>
+    </div>
+
+    <!-- COPYRIGHT -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Oswald',sans-serif;font-size:.65rem;color:#3a4f63">© 2026 FullTime NG — instantlivefootball.com.ng. All rights reserved.</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:#3a4f63">Built with ❤️ for Nigerian football fans</div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ABOUT MODAL -->
+<div class="art-overlay" id="about-overlay" onclick="if(event.target===this)closeAbout()" style="z-index:550">
+  <div class="art-modal">
+    <div class="art-modal-hdr">
+      <div class="art-modal-source">About FullTime NG</div>
+      <button class="art-modal-x" onclick="closeAbout()">✕</button>
+    </div>
+    <div class="art-modal-body">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--bd)">
+        <div style="width:50px;height:50px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+        </div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--t1)">FULLTIME <span style="color:var(--accent)">NG</span></div>
+          <div style="font-family:'Oswald',sans-serif;font-size:.62rem;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase">Nigeria's #1 Football News & Scores</div>
+        </div>
+      </div>
+      <div id="about-content" style="font-family:'Barlow',sans-serif;font-size:.9rem;line-height:1.75;color:var(--t1)"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== ABOUT PAGE =====
+const DEFAULT_ABOUT = `<p>FullTime NG is Nigeria's home for live football scores, breaking news, transfer updates, and match analysis.</p><p>Founded in 2026 by Ayodeji, we cover the <strong>English Premier League</strong>, <strong>UEFA Champions League</strong>, <strong>La Liga</strong>, <strong>Serie A</strong>, <strong>Bundesliga</strong>, and Nigerian football — from the NPFL to the Super Eagles.</p><p>Our mission is simple: give Nigerian fans fast, accurate football updates straight to their phone. No clickbait, no fake news — just football.</p><p>We also partner with licensed betting brands to bring you safe betting tips and offers. We promote responsible gambling for 18+ only.</p><p>Got a tip or complaint? Reach us at <a href="mailto:support@instantlivefootball.com.ng" style="color:var(--accent)">support@instantlivefootball.com.ng</a> or via our Contact Us page.</p><p style="margin-top:16px;font-size:.85rem;color:var(--t2)">Built with ❤️ for Nigerian football fans.</p>`;
+
+const PAGE_TITLES = {about:'About Us',privacy:'Privacy Policy',terms:'Terms of Use',cookies:'Cookie Policy',contact:'Contact Us'};
+const DEFAULT_PAGES_PUB = {
+  privacy:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Privacy Policy</h3><p>Last updated: June 2026</p><p>FullTime NG collects minimal data to improve your experience. We use Google Analytics for traffic analysis and Google AdSense for advertising. Our betting partners may set their own cookies.</p><p>For full details, email support@instantlivefootball.com.ng</p>`,
+  terms:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Terms of Use</h3><p>Last updated: June 2026</p><p>By using this site you agree to our terms. Content is for informational purposes only. Betting content is for 18+ only. We are not responsible for gambling losses.</p>`,
+  cookies:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Cookie Policy</h3><p>We use essential, analytics and advertising cookies. You can manage cookies in your browser settings.</p>`,
+  contact:`<h3 style="font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:10px">Contact Us</h3><p>📧 support@instantlivefootball.com.ng</p><p>📘 facebook.com/instantlivefootball</p><p>💬 WhatsApp Channel: whatsapp.com/channel/0029VbCSOhy9xVJmdDBAaL2N</p>`
+};
+
+async function openPage(pageId){
+  const titleEl = document.querySelector('#about-overlay .art-modal-source');
+  if(titleEl) titleEl.textContent = PAGE_TITLES[pageId]||'FullTime NG';
+  let pageContent = pageId==='about' ? DEFAULT_ABOUT : (DEFAULT_PAGES_PUB[pageId]||'');
+  try{
+    if(typeof firebase !== 'undefined' && firebase.firestore){
+      const doc = await firebase.firestore().collection('pages').doc(pageId).get();
+      if(doc.exists && doc.data().content) pageContent = doc.data().content;
+    }
+  }catch(e){}
+  document.getElementById('about-content').innerHTML = pageContent;
+  document.getElementById('about-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function openAbout(){ openPage('about'); }
+function closeAbout(){
+  document.getElementById('about-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+
 </body>
 </html>
