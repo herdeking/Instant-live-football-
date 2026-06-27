@@ -532,44 +532,6 @@ window.onerror=function(msg,src,line){
 
 <!-- STANDINGS SECTION -->
 <div id="section-standings" style="display:none">
-  <div class="section-label-bar">
-    <h2>Standings</h2>
-  </div>
-  <div style="padding:10px 12px">
-    <div class="filters-wrap" style="margin-bottom:10px">
-      <div class="filters">
-        <button class="f-btn active" onclick="loadStandings('pl',this)">Premier League</button>
-        <button class="f-btn" onclick="loadStandings('ucl',this)">UCL</button>
-        <button class="f-btn" onclick="loadStandings('laliga',this)">La Liga</button>
-        <button class="f-btn" onclick="loadStandings('seriea',this)">Serie A</button>
-        <button class="f-btn" onclick="loadStandings('bundesliga',this)">Bundesliga</button>
-      </div>
-    </div>
-    <div id="standings-container">
-      <div class="ls-loading"><div class="ls-spinner"></div><span>Loading standings…</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- STANDINGS SECTION -->
-<div id="section-standings" style="display:none">
-  <div class="section-label-bar"><h2>Standings</h2></div>
-  <div style="padding:10px 12px">
-    <div class="filters-wrap" style="margin-bottom:10px">
-      <div class="filters">
-        <button class="f-btn active" onclick="loadStandings('pl',this)">Premier League</button>
-        <button class="f-btn" onclick="loadStandings('ucl',this)">UCL</button>
-        <button class="f-btn" onclick="loadStandings('laliga',this)">La Liga</button>
-        <button class="f-btn" onclick="loadStandings('seriea',this)">Serie A</button>
-        <button class="f-btn" onclick="loadStandings('bundesliga',this)">Bundesliga</button>
-      </div>
-    </div>
-    <div id="standings-table"><div class="ls-loading"><div class="ls-spinner"></div><span>Loading…</span></div></div>
-  </div>
-</div>
-
-<!-- STANDINGS SECTION -->
-<div id="section-standings" style="display:none">
   <div class="section-label-bar"><h2>Standings</h2></div>
   <div style="padding:10px 12px">
     <div class="filters-wrap" style="margin-bottom:10px">
@@ -770,7 +732,6 @@ function toggleTheme() {
 function showSection(name, el) {
   document.getElementById('section-matches').style.display = name === 'matches' ? '' : 'none';
   document.getElementById('section-livescores').style.display = name === 'livescores' ? '' : 'none';
-  document.getElementById('section-standings').style.display = name === 'standings' ? '' : 'none';
   document.getElementById('section-standings').style.display = name === 'standings' ? '' : 'none';
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   if (el) el.classList.add('active');
