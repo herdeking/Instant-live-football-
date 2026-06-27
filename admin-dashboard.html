@@ -2,313 +2,1002 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FullTime Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FULLTIME — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- ===== FIREBASE SDK ===== -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#080c10;--s1:#0d1117;--s2:#161b22;--s3:#1c2128;--g:#00e676;--g2:#69ff47;--red:#ff1744;--yellow:#ffcc00;--blue:#2196f3;--t1:#e6edf3;--t2:#8b949e;--t3:#484f58;--bd:#21262d;--bd2:#30363d;--r:10px}
-html,body{height:100%;overflow:hidden}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
-.topbar{height:56px;background:var(--s1);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;z-index:10}
-.tb-logo{font-size:1.1rem;font-weight:800;letter-spacing:-0.5px;color:#fff}
-.tb-logo span{color:var(--g)}
-.tb-spacer{flex:1}
-.tb-date{font-size:.72rem;color:var(--t2)}
-.tb-logout{background:none;border:1px solid var(--bd2);border-radius:6px;color:var(--t2);padding:6px 12px;font-size:.75rem;cursor:pointer;min-height:36px}
-.stats-bar{display:flex;gap:0;border-bottom:1px solid var(--bd);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.stats-bar::-webkit-scrollbar{display:none}
-.stat-item{flex:1;min-width:80px;padding:12px 10px;text-align:center;border-right:1px solid var(--bd);cursor:pointer;transition:background .15s}
-.stat-item:last-child{border-right:none}
-.stat-item:active{background:var(--s2)}
-.stat-num{font-size:1.4rem;font-weight:800;line-height:1;color:#fff}
-.stat-num.green{color:var(--g)}
-.stat-num.yellow{color:var(--yellow)}
-.stat-num.blue{color:var(--blue)}
-.stat-lbl{font-size:.6rem;color:var(--t2);letter-spacing:.5px;margin-top:3px;text-transform:uppercase}
-.tab-nav{display:flex;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.tab-nav::-webkit-scrollbar{display:none}
-.tab-btn{padding:12px 16px;font-size:.75rem;font-weight:600;color:var(--t2);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;min-height:44px;letter-spacing:.3px}
-.tab-btn.active{color:var(--g);border-bottom-color:var(--g)}
-.tab-btn:active{background:var(--s2)}
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+:root{--g:#00e96b;--gd:#00b854;--red:#ff3535;--gold:#ffc107;--blue:#4fc3f7;--bg:#07090a;--s1:#0d1117;--s2:#131920;--s3:#1a2330;--bd:#1e2d3d;--bd2:#243447;--t1:#e8edf2;--t2:#8a9ab0;--t3:#4a5a6a;--live:#ff3535;--sidebar:220px}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sb-brand{padding:18px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.sb-logo{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;color:var(--g)}
+.sb-logo span{color:var(--t1)}
+.sb-badge{background:rgba(0,233,107,.12);border:1px solid rgba(0,233,107,.25);border-radius:4px;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g)}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-section{padding:8px 16px 4px;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3)}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent;text-decoration:none}
+.sb-item svg{width:16px;height:16px;fill:none;stroke:var(--t3);stroke-width:2;flex-shrink:0;transition:stroke .15s}
+.sb-item span{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem;letter-spacing:.5px;color:var(--t3);transition:color .15s}
+.sb-item:hover,.sb-item.active{background:rgba(0,233,107,.06);border-left-color:var(--g)}
+.sb-item:hover svg,.sb-item.active svg{stroke:var(--g)}
+.sb-item:hover span,.sb-item.active span{color:var(--t1)}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--bd)}
+.sb-admin{display:flex;align-items:center;gap:8px}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:rgba(0,233,107,.15);border:1px solid rgba(0,233,107,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-avatar svg{width:16px;height:16px;fill:none;stroke:var(--g);stroke-width:2}
+.sb-admin-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem}
+.sb-admin-role{font-size:.65rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif}
+.sb-logout{background:none;border:none;cursor:pointer;color:var(--t3);padding:4px;transition:color .15s}
+.sb-logout:hover{color:var(--red)}
+.sb-logout svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.main{flex:1;margin-left:var(--sidebar);display:flex;flex-direction:column;min-width:0}
+.topbar{background:rgba(13,17,23,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-date{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1px;color:var(--t3)}
+.mob-menu{display:none;background:none;border:none;cursor:pointer;color:var(--t2);padding:4px}
+@media(max-width:768px){
+  .mob-menu{display:block}
+  .sidebar{transform:translateX(-100%);position:fixed;z-index:200;width:220px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0 !important;width:100%}
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .table-wrap table{min-width:600px}
+  .topbar{padding:0 12px}
+  .content{padding:12px}
+  .form-grid{grid-template-columns:1fr}
+  .dialog{margin:0 10px;max-width:calc(100% - 20px)}
+}
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:700px){.stats-strip{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card:nth-child(1)::before{background:var(--g)}
+.stat-card:nth-child(2)::before{background:var(--live)}
+.stat-card:nth-child(3)::before{background:var(--gold)}
+.stat-card:nth-child(4)::before{background:var(--blue)}
+.stat-label{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;line-height:1}
+.stat-sub{font-size:.72rem;color:var(--t2);margin-top:3px;font-family:'Barlow Condensed',sans-serif}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2.5px}
+.btn-primary{background:var(--g);color:var(--bg);border:none;border-radius:5px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:6px}
+.btn-primary:hover{background:var(--gd)}
+.btn-primary svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.5}
+.btn-secondary{background:transparent;color:var(--t2);border:1px solid var(--bd);border-radius:5px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-secondary:hover{border-color:var(--g);color:var(--g)}
+.btn-secondary svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
 .panel{display:none}
 .panel.active{display:block}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sec-title{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
-.sec-action{background:var(--g);color:#000;border:none;border-radius:6px;padding:8px 14px;font-size:.78rem;font-weight:700;cursor:pointer;min-height:36px}
-.match-list{display:flex;flex-direction:column;gap:8px}
-.mc{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-.mc-top{display:flex;align-items:center;padding:10px 12px;gap:8px;border-bottom:1px solid var(--bd)}
-.mc-badge{font-size:.6rem;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
-.mc-badge.live{background:rgba(255,23,68,.15);color:var(--red);border:1px solid rgba(255,23,68,.3)}
-.mc-badge.upcoming{background:rgba(255,204,0,.12);color:var(--yellow);border:1px solid rgba(255,204,0,.25)}
-.mc-badge.finished{background:rgba(139,148,158,.1);color:var(--t2);border:1px solid var(--bd)}
-.mc-comp{font-size:.7rem;color:var(--t2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mc-time{font-size:.68rem;color:var(--t3);flex-shrink:0}
-.mc-body{padding:12px}
-.mc-teams{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.mc-team{flex:1;font-size:.88rem;font-weight:700;color:var(--t1)}
-.mc-team.right{text-align:right}
-.mc-score-box{background:var(--s2);border:1px solid var(--bd2);border-radius:6px;padding:4px 12px;font-size:1rem;font-weight:800;color:#fff;flex-shrink:0}
-.mc-actions{display:flex;gap:6px;flex-wrap:wrap}
-.mc-btn{flex:1;min-width:60px;padding:8px 6px;border-radius:6px;border:1px solid var(--bd2);background:var(--s2);color:var(--t2);font-size:.7rem;font-weight:600;cursor:pointer;text-align:center;min-height:36px;transition:all .15s}
-.mc-btn:active{background:var(--s3)}
-.mc-btn.live-btn{border-color:rgba(255,23,68,.4);color:var(--red);background:rgba(255,23,68,.08)}
-.mc-btn.edit-btn{border-color:rgba(0,230,118,.3);color:var(--g);background:rgba(0,230,118,.07)}
-.mc-btn.del-btn{border-color:rgba(255,23,68,.2);color:var(--red)}
-.form-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.form-title{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.form-title::before{content:"";width:3px;height:14px;background:var(--g);border-radius:2px;display:block}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:.7rem;color:var(--t2);margin-bottom:5px;font-weight:600;letter-spacing:.3px}
-.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;color:var(--t1);padding:10px 12px;font-size:.85rem;outline:none;-webkit-appearance:none;min-height:44px}
-.field input:focus,.field select:focus{border-color:var(--g)}
-.field select option{background:var(--s2)}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.btn-primary{width:100%;background:var(--g);color:#000;border:none;border-radius:8px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer;min-height:52px;margin-top:4px}
-.btn-primary:active{opacity:.85}
-.btn-secondary{width:100%;background:var(--s2);color:var(--t1);border:1px solid var(--bd2);border-radius:8px;padding:12px;font-size:.85rem;font-weight:600;cursor:pointer;min-height:48px;margin-top:8px}
-.score-editor{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.score-team{flex:1;font-size:.78rem;font-weight:700;color:var(--t1);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.score-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.score-minus,.score-plus{width:40px;height:40px;border-radius:8px;border:1px solid var(--bd2);background:var(--s2);color:var(--t1);font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:40px}
-.score-minus:active,.score-plus:active{background:var(--s3)}
-.score-val{font-size:1.5rem;font-weight:800;color:#fff;min-width:32px;text-align:center}
-.subs-list{display:flex;flex-direction:column;gap:6px}
-.sub-row{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px}
-.sub-email{flex:1;font-size:.82rem;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sub-plan{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(0,230,118,.1);color:var(--g);border:1px solid rgba(0,230,118,.2);flex-shrink:0}
-.empty{text-align:center;padding:40px 20px;color:var(--t3)}
-.empty-icon{font-size:2rem;margin-bottom:8px}
-.empty p{font-size:.82rem}
-.loading{display:flex;align-items:center;gap:10px;padding:20px;color:var(--t2);font-size:.82rem}
-.spinner{width:18px;height:18px;border:2px solid var(--bd2);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--bd2);color:var(--t1);padding:10px 18px;border-radius:24px;font-size:.8rem;font-weight:600;opacity:0;transition:all .25s;z-index:9999;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.success{border-color:rgba(0,230,118,.4);color:var(--g)}
-.toast.error{border-color:rgba(255,23,68,.4);color:var(--red)}
-.dialog-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.dialog-bg.open{opacity:1;pointer-events:all}
-.dialog{background:var(--s1);border:1px solid var(--bd);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:24px 20px;transform:translateY(40px);transition:transform .25s}
-.dialog-bg.open .dialog{transform:translateY(0)}
-.dialog h3{font-size:1rem;font-weight:700;margin-bottom:8px}
-.dialog p{font-size:.82rem;color:var(--t2);margin-bottom:20px;line-height:1.5}
-.dialog-btns{display:flex;gap:10px}
-.dialog-btns button{flex:1;padding:13px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:48px;border:none}
-.dialog-cancel{background:var(--s2);color:var(--t1);border:1px solid var(--bd2)!important}
-.dialog-confirm{background:var(--red);color:#fff}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease-in-out infinite;display:inline-block;margin-right:4px;vertical-align:middle}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.form-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:16px}
+.form-card-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.form-card-title svg{width:16px;height:16px;fill:none;stroke:var(--g);stroke-width:2}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-grid.full{grid-template-columns:1fr}
+.field-group{display:flex;flex-direction:column;gap:5px}
+.field-group.full{grid-column:1/-1}
+.field-group label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--t2)}
+.field-group input,.field-group select,.field-group textarea{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:10px 12px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;width:100%}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--g)}
+.field-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a5a6a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.field-group textarea{resize:vertical;min-height:80px;line-height:1.5}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.alert{padding:10px 14px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:.5px;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-success{background:rgba(0,233,107,.1);border:1px solid rgba(0,233,107,.25);color:var(--g)}
+.alert-error{background:rgba(255,53,53,.1);border:1px solid rgba(255,53,53,.25);color:var(--red)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--g);color:var(--t1);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.5px;padding:10px 16px;border-radius:6px;z-index:9999;display:flex;align-items:center;gap:8px;animation:slideIn .3s ease;max-width:280px}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
+.overlay.open{opacity:1;pointer-events:all}
+.dialog{background:var(--s1);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:520px;overflow:hidden;transform:scale(.95);transition:transform .25s}
+.overlay.open .dialog{transform:scale(1)}
+.dialog-hdr{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.dialog-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px}
+.dialog-close{background:none;border:none;color:var(--t2);font-size:1rem;cursor:pointer}
+.dialog-body{padding:18px}
+.dialog-footer{padding:12px 18px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+.m-admin-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.m-admin-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.m-admin-card.live::before{background:var(--live)}
+.m-admin-card.finished::before{background:var(--t3)}
+.m-admin-card.upcoming::before{background:var(--gold)}
+.m-admin-card.draft::before{background:var(--blue)}
+.mac-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mac-comp{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.pill-live{background:rgba(255,53,53,.12);color:var(--live);border:1px solid rgba(255,53,53,.25)}
+.pill-ft{background:rgba(74,90,106,.15);color:var(--t3);border:1px solid var(--bd)}
+.pill-up{background:rgba(255,193,7,.1);color:var(--gold);border:1px solid rgba(255,193,7,.25)}
+.pill-draft{background:rgba(79,195,247,.1);color:var(--blue);border:1px solid rgba(79,195,247,.25)}
+.live-dot-sm{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.mac-teams{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mac-home{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mac-away{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.mac-score{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;flex-shrink:0;text-align:center;min-width:48px}
+.mac-meta{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.mac-stream-tag{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:10px}
+.mac-stream-tag.on{color:var(--g);background:rgba(0,233,107,.1);border:1px solid rgba(0,233,107,.2)}
+.mac-stream-tag.off{color:var(--t3);background:var(--s2);border:1px solid var(--bd)}
+.mac-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.mac-btn{border:none;border-radius:6px;padding:9px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.mac-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.mac-btn.edit-btn{background:rgba(79,195,247,.1);color:var(--blue);border:1px solid rgba(79,195,247,.25)}
+.mac-btn.stream-btn{background:rgba(0,233,107,.08);color:var(--g);border:1px solid rgba(0,233,107,.25)}
+.mac-btn.del-btn{background:rgba(255,53,53,.08);color:var(--red);border:1px solid rgba(255,53,53,.2)}
+.mac-empty{text-align:center;padding:40px 16px;color:var(--t3);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;line-height:1.6}
+.embed-hint{font-size:.72rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif;margin-top:3px;line-height:1.4}
+.firebase-badge{background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:var(--gold);line-height:1.5}
+.firebase-badge strong{color:var(--t1)}
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+<div class="sb-brand">
+<div style="display:flex;align-items:center;gap:8px">
+<svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+<circle cx="16" cy="16" r="15" fill="#00e96b"/>
+<path d="M16 6.5L19.2 11.5H25.5L21 17L23 23.5L16 20L9 23.5L11 17L6.5 11.5H12.8Z" fill="#07090a"/>
+<circle cx="16" cy="16" r="3" fill="#00e96b"/>
+</svg>
+<div class="sb-logo">FULL<span>TIME</span></div>
+</div>
+<div class="sb-badge">Admin</div>
+</div>
+<nav class="sb-nav">
+<div class="sb-section">Main</div>
+<a class="sb-item active" onclick="showPanel('dashboard',this)" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="sb-item" onclick="showPanel('matches',this)" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Matches</span></a>
+<a class="sb-item" onclick="showPanel('upload',this)" href="#"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Add Match</span></a>
+<a class="sb-item" onclick="showPanel('streams',this)" href="#"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Live Streams</span></a>
+<div class="sb-section">Settings</div>
+<a class="sb-item" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>View Public Site</span></a>
+<a class="sb-item" onclick="showPanel('liveupdates',this)" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Live Updates</span></a>
+<a class="sb-item" onclick="copyPublicLink()" href="#"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><span>Copy Public Link</span></a>
+</nav>
+<div class="sb-footer">
+<div class="sb-admin">
+<div class="sb-avatar"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+<div><div class="sb-admin-name">herdeking</div><div class="sb-admin-role">Super Admin</div></div>
+<button class="sb-logout" onclick="logout()" title="Logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+</div>
+</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
 <div class="topbar">
-  <div class="tb-logo">Full<span>Time</span> <span style="font-size:.65rem;color:var(--t3);font-weight:400">Admin</span></div>
-  <div class="tb-spacer"></div>
-  <div class="tb-date" id="tb-date"></div>
-  <button class="tb-logout" onclick="logout()">Log out</button>
+<button class="mob-menu" onclick="toggleSidebar()" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(0,233,107,.1);border:1.5px solid rgba(0,233,107,.3);padding:0">
+<svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#00e96b"/><path d="M16 6.5L19.2 11.5H25.5L21 17L23 23.5L16 20L9 23.5L11 17L6.5 11.5H12.8Z" fill="#07090a"/></svg>
+</button>
+<div class="topbar-title" id="topbar-title">Dashboard</div>
+<div class="topbar-right">
+<div class="topbar-date" id="topbar-date"></div>
+<button class="btn-primary" onclick="showPanel('upload',document.querySelector('[onclick*=upload]'))">
+<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Match
+</button>
 </div>
-<div class="stats-bar">
-  <div class="stat-item" onclick="switchTab('matches',null)">
-    <div class="stat-num green" id="st-live">0</div>
-    <div class="stat-lbl">Live</div>
-  </div>
-  <div class="stat-item" onclick="switchTab('matches',null)">
-    <div class="stat-num yellow" id="st-upcoming">0</div>
-    <div class="stat-lbl">Upcoming</div>
-  </div>
-  <div class="stat-item" onclick="switchTab('matches',null)">
-    <div class="stat-num" id="st-total">0</div>
-    <div class="stat-lbl">Total</div>
-  </div>
-  <div class="stat-item" onclick="switchTab('subs',null)">
-    <div class="stat-num blue" id="st-subs">0</div>
-    <div class="stat-lbl">Subscribers</div>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-dashboard">
+<div class="firebase-badge">
+🔥 <strong>Firebase Connected</strong> — All matches are instantly visible to every visitor.
+<span style="margin-left:8px;background:rgba(0,233,107,.15);border:1px solid rgba(0,233,107,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer" onclick="window.open('index.html','_blank')">👁 View Public Site →</span>
+<span style="margin-left:4px;background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:#4fc3f7" onclick="copyPublicLink()">🔗 Copy Link</span>
+<span style="margin-left:4px;background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:var(--gold)" onclick="fixPublishedField()">🔧 Fix Visibility</span>
+</div>
+<div class="stats-strip">
+<div class="stat-card"><div class="stat-label">Live Matches</div><div class="stat-val" style="color:var(--live)" id="stat-live">0</div><div class="stat-sub">Currently live</div></div>
+<div class="stat-card"><div class="stat-label">Total Matches</div><div class="stat-val" id="stat-total">0</div><div class="stat-sub">In database</div></div>
+<div class="stat-card"><div class="stat-label">Upcoming</div><div class="stat-val" style="color:var(--gold)" id="stat-up">0</div><div class="stat-sub">Scheduled</div></div>
+<div class="stat-card"><div class="stat-label">Finished</div><div class="stat-val" style="color:var(--blue)" id="stat-ft">0</div><div class="stat-sub">Completed</div></div>
+</div>
+<div class="section-hdr">
+<div class="section-title">Recent Matches</div>
+<button class="btn-secondary" onclick="showPanel('matches',document.querySelectorAll('.sb-item')[2])"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View All</button>
+</div>
+<div id="dash-cards"></div>
+</div>
+
+<!-- MATCHES -->
+<div class="panel" id="panel-matches">
+<div class="section-hdr">
+<div class="section-title">All Matches</div>
+<button class="btn-primary" onclick="showPanel('upload',document.querySelectorAll('.sb-item')[3])">
+<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Match
+</button>
+</div>
+<div id="matches-card-list"></div>
+</div>
+
+<!-- ADD MATCH -->
+<div class="panel" id="panel-upload">
+<div class="section-hdr"><div class="section-title" id="upload-panel-title">Add New Match</div></div>
+<div id="upload-alert" class="alert alert-success"></div>
+
+<div class="form-card">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Match Details</div>
+<div class="form-grid">
+<div class="field-group"><label>Home Team</label><input type="text" id="f-home" placeholder="e.g. Arsenal"></div>
+<div class="field-group"><label>Away Team</label><input type="text" id="f-away" placeholder="e.g. Chelsea"></div>
+<div class="field-group">
+<label>Competition / League</label>
+<select id="f-comp">
+<option value="">Select competition…</option>
+<optgroup label="Top 5 Leagues">
+<option>Premier League</option><option>La Liga</option><option>Serie A</option><option>Bundesliga</option><option>Ligue 1</option>
+</optgroup>
+<optgroup label="European Cups">
+<option>UEFA Champions League</option><option>UEFA Europa League</option><option>Conference League</option><option>UEFA Super Cup</option>
+</optgroup>
+<optgroup label="Domestic Cups">
+<option>FA Cup</option><option>Carabao Cup</option><option>Copa Del Rey</option><option>DFB Pokal</option><option>Coppa Italia</option><option>Coupe de France</option>
+</optgroup>
+<optgroup label="Other European">
+<option>Eredivisie</option><option>Liga Portugal</option><option>Scottish Premiership</option><option>Super Lig</option><option>Serie B</option><option>Championship</option>
+</optgroup>
+<optgroup label="International">
+<option>World Cup</option><option>UEFA Euro</option><option>AFCON</option><option>Copa America</option><option>Nations League</option><option>Club World Cup</option>
+</optgroup>
+<optgroup label="Other Leagues">
+<option>Saudi Pro League</option><option>MLS</option><option>Liga MX</option><option>Brasileirao</option><option>J1 League</option><option>NPFL</option><option>Other</option>
+</optgroup>
+</select>
+</div>
+<div class="field-group"><label>Matchday / Round</label><input type="text" id="f-round" placeholder="e.g. Matchday 36"></div>
+<div class="field-group"><label>Match Date</label><input type="date" id="f-date"></div>
+<div class="field-group"><label>Kick-off Time (Nigerian WAT)</label><input type="time" id="f-time"></div>
+<div class="field-group"><label>Home Score</label><input type="number" id="f-hscore" placeholder="0" min="0" value="0"></div>
+<div class="field-group"><label>Away Score</label><input type="number" id="f-ascore" placeholder="0" min="0" value="0"></div>
+<div class="field-group">
+<label>Status</label>
+<select id="f-status">
+<option value="upcoming">Upcoming</option>
+<option value="live">Live</option>
+<option value="finished">Finished (FT)</option>
+<option value="draft">Draft (hidden)</option>
+</select>
+</div>
+<div class="field-group"><label>Minute (if Live)</label><input type="text" id="f-minute" placeholder="e.g. 67'"></div>
+</div>
+</div>
+
+<div class="form-card">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Live Stream Servers</div>
+<div style="font-size:.78rem;color:var(--t2);margin-bottom:14px;line-height:1.7">Add up to <strong style="color:var(--g)">3 stream servers</strong>. Viewers can switch between them if one is down. Paste a URL or full iframe embed code in each slot.</div>
+
+<!-- Server 1 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--g);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:var(--g);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">1</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 1 — Primary</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--g);background:rgba(0,233,107,.1);border:1px solid rgba(0,233,107,.2);border-radius:4px;padding:1px 6px">Main</div>
+</div>
+<div class="field-group full">
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream1" rows="3" placeholder="https://stream-server1.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Paste URL or full &lt;iframe&gt; embed code</div>
+</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 1 Label (shown to viewers)</label>
+  <input type="text" id="f-stream1-label" placeholder="e.g. HD Server 1" value="Server 1">
+</div>
+</div>
+
+<!-- Server 2 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--gold);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:var(--gold);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">2</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 2 — Backup</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--gold);background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.2);border-radius:4px;padding:1px 6px">Backup</div>
+</div>
+<div class="field-group full">
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream2" rows="3" placeholder="https://stream-server2.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Optional — shown if Server 1 fails</div>
+</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 2 Label</label>
+  <input type="text" id="f-stream2-label" placeholder="e.g. HD Server 2" value="Server 2">
+</div>
+</div>
+
+<!-- Server 3 -->
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid #4fc3f7;border-radius:8px;padding:12px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="background:#4fc3f7;color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.75rem;flex-shrink:0">3</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;color:var(--t1)">Server 3 — Extra Backup</div>
+  <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:#4fc3f7;background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.2);border-radius:4px;padding:1px 6px">Backup 2</div>
+</div>
+<div class="field-group full">
+  <label>Stream URL or Embed Code</label>
+  <textarea id="f-stream3" rows="3" placeholder="https://stream-server3.com/embed/... or paste full iframe code"></textarea>
+  <div class="embed-hint">Optional — shown if Server 1 & 2 fail</div>
+</div>
+<div class="field-group" style="margin-top:8px">
+  <label>Server 3 Label</label>
+  <input type="text" id="f-stream3-label" placeholder="e.g. SD Server 3" value="Server 3">
+</div>
+</div>
+</div>
+
+<div class="form-card">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Match Description</div>
+<div class="form-grid full">
+<div class="field-group full"><label>Match Description (shown to users)</label><textarea id="f-desc" placeholder="e.g. A top-of-the-table clash…" rows="3"></textarea></div>
+</div>
+</div>
+
+<div class="form-card">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Team Lineups (optional)</div>
+<div style="font-size:.8rem;color:var(--t2);margin-bottom:12px">Enter each player on a new line. e.g. <code style="background:var(--s2);padding:1px 5px;border-radius:3px">1. Raya (GK)</code></div>
+<div class="form-grid">
+<div class="field-group"><label id="f-home-lineup-lbl">Home Lineup</label><textarea id="f-home-lineup" rows="11" style="font-family:monospace;font-size:.8rem" placeholder="1. Player (GK)&#10;2. Player&#10;..."></textarea></div>
+<div class="field-group"><label id="f-away-lineup-lbl">Away Lineup</label><textarea id="f-away-lineup" rows="11" style="font-family:monospace;font-size:.8rem" placeholder="1. Player (GK)&#10;2. Player&#10;..."></textarea></div>
+</div>
+</div>
+
+<div class="form-actions">
+<button class="btn-secondary" onclick="clearForm()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Clear</button>
+<button class="btn-primary" onclick="saveMatch()"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save Match to Firebase</button>
+</div>
+</div>
+
+<!-- STREAMS PANEL -->
+<div class="panel" id="panel-streams">
+<div class="section-hdr"><div class="section-title">Live Stream Management</div></div>
+<div class="form-card">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Stream Options</div>
+<div style="font-size:.83rem;color:var(--t2);line-height:1.8">
+<strong style="color:var(--g)">Option 1 — iFrame URL:</strong> Paste the stream embed URL in any match's stream field.<br>
+<strong style="color:var(--g)">Option 2 — YouTube Live:</strong> Use: <code style="background:var(--s2);padding:2px 6px;border-radius:3px;font-size:.78rem">https://www.youtube.com/embed/VIDEO_ID?autoplay=1</code><br>
+<strong style="color:var(--g)">Option 3 — Raw HTML:</strong> Paste your full &lt;iframe&gt; embed code for any provider.<br>
+</div>
+</div>
+<div class="section-hdr"><div class="section-title">Matches With Streams</div></div>
+<div id="streams-list"></div>
+</div>
+
+<!-- LIVE UPDATES PANEL -->
+<div class="panel" id="panel-liveupdates">
+<div class="section-hdr"><div class="section-title">Live Score Updates</div></div>
+<div class="firebase-badge" style="background:rgba(255,53,53,.08);border-color:rgba(255,53,53,.25);color:#ff8a8a">
+⚽ <strong style="color:#e8edf2">Select a live match below</strong> to manually update the score, minute, and add goal scorers. Changes appear instantly on the public site.
+</div>
+<div id="live-match-selector" style="margin-bottom:16px"></div>
+
+<!-- Score Update Form -->
+<div class="form-card" id="score-update-form" style="display:none">
+<div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Update Score — <span id="su-match-name" style="color:var(--g)"></span></div>
+<div class="form-grid">
+  <div class="field-group"><label id="su-home-lbl">Home Score</label><input type="number" id="su-hscore" min="0" value="0"></div>
+  <div class="field-group"><label id="su-away-lbl">Away Score</label><input type="number" id="su-ascore" min="0" value="0"></div>
+  <div class="field-group"><label>Current Minute</label><input type="text" id="su-minute" placeholder="e.g. 67'"></div>
+  <div class="field-group">
+    <label>Match Status</label>
+    <select id="su-status">
+      <option value="live">Live</option>
+      <option value="finished">Full Time</option>
+      <option value="upcoming">Upcoming</option>
+    </select>
   </div>
 </div>
-<div class="tab-nav" id="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('matches',this)">Matches</button>
-  <button class="tab-btn" onclick="switchTab('add',this)">+ Add</button>
-  <button class="tab-btn" onclick="switchTab('scores',this)">Scores</button>
-  <button class="tab-btn" onclick="switchTab('subs',this)">Subscribers</button>
+<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:10px">Add Match Event</div>
+  <div class="form-grid">
+    <div class="field-group"><label>Minute</label><input type="text" id="ev-min" placeholder="e.g. 23'"></div>
+    <div class="field-group">
+      <label>Event Type</label>
+      <select id="ev-type">
+        <option value="goal">⚽ Goal</option>
+        <option value="yellow">🟨 Yellow Card</option>
+        <option value="red">🟥 Red Card</option>
+        <option value="sub">🔄 Substitution</option>
+        <option value="pen_miss">❌ Penalty Missed</option>
+      </select>
+    </div>
+    <div class="field-group"><label>Player Name</label><input type="text" id="ev-player" placeholder="e.g. Saka"></div>
+    <div class="field-group">
+      <label>Team</label>
+      <select id="ev-team">
+        <option value="home">Home</option>
+        <option value="away">Away</option>
+      </select>
+    </div>
+    <div class="field-group full"><label>Detail (optional)</label><input type="text" id="ev-detail" placeholder="e.g. assisted by Odegaard / penalty"></div>
+  </div>
+  <button class="btn-secondary" style="margin-top:8px" onclick="addEvent()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Event
+  </button>
+  <div id="events-preview" style="margin-top:10px"></div>
 </div>
-<div class="scroll-area">
-  <div class="panel active" id="panel-matches">
-    <div class="sec-hdr">
-      <span class="sec-title">All Matches</span>
-      <button class="sec-action" onclick="loadMatches()">Refresh</button>
-    </div>
-    <div class="match-list" id="match-list">
-      <div class="loading"><div class="spinner"></div>Loading from Firebase...</div>
-    </div>
-  </div>
-  <div class="panel" id="panel-add">
-    <div class="form-card">
-      <div class="form-title">Match Details</div>
-      <div class="field-row">
-        <div class="field"><label>Home Team</label><input type="text" id="f-home" placeholder="Arsenal"></div>
-        <div class="field"><label>Away Team</label><input type="text" id="f-away" placeholder="Chelsea"></div>
-      </div>
-      <div class="field"><label>Competition</label><input type="text" id="f-comp" placeholder="Premier League"></div>
-      <div class="field-row">
-        <div class="field"><label>Date & Time</label><input type="datetime-local" id="f-date"></div>
-        <div class="field"><label>Kick-off</label><input type="text" id="f-time" placeholder="20:00"></div>
-      </div>
-      <div class="field"><label>Status</label><select id="f-status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="finished">Finished</option></select></div>
-      <div class="field-row3">
-        <div class="field"><label>Home Score</label><input type="number" id="f-hs" value="0" min="0"></div>
-        <div class="field"><label>Away Score</label><input type="number" id="f-as" value="0" min="0"></div>
-        <div class="field"><label>Minute</label><input type="number" id="f-min" placeholder="45"></div>
-      </div>
-    </div>
-    <div class="form-card">
-      <div class="form-title">Stream Links</div>
-      <div class="field"><label>Server 1 URL</label><input type="url" id="f-stream1" placeholder="https://..."></div>
-      <div class="field-row">
-        <div class="field"><label>Label</label><input type="text" id="f-label1" placeholder="Server 1"></div>
-        <div class="field"><label>Type</label><select id="f-type1"><option value="iframe">iframe</option><option value="hls">HLS</option><option value="direct">Direct</option></select></div>
-      </div>
-      <div class="field"><label>Server 2 URL</label><input type="url" id="f-stream2" placeholder="https://..."></div>
-      <div class="field"><label>Server 3 URL</label><input type="url" id="f-stream3" placeholder="https://..."></div>
-    </div>
-    <div class="form-card">
-      <div class="form-title">Team Logos & Info</div>
-      <div class="field-row">
-        <div class="field"><label>Home Logo URL</label><input type="url" id="f-hlogo" placeholder="https://..."></div>
-        <div class="field"><label>Away Logo URL</label><input type="url" id="f-alogo" placeholder="https://..."></div>
-      </div>
-      <div class="field"><label>Round / Matchday</label><input type="text" id="f-round" placeholder="Matchday 32"></div>
-    </div>
-    <button class="btn-primary" id="save-btn" onclick="saveMatch()">Save Match</button>
-    <button class="btn-secondary" id="cancel-edit-btn" style="display:none" onclick="cancelEdit()">Cancel Edit</button>
-  </div>
-  <div class="panel" id="panel-scores">
-    <div class="sec-hdr"><span class="sec-title">Update Scores</span></div>
-    <div id="scores-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-  <div class="panel" id="panel-subs">
-    <div class="sec-hdr">
-      <span class="sec-title">Subscribers</span>
-      <button class="sec-action" onclick="loadSubs()">Refresh</button>
-    </div>
-    <div class="subs-list" id="subs-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
+<div class="form-actions">
+  <button class="btn-secondary" onclick="document.getElementById('score-update-form').style.display='none';selectedLiveMatch=null">Cancel</button>
+  <button class="btn-primary" onclick="pushScoreUpdate()">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Push Update Live
+  </button>
 </div>
-<div class="dialog-bg" id="confirm-dialog">
-  <div class="dialog">
-    <h3 id="dialog-title">Are you sure?</h3>
-    <p id="dialog-msg">This cannot be undone.</p>
-    <div class="dialog-btns">
-      <button class="dialog-cancel" onclick="closeDialog()">Cancel</button>
-      <button class="dialog-confirm" id="dialog-confirm-btn">Confirm</button>
-    </div>
-  </div>
 </div>
-<div class="toast" id="toast"></div>
+</div>
+
+</div><!-- end content -->
+</div><!-- end main -->
+
+<!-- EDIT MATCH DIALOG -->
+<div class="overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+<div class="dialog">
+<div class="dialog-hdr"><div class="dialog-title">Edit Match</div><button class="dialog-close" onclick="closeEdit()">✕</button></div>
+<div class="dialog-body">
+<div class="form-grid">
+<div class="field-group"><label>Home Team</label><input type="text" id="e-home"></div>
+<div class="field-group"><label>Away Team</label><input type="text" id="e-away"></div>
+<div class="field-group"><label>Home Score</label><input type="number" id="e-hscore" min="0"></div>
+<div class="field-group"><label>Away Score</label><input type="number" id="e-ascore" min="0"></div>
+<div class="field-group"><label>Status</label>
+<select id="e-status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="finished">Finished</option><option value="draft">Draft</option></select>
+</div>
+<div class="field-group"><label>Minute (if Live)</label><input type="text" id="e-minute" placeholder="e.g. 67'"></div>
+<div class="field-group full"><label>Server 1 — Primary Stream URL</label><textarea id="e-stream" rows="2" placeholder="https://... or iframe code"></textarea></div>
+<div class="field-group full"><label>Server 1 Label</label><input type="text" id="e-stream-label" placeholder="Server 1"></div>
+<div class="field-group full"><label>Server 2 — Backup Stream URL</label><textarea id="e-stream2" rows="2" placeholder="https://... or iframe code (optional)"></textarea></div>
+<div class="field-group full"><label>Server 2 Label</label><input type="text" id="e-stream2-label" placeholder="Server 2"></div>
+<div class="field-group full"><label>Server 3 — Extra Backup</label><textarea id="e-stream3" rows="2" placeholder="https://... or iframe code (optional)"></textarea></div>
+<div class="field-group full"><label>Server 3 Label</label><input type="text" id="e-stream3-label" placeholder="Server 3"></div>
+<div class="field-group full"><label>Competition</label><input type="text" id="e-comp"></div>
+<div class="field-group full"><label>Match Date</label><input type="date" id="e-date"></div>
+<div class="field-group full"><label>Kick-off Time (WAT)</label><input type="time" id="e-time"></div>
+</div>
+</div>
+<div class="dialog-footer">
+<button class="btn-secondary" onclick="closeEdit()">Cancel</button>
+<button class="btn-primary" onclick="saveEdit()">Save to Firebase</button>
+</div>
+</div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="overlay" id="del-overlay" onclick="if(event.target===this)closeDel()">
+<div class="dialog" style="max-width:380px">
+<div class="dialog-hdr"><div class="dialog-title" style="color:var(--red)">Delete Match</div><button class="dialog-close" onclick="closeDel()">✕</button></div>
+<div class="dialog-body">
+<div style="font-size:.9rem;color:var(--t2);line-height:1.5;margin-bottom:8px">Are you sure you want to delete this match?</div>
+<div id="del-match-name" style="font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1)"></div>
+<div style="font-size:.78rem;color:var(--t3);margin-top:6px">This will be permanently removed from Firebase.</div>
+</div>
+<div class="dialog-footer">
+<button class="btn-secondary" onclick="closeDel()">Cancel</button>
+<button style="background:rgba(255,53,53,.15);color:var(--red);border:1px solid rgba(255,53,53,.3);border-radius:5px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer" onclick="confirmDelete()">Delete Match</button>
+</div>
+</div>
+</div>
+
 <script>
-const firebaseConfig={apiKey:"AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",authDomain:"instantlivefootball.firebaseapp.com",projectId:"instantlivefootball",storageBucket:"instantlivefootball.firebasestorage.app",messagingSenderId:"584488048641",appId:"1:584488048641:web:7adf83799426222a5fc800"};
-window.onerror=function(msg,src,line,col,err){
-  document.body.innerHTML='<div style="padding:20px;color:red;font-size:14px;background:#000;min-height:100vh"><h2>JS Error</h2><p>'+msg+'</p><p>Line: '+line+'</p><p>'+String(err)+'</p></div>';
-  return true;
+// =====================================================
+// FIREBASE CONFIG — SAME AS index.html
+// =====================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyC7DzEQEgpeyBcsUo_QaKl7faeYRer8e2E",
+  authDomain: "instantlivefootball.firebaseapp.com",
+  projectId: "instantlivefootball",
+  storageBucket: "instantlivefootball.firebasestorage.app",
+  messagingSenderId: "584488048641",
+  appId: "1:584488048641:web:7adf83799426222a5fc800"
 };
-// auth check disabled for debug
+
 firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-let _matches=[],editDocId=null,_dialogCb=null;
-const g=id=>document.getElementById(id);
-const gv=id=>g(id)?g(id).value:"";
-let _tt;
-function toast(msg,type){const t=g("toast");t.textContent=msg;t.className="toast show"+(type?" "+type:"");clearTimeout(_tt);_tt=setTimeout(()=>t.className="toast",2800);}
-function showDialog(title,msg,cb){g("dialog-title").textContent=title;g("dialog-msg").textContent=msg;_dialogCb=cb;g("dialog-confirm-btn").onclick=()=>{closeDialog();if(_dialogCb)_dialogCb();};g("confirm-dialog").classList.add("open");}
-function closeDialog(){g("confirm-dialog").classList.remove("open");}
-function switchTab(name,el){
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-  g("panel-"+name).classList.add("active");
-  if(el)el.classList.add("active");
-  if(name==="scores")renderScores();
-  if(name==="subs")loadSubs();
-}
+const db = firebase.firestore();
+
+// =====================================================
+// AUTH CHECK
+// =====================================================
+(function(){
+  try{if(localStorage.getItem('ft_admin_auth')!=='true')window.location.href='admin-login.html';}catch(e){}
+})();
+
+// =====================================================
+// STATE
+// =====================================================
+let matches=[], editId=null, deleteId=null;
+let currentPassword='Ayolad';
+try{const s=localStorage.getItem('ft_admin_pw');if(s)currentPassword=s;}catch(e){}
+
+// =====================================================
+// LOAD MATCHES FROM FIREBASE
+// =====================================================
 function loadMatches(){
-  g("match-list").innerHTML="<div class='loading'><div class='spinner'></div>Loading...</div>";
-  const timeout=setTimeout(()=>{g("match-list").innerHTML="<div class='empty'><div class='empty-icon'>⚠️</div><p>Firebase timeout. Check connection. <span onclick='loadMatches()' style='color:var(--g);cursor:pointer'>Retry</span></p></div>";},8000);
-  db.collection("matches").get().then(snap=>{clearTimeout(timeout);
-    _matches=[];
-    snap.forEach(doc=>_matches.push({id:doc.id,...doc.data()}));
-    updateStats();renderMatches();renderScores();
-  }).catch(()=>{g("match-list").innerHTML="<div class='empty'><div class='empty-icon'>⚠️</div><p>Failed to load. <span onclick='loadMatches()' style='color:var(--g);cursor:pointer'>Retry</span></p></div>";});
+  db.collection('matches').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+    matches=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    renderDashboard();
+    renderMatchCards();
+    renderStreams();
+    updateStats();
+  }, err=>{
+    // Fallback without ordering (first time before index builds)
+    db.collection('matches').onSnapshot(snapshot=>{
+      matches=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      renderDashboard();
+      renderMatchCards();
+      renderStreams();
+      updateStats();
+    });
+  });
 }
+
+// =====================================================
+// SAVE MATCH TO FIREBASE
+// =====================================================
+async function saveMatch(){
+  const home=document.getElementById('f-home').value.trim();
+  const away=document.getElementById('f-away').value.trim();
+  if(!home||!away){showAlert('upload-alert','Please enter both team names.','error');return;}
+
+  const stream1 = document.getElementById('f-stream1').value.trim();
+  const stream2 = document.getElementById('f-stream2').value.trim();
+  const stream3 = document.getElementById('f-stream3').value.trim();
+  const stream1label = document.getElementById('f-stream1-label').value.trim() || 'Server 1';
+  const stream2label = document.getElementById('f-stream2-label').value.trim() || 'Server 2';
+  const stream3label = document.getElementById('f-stream3-label').value.trim() || 'Server 3';
+  // Keep backward compat — primary stream field
+  const stream = stream1;
+
+  const homeLineup=document.getElementById('f-home-lineup').value.trim().split('\n').map(s=>s.trim()).filter(Boolean);
+  const awayLineup=document.getElementById('f-away-lineup').value.trim().split('\n').map(s=>s.trim()).filter(Boolean);
+
+  const matchData={
+    published: document.getElementById('f-status').value !== 'draft', // drafts hidden from public
+    home, away,
+    comp:document.getElementById('f-comp').value||'',
+    round:document.getElementById('f-round').value.trim()||'',
+    date:document.getElementById('f-date').value||'',
+    time:document.getElementById('f-time').value||'',
+    hscore:parseInt(document.getElementById('f-hscore').value)||0,
+    ascore:parseInt(document.getElementById('f-ascore').value)||0,
+    status:document.getElementById('f-status').value||'upcoming',
+    minute:document.getElementById('f-minute').value.trim()||'',
+    stream, // primary (Server 1)
+    streams:[
+      {url:stream1, label:stream1label},
+      {url:stream2, label:stream2label},
+      {url:stream3, label:stream3label},
+    ].filter(s=>s.url), // only save non-empty
+    desc:document.getElementById('f-desc').value.trim()||'',
+    homeLineup, awayLineup,
+    events:[], stats:[],
+    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try{
+    if(editId){
+      // Updating existing match
+      await db.collection('matches').doc(editId).update({...matchData});
+      showToast('✓ Match updated — visible to all users!');
+      closeEdit();
+      clearForm();
+      editId=null;
+    } else {
+      // New match
+      await db.collection('matches').add(matchData);
+      showToast('✓ Match saved to Firebase — public can see it!');
+      showAlert('upload-alert',`✓ ${home} vs ${away} is now live on the site!`,'success');
+      clearForm();
+    }
+  }catch(err){
+    showAlert('upload-alert','Error saving match: '+err.message,'error');
+    console.error(err);
+  }
+}
+
+// =====================================================
+// EDIT / DELETE
+// =====================================================
+function openEdit(id){
+  editId=id;
+  const m=matches.find(x=>x.id===id);
+  if(!m) return;
+  document.getElementById('e-home').value=m.home||'';
+  document.getElementById('e-away').value=m.away||'';
+  document.getElementById('e-hscore').value=m.hscore||0;
+  document.getElementById('e-ascore').value=m.ascore||0;
+  document.getElementById('e-status').value=m.status||'upcoming';
+  document.getElementById('e-minute').value=m.minute||'';
+  document.getElementById('e-stream').value=m.stream||m.streams?.[0]?.url||'';
+  document.getElementById('e-stream-label').value=m.streams?.[0]?.label||'Server 1';
+  document.getElementById('e-stream2').value=m.streams?.[1]?.url||'';
+  document.getElementById('e-stream2-label').value=m.streams?.[1]?.label||'Server 2';
+  document.getElementById('e-stream3').value=m.streams?.[2]?.url||'';
+  document.getElementById('e-stream3-label').value=m.streams?.[2]?.label||'Server 3';
+  document.getElementById('e-comp').value=m.comp||'';
+  document.getElementById('e-date').value=m.date||'';
+  document.getElementById('e-time').value=m.time||'';
+  document.getElementById('edit-overlay').classList.add('open');
+}
+function closeEdit(){document.getElementById('edit-overlay').classList.remove('open');editId=null;}
+
+async function saveEdit(){
+  if(!editId) return;
+  const m=matches.find(x=>x.id===editId);
+  if(!m) return;
+  const upd={
+    home:document.getElementById('e-home').value.trim(),
+    away:document.getElementById('e-away').value.trim(),
+    hscore:parseInt(document.getElementById('e-hscore').value)||0,
+    ascore:parseInt(document.getElementById('e-ascore').value)||0,
+    status:document.getElementById('e-status').value,
+    minute:document.getElementById('e-minute').value.trim(),
+    stream:document.getElementById('e-stream').value.trim(),
+    streams:[
+      {url:document.getElementById('e-stream').value.trim(),label:document.getElementById('e-stream-label').value.trim()||'Server 1'},
+      {url:document.getElementById('e-stream2').value.trim(),label:document.getElementById('e-stream2-label').value.trim()||'Server 2'},
+      {url:document.getElementById('e-stream3').value.trim(),label:document.getElementById('e-stream3-label').value.trim()||'Server 3'},
+    ].filter(s=>s.url),
+    comp:document.getElementById('e-comp').value.trim(),
+    date:document.getElementById('e-date').value,
+    time:document.getElementById('e-time').value,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try{
+    await db.collection('matches').doc(editId).update(upd);
+    showToast('✓ Match updated!');
+    closeEdit();
+  }catch(err){alert('Error: '+err.message);}
+}
+
+function openDelete(id){
+  deleteId=id;
+  const m=matches.find(x=>x.id===id);
+  document.getElementById('del-match-name').textContent=m?m.home+' vs '+m.away:'';
+  document.getElementById('del-overlay').classList.add('open');
+}
+function closeDel(){document.getElementById('del-overlay').classList.remove('open');deleteId=null;}
+async function confirmDelete(){
+  if(!deleteId) return;
+  try{
+    await db.collection('matches').doc(deleteId).delete();
+    showToast('Match deleted from Firebase');
+    closeDel();
+  }catch(err){alert('Error: '+err.message);}
+}
+
+// =====================================================
+// RENDER FUNCTIONS
+// =====================================================
+function statusPill(s,min){
+  if(s==='live') return`<span class="status-pill pill-live"><span class="live-dot-sm"></span>LIVE ${min||''}</span>`;
+  if(s==='finished') return`<span class="status-pill pill-ft">FT</span>`;
+  if(s==='upcoming') return`<span class="status-pill pill-up">Upcoming</span>`;
+  return`<span class="status-pill pill-draft">Draft</span>`;
+}
+
+// Same status detection as public site (WAT = UTC+1)
+function getMatchStatus(m){
+  if(m.status==='finished'||m.status==='draft') return m.status;
+  if(m.date && m.time){
+    const kickoff=new Date(m.date+'T'+m.time+':00+01:00');
+    const now=new Date();
+    const diffMins=(now-kickoff)/60000;
+    if(diffMins>=0 && diffMins<110) return 'live';
+    if(diffMins>=110) return 'finished';
+  }
+  return m.status||'upcoming';
+}
+
+function getLiveMinute(m){
+  if(m.minute) return m.minute;
+  if(m.date && m.time){
+    const kickoff=new Date(m.date+'T'+m.time+':00+01:00');
+    const diff=Math.floor((new Date()-kickoff)/60000);
+    if(diff>=0&&diff<=45) return diff+"'";
+    if(diff>45&&diff<=60) return "45+'";
+    if(diff>60&&diff<=105) return (diff-15)+"'";
+    if(diff>105) return "90+'";
+  }
+  return '';
+}
+
 function updateStats(){
-  g("st-live").textContent=_matches.filter(m=>m.status==="live").length;
-  g("st-upcoming").textContent=_matches.filter(m=>m.status==="upcoming").length;
-  g("st-total").textContent=_matches.length;
+  const withStatus = matches.map(m=>({...m, _status: getMatchStatus(m)}));
+  const live=withStatus.filter(m=>m._status==='live').length;
+  const up=withStatus.filter(m=>m._status==='upcoming').length;
+  const ft=withStatus.filter(m=>m._status==='finished').length;
+  document.getElementById('stat-live').textContent=live;
+  document.getElementById('stat-total').textContent=matches.length;
+  document.getElementById('stat-up').textContent=up;
+  document.getElementById('stat-ft').textContent=ft;
+  // Refresh every 30 seconds to keep counts accurate
+  if(!window._statsTimer) window._statsTimer=setInterval(updateStats, 30000);
 }
-function renderMatches(){
-  const list=g("match-list");
-  if(!_matches.length){list.innerHTML="<div class='empty'><div class='empty-icon'>📭</div><p>No matches yet. Add your first match.</p></div>";return;}
-  const order={live:0,upcoming:1,finished:2};
-  const sorted=[..._matches].sort((a,b)=>(order[a.status]??1)-(order[b.status]??1));
-  list.innerHTML=sorted.map(m=>{
-    const isLive=m.status==="live",isFt=m.status==="finished";
-    return "<div class='mc'><div class='mc-top'><span class='mc-badge "+m.status+"'>"+(isLive?"<span class='live-dot'></span>":"")+m.status.toUpperCase()+"</span><span class='mc-comp'>"+(m.comp||"Football")+"</span><span class='mc-time'>"+(m.time||"")+"</span></div><div class='mc-body'><div class='mc-teams'><span class='mc-team'>"+(m.home||"?")+"</span><span class='mc-score-box'>"+(isLive||isFt?(m.hscore??0)+" - "+(m.ascore??0):"vs")+"</span><span class='mc-team right'>"+(m.away||"?")+"</span></div><div class='mc-actions'><button class='mc-btn edit-btn' onclick="editMatch('"+m.id+"')">Edit</button><button class='mc-btn live-btn' onclick="toggleStatus('"+m.id+"','"+m.status+"')">"+(isLive?"End Live":"Go Live")+"</button><button class='mc-btn' onclick="toggleHidden('"+m.id+"',"+!!m.hidden+")">"+(m.hidden?"Show":"Hide")+"</button><button class='mc-btn del-btn' onclick="deleteMatch('"+m.id+"','"+m.home+" vs "+m.away+"')">Delete</button></div></div></div>";
-  }).join("");
+
+function renderDashboard(){
+  const el=document.getElementById('dash-cards');
+  if(!matches.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--t3);font-family:\'Barlow Condensed\',sans-serif">No matches yet. Click Add Match to get started.</div>';return;}
+  el.innerHTML=matches.slice(0,5).map(m=>buildMatchCard(m)).join('');
 }
-function renderScores(){
-  const list=g("scores-list");
-  const live=_matches.filter(m=>m.status==="live"||m.status==="upcoming");
-  if(!live.length){list.innerHTML="<div class='empty'><div class='empty-icon'>⚽</div><p>No live or upcoming matches</p></div>";return;}
-  list.innerHTML=live.map(m=>"<div class='form-card' style='margin-bottom:10px'><div class='form-title' style='margin-bottom:10px'>"+m.home+" vs "+m.away+"</div><div class='score-editor'><span class='score-team'>"+m.home+"</span><div class='score-ctrl'><button class='score-minus' onclick="adjScore('"+m.id+"','h',-1)">-</button><span class='score-val' id='hs-"+m.id+"'>"+(m.hscore??0)+"</span><button class='score-plus' onclick="adjScore('"+m.id+"','h',1)">+</button></div><span style='color:var(--t3);flex-shrink:0'>vs</span><div class='score-ctrl'><button class='score-minus' onclick="adjScore('"+m.id+"','a',-1)">-</button><span class='score-val' id='as-"+m.id+"'>"+(m.ascore??0)+"</span><button class='score-plus' onclick="adjScore('"+m.id+"','a',1)">+</button></div><span class='score-team' style='text-align:right'>"+m.away+"</span></div><div class='field-row'><div class='field'><label>Minute</label><input type='number' id='min-"+m.id+"' value='"+(m.minute||"")+"' placeholder='45' style='text-align:center'></div><div class='field'><label>Status</label><select id='st-"+m.id+"'><option value='upcoming' "+(m.status==="upcoming"?"selected":"")+">Upcoming</option><option value='live' "+(m.status==="live"?"selected":"")+">Live</option><option value='finished' "+(m.status==="finished"?"selected":"")+">Finished</option></select></div></div><button class='btn-primary' style='margin-top:8px' onclick="pushScore('"+m.id+"')">Push Score</button></div>").join("");
+
+function renderMatchCards(){
+  const el=document.getElementById('matches-card-list');
+  if(!matches.length){el.innerHTML='<div class="mac-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>No matches yet.<br>Tap <strong style="color:var(--g)">Add Match</strong> to get started.</div>';return;}
+  el.innerHTML=matches.map(m=>buildMatchCard(m)).join('');
 }
-function adjScore(id,side,delta){const m=_matches.find(x=>x.id===id);if(!m)return;if(side==="h"){m.hscore=Math.max(0,(m.hscore||0)+delta);g("hs-"+id).textContent=m.hscore;}else{m.ascore=Math.max(0,(m.ascore||0)+delta);g("as-"+id).textContent=m.ascore;}}
-function pushScore(id){
-  const m=_matches.find(x=>x.id===id);if(!m)return;
-  const minute=parseInt(gv("min-"+id))||null,status=gv("st-"+id);
-  db.collection("matches").doc(id).update({hscore:m.hscore||0,ascore:m.ascore||0,minute:minute,status:status}).then(()=>{m.minute=minute;m.status=status;toast("Score updated!","success");updateStats();}).catch(()=>toast("Failed","error"));
+
+function buildMatchCard(m){
+  const status=getMatchStatus(m);
+  const minute=status==='live'?(m.minute||getLiveMinute(m)):'';
+  const isUp=status==='upcoming';
+  const scoreStr=isUp?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`;
+  const hasStream=m.stream&&m.stream.trim();
+  return`<div class="m-admin-card ${status}">
+<div class="mac-top"><div class="mac-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</div>${statusPill(status,minute)}</div>
+<div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${scoreStr}</div><div class="mac-away">${m.away}</div></div>
+<div class="mac-meta">
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--t3)">${m.date||''} ${m.time||''} WAT</span>
+<span class="mac-stream-tag ${hasStream?'on':'off'}">${hasStream?'✓ Stream Active':'No Stream'}</span>
+</div>
+<div class="mac-actions">
+<button class="mac-btn edit-btn" onclick="openEdit('${m.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+<button class="mac-btn stream-btn" onclick="openStreamEdit('${m.id}')"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Stream</button>
+<button class="mac-btn ${m.published===false?'edit-btn':'del-btn'}" onclick="togglePublish('${m.id}',${m.published!==false})">${m.published===false?'🔒 Publish':'👁 Hide'}</button>
+<button class="mac-btn del-btn" onclick="openDelete('${m.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>Delete</button>
+</div>
+</div>`;
 }
-function saveMatch(){
-  const home=gv("f-home").trim(),away=gv("f-away").trim();
-  if(!home||!away){toast("Enter both team names","error");return;}
-  const s1=gv("f-stream1").trim(),s2=gv("f-stream2").trim(),s3=gv("f-stream3").trim();
-  const streams=[];
-  if(s1)streams.push({url:s1,label:gv("f-label1").trim()||"Server 1",type:gv("f-type1")});
-  if(s2)streams.push({url:s2,label:"Server 2",type:"iframe"});
-  if(s3)streams.push({url:s3,label:"Server 3",type:"iframe"});
-  const data={home,away,comp:gv("f-comp").trim(),date:gv("f-date"),time:gv("f-time").trim(),status:gv("f-status"),hscore:parseInt(gv("f-hs"))||0,ascore:parseInt(gv("f-as"))||0,minute:parseInt(gv("f-min"))||null,stream:s1,stream2:s2,stream3:s3,streamLabel:gv("f-label1").trim()||"Server 1",hlogo:gv("f-hlogo").trim(),alogo:gv("f-alogo").trim(),round:gv("f-round").trim(),hidden:false,streams:streams};
-  const btn=g("save-btn");btn.textContent="Saving...";btn.disabled=true;
-  const op=editDocId?db.collection("matches").doc(editDocId).update({...data,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}):db.collection("matches").add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  op.then(()=>{toast(editDocId?"Match updated!":"Match added!","success");clearForm();loadMatches();switchTab("matches",g("tab-nav").querySelector(".tab-btn"));}).catch(err=>toast("Save failed: "+err.message,"error")).finally(()=>{btn.textContent="Save Match";btn.disabled=false;});
+
+function openStreamEdit(id){
+  editId=id;
+  const m=matches.find(x=>x.id===id);
+  if(!m) return;
+  document.getElementById('e-home').value=m.home||'';
+  document.getElementById('e-away').value=m.away||'';
+  document.getElementById('e-hscore').value=m.hscore||0;
+  document.getElementById('e-ascore').value=m.ascore||0;
+  document.getElementById('e-status').value=m.status||'upcoming';
+  document.getElementById('e-minute').value=m.minute||'';
+  document.getElementById('e-stream').value=m.stream||'';
+  document.getElementById('e-comp').value=m.comp||'';
+  document.getElementById('e-date').value=m.date||'';
+  document.getElementById('e-time').value=m.time||'';
+  document.getElementById('edit-overlay').classList.add('open');
 }
-function editMatch(id){
-  const m=_matches.find(x=>x.id===id);if(!m)return;
-  editDocId=id;
-  const sv=(fid,val)=>{const el=g(fid);if(el)el.value=val||"";};
-  sv("f-home",m.home);sv("f-away",m.away);sv("f-comp",m.comp);sv("f-date",m.date);sv("f-time",m.time);sv("f-status",m.status);sv("f-hs",m.hscore??0);sv("f-as",m.ascore??0);sv("f-min",m.minute||"");sv("f-stream1",m.stream||m.streams?.[0]?.url||"");sv("f-stream2",m.stream2||m.streams?.[1]?.url||"");sv("f-stream3",m.stream3||m.streams?.[2]?.url||"");sv("f-label1",m.streamLabel||"Server 1");sv("f-hlogo",m.hlogo);sv("f-alogo",m.alogo);sv("f-round",m.round);
-  g("save-btn").textContent="Update Match";g("cancel-edit-btn").style.display="block";
-  switchTab("add",document.querySelectorAll(".tab-btn")[1]);
-  toast("Editing: "+m.home+" vs "+m.away);
+
+function renderStreams(){
+  const el=document.getElementById('streams-list');
+  if(!el) return;
+  const withStream=matches.filter(m=>m.stream&&m.stream.trim());
+  if(!withStream.length){el.innerHTML='<div style="color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.82rem;padding:16px 0;text-align:center">No active streams. Add a stream URL when editing a match.</div>';return;}
+  el.innerHTML=withStream.map(m=>`<div class="m-admin-card ${m.status}" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem">${m.home} vs ${m.away}</div><div style="font-size:.7rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif;margin-top:2px;word-break:break-all">${m.stream.substring(0,80)}${m.stream.length>80?'...':''}</div></div><button class="mac-btn edit-btn" onclick="openEdit('${m.id}')" style="margin-left:10px;flex-shrink:0">Edit</button></div></div>`).join('');
 }
-function cancelEdit(){editDocId=null;clearForm();g("save-btn").textContent="Save Match";g("cancel-edit-btn").style.display="none";}
-function clearForm(){["f-home","f-away","f-comp","f-date","f-time","f-min","f-stream1","f-stream2","f-stream3","f-label1","f-hlogo","f-alogo","f-round"].forEach(id=>{const el=g(id);if(el)el.value="";});g("f-hs").value="0";g("f-as").value="0";g("f-status").value="upcoming";g("f-type1").value="iframe";editDocId=null;}
-function toggleStatus(id,current){const ns=current==="live"?"finished":"live";db.collection("matches").doc(id).update({status:ns}).then(()=>{toast("Status: "+ns,"success");loadMatches();}).catch(()=>toast("Failed","error"));}
-function toggleHidden(id,hidden){db.collection("matches").doc(id).update({hidden:!hidden}).then(()=>{toast(!hidden?"Hidden":"Visible","success");loadMatches();}).catch(()=>toast("Failed","error"));}
-function deleteMatch(id,name){showDialog("Delete match?",name+" will be permanently deleted.",()=>{db.collection("matches").doc(id).delete().then(()=>{toast("Deleted","success");loadMatches();}).catch(()=>toast("Delete failed","error"));});}
-function loadSubs(){
-  g("subs-list").innerHTML="<div class='loading'><div class='spinner'></div>Loading...</div>";
-  db.collection("subscribers").get().then(snap=>{
-    const subs=[];snap.forEach(doc=>subs.push({id:doc.id,...doc.data()}));
-    g("st-subs").textContent=subs.length;
-    if(!subs.length){g("subs-list").innerHTML="<div class='empty'><div class='empty-icon'>👥</div><p>No subscribers yet</p></div>";return;}
-    g("subs-list").innerHTML=subs.map(s=>"<div class='sub-row'><span class='sub-email'>"+(s.email||s.id)+"</span><span class='sub-plan'>"+(s.plan||"PRO")+"</span></div>").join("");
-  }).catch(()=>{g("subs-list").innerHTML="<div class='empty'><p>Failed to load</p></div>";});
+
+// =====================================================
+// FORM HELPERS
+// =====================================================
+function onStreamTypeChange(){
+  const t=document.getElementById('f-stream-type').value;
+  document.getElementById('stream-url-field').style.display=t==='none'||t==='html'?'none':'';
+  document.getElementById('stream-html-field').style.display=t==='html'?'':'none';
+  const labels={iframe:'Stream Embed URL',youtube:'YouTube Embed URL (e.g. youtube.com/embed/ID)',dailymotion:'Dailymotion Embed URL'};
+  const lbl=document.getElementById('stream-url-label');
+  if(lbl) lbl.textContent=labels[t]||'Stream URL';
 }
-function logout(){showDialog("Log out?","You will be returned to the login page.",()=>{try{localStorage.removeItem("ft_admin_auth");}catch(e){}window.location.href="admin-login.html";});}
-g("tb-date").textContent=new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
-loadMatches();
+
+function clearForm(){
+  ['f-home','f-away','f-round','f-minute','f-stream1','f-stream2','f-stream3','f-desc','f-home-lineup','f-away-lineup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const s1l=document.getElementById('f-stream1-label');if(s1l)s1l.value='Server 1';
+  const s2l=document.getElementById('f-stream2-label');if(s2l)s2l.value='Server 2';
+  const s3l=document.getElementById('f-stream3-label');if(s3l)s3l.value='Server 3';
+  ['f-hscore','f-ascore'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='0';});
+  const fComp=document.getElementById('f-comp');if(fComp)fComp.value='';
+  const fStatus=document.getElementById('f-status');if(fStatus)fStatus.value='upcoming';
+  const fType=document.getElementById('f-stream-type');if(fType)fType.value='none';
+  onStreamTypeChange();
+  document.getElementById('upload-panel-title').textContent='Add New Match';
+  editId=null;
+  // Set today's date and current WAT time as default
+  const now=new Date();
+  const fDate=document.getElementById('f-date');
+  if(fDate){
+    // WAT = UTC+1
+    const watDate=new Date(now.getTime()+60*60000);
+    fDate.value=watDate.toISOString().split('T')[0];
+  }
+}
+
+function showAlert(id,msg,type){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=msg;
+  el.className='alert alert-'+(type==='error'?'error':'success')+' show';
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--g)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// =====================================================
+// INIT
+// =====================================================
+
+async function togglePublish(id, currentlyPublished){
+  try{
+    await db.collection('matches').doc(id).update({
+      published: !currentlyPublished,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(currentlyPublished ? '🔒 Match hidden from public site' : '✓ Match published — visible to all users');
+  }catch(err){alert('Error: '+err.message);}
+}
+
+// Fix: Set published=true on all matches that don't have it set
+// This fixes matches saved before the publish feature was added
+async function fixPublishedField(){
+  try{
+    const snapshot = await db.collection('matches').get();
+    let fixed = 0;
+    const batch = db.batch();
+    snapshot.docs.forEach(doc=>{
+      const data = doc.data();
+      if(data.published === undefined || data.published === null){
+        batch.update(doc.ref, {published: true});
+        fixed++;
+      }
+    });
+    if(fixed > 0){
+      await batch.commit();
+      showToast(`✓ Fixed ${fixed} match${fixed!==1?'es':''} — now visible to public!`);
+    } else {
+      showToast('✓ All matches already have visibility set correctly');
+    }
+  }catch(err){
+    alert('Error: '+err.message);
+  }
+}
+
+function copyPublicLink(){
+  const url=window.location.origin+'/index.html';
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('✓ Public link copied!')).catch(()=>prompt('Copy this link:',url));}
+  else{prompt('Copy this link:',url);}
+}
+
+// =====================================================
+// LIVE UPDATES — Manual Score Push + Events
+// =====================================================
+let selectedLiveMatch = null;
+let pendingEvents = [];
+
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',matches:'All Matches',upload:'Add Match',streams:'Live Streams',liveupdates:'Live Updates'};
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+  if(id==='matches') renderMatchCards();
+  if(id==='streams') renderStreams();
+  if(id==='upload') clearForm();
+  if(id==='liveupdates') renderLiveSelector();
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function renderLiveSelector(){
+  const el=document.getElementById('live-match-selector');
+  const live=matches.filter(m=>getMatchStatus(m)==='live'||getMatchStatus(m)==='upcoming');
+  if(!live.length){el.innerHTML='<div style="color:var(--t3);font-family:\'Barlow Condensed\',sans-serif;font-size:.85rem;padding:16px 0;text-align:center">No live or upcoming matches found.</div>';return;}
+  el.innerHTML=`<div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;margin-bottom:8px">Select Match to Update</div>`+
+  live.map(m=>{
+    const status=getMatchStatus(m);
+    const min=status==='live'?(m.minute||getLiveMinute(m)):'';
+    const hasStream=m.stream&&m.stream.trim();
+    return`<div class="m-admin-card ${status}" style="cursor:pointer;margin-bottom:8px">
+    <div onclick="selectLiveMatch('${m.id}')">
+      <div class="mac-top"><div class="mac-comp">${m.comp||'Football'}</div>${statusPill(status,min)}</div>
+      <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${status==='upcoming'?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`}</div><div class="mac-away">${m.away}</div></div>
+    </div>
+    ${!hasStream?`<div style="background:rgba(255,53,53,.08);border:1px solid rgba(255,53,53,.2);border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--red)">⚠️ No stream added — users see black screen</span>
+      <button onclick="openStreamEdit('${m.id}')" style="background:var(--g);color:var(--bg);border:none;border-radius:4px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;cursor:pointer">Add Stream</button>
+    </div>`:''}
+    <div style="text-align:center;margin-top:8px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:var(--g);letter-spacing:1px" onclick="selectLiveMatch('${m.id}')">TAP TO UPDATE SCORE →</span></div>
+    </div>`;
+  }).join('');
+}
+
+function selectLiveMatch(id){
+  selectedLiveMatch=matches.find(m=>m.id===id);
+  if(!selectedLiveMatch) return;
+  pendingEvents=[...(selectedLiveMatch.events||[])];
+  document.getElementById('su-match-name').textContent=selectedLiveMatch.home+' vs '+selectedLiveMatch.away;
+  document.getElementById('su-home-lbl').textContent=selectedLiveMatch.home+' Score';
+  document.getElementById('su-away-lbl').textContent=selectedLiveMatch.away+' Score';
+  document.getElementById('su-hscore').value=selectedLiveMatch.hscore||0;
+  document.getElementById('su-ascore').value=selectedLiveMatch.ascore||0;
+  document.getElementById('su-minute').value=selectedLiveMatch.minute||'';
+  document.getElementById('su-status').value=selectedLiveMatch.status||'live';
+  renderEventsPreview();
+  document.getElementById('score-update-form').style.display='';
+  document.getElementById('score-update-form').scrollIntoView({behavior:'smooth'});
+}
+
+function addEvent(){
+  const min=document.getElementById('ev-min').value.trim();
+  const type=document.getElementById('ev-type').value;
+  const player=document.getElementById('ev-player').value.trim();
+  const team=document.getElementById('ev-team').value;
+  const detail=document.getElementById('ev-detail').value.trim();
+  if(!min||!player){showToast('Enter minute and player name');return;}
+  pendingEvents.push({min,type,player,team,detail});
+  // Clear inputs
+  document.getElementById('ev-min').value='';
+  document.getElementById('ev-player').value='';
+  document.getElementById('ev-detail').value='';
+  renderEventsPreview();
+  showToast('Event added — tap Push Update Live to save');
+}
+
+function removeEvent(i){
+  pendingEvents.splice(i,1);
+  renderEventsPreview();
+}
+
+function renderEventsPreview(){
+  const el=document.getElementById('events-preview');
+  if(!pendingEvents.length){el.innerHTML='<div style="color:var(--t3);font-size:.78rem;font-family:\'Barlow Condensed\',sans-serif;padding:4px 0">No events yet</div>';return;}
+  el.innerHTML=pendingEvents.map((e,i)=>`
+  <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-family:'Barlow Condensed',sans-serif;font-size:.82rem">
+    <span style="color:var(--g);min-width:28px;font-weight:700">${e.min}</span>
+    <span>${e.type==='goal'?'⚽':e.type==='yellow'?'🟨':e.type==='red'?'🟥':e.type==='sub'?'🔄':'❌'}</span>
+    <span style="flex:1"><strong>${e.player}</strong>${e.detail?' · <span style="color:var(--t3)">'+e.detail+'</span>':''} <span style="color:var(--t3);font-size:.7rem">(${e.team})</span></span>
+    <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding:2px 6px">✕</button>
+  </div>`).join('');
+}
+
+async function pushScoreUpdate(){
+  if(!selectedLiveMatch) return;
+  const hscore=parseInt(document.getElementById('su-hscore').value)||0;
+  const ascore=parseInt(document.getElementById('su-ascore').value)||0;
+  const minute=document.getElementById('su-minute').value.trim();
+  const status=document.getElementById('su-status').value;
+
+  try{
+    await db.collection('matches').doc(selectedLiveMatch.id).update({
+      hscore, ascore, minute, status,
+      events: pendingEvents,
+      scoreUpdatedAt: new Date().toISOString(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(`✓ ${selectedLiveMatch.home} ${hscore}–${ascore} ${selectedLiveMatch.away} pushed live!`);
+    document.getElementById('score-update-form').style.display='none';
+    selectedLiveMatch=null;
+    renderLiveSelector();
+  }catch(err){
+    alert('Error: '+err.message);
+  }
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  loadMatches();
+  clearForm(); // Set today's date
+});
 </script>
+  <script src="auto-status-updater.js"></script>
 </body>
 </html>
