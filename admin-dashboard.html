@@ -233,7 +233,7 @@ function switchTab(name,el){
 function loadMatches(){
   g("match-list").innerHTML="<div class='loading'><div class='spinner'></div>Loading...</div>";
   const timeout=setTimeout(()=>{g("match-list").innerHTML="<div class='empty'><div class='empty-icon'>⚠️</div><p>Firebase timeout. Check connection. <span onclick='loadMatches()' style='color:var(--g);cursor:pointer'>Retry</span></p></div>";},8000);
-  db.collection("matches").orderBy("date","desc").get().then(snap=>{clearTimeout(timeout);
+  db.collection("matches").get().then(snap=>{clearTimeout(timeout);
     _matches=[];
     snap.forEach(doc=>_matches.push({id:doc.id,...doc.data()}));
     updateStats();renderMatches();renderScores();
