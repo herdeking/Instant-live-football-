@@ -833,13 +833,14 @@ function sendLiveNotification(m) {
 function loadMatches() {
   const list = document.getElementById('match-list');
   list.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><span>Loading matches…</span></div>';
-  db.collection('matches').orderBy('date','desc').get()
+  db.collection('matches').get()
     .then(snapshot => {
       const prev = _matches.map(m => m.id);
       _matches = [];
       snapshot.forEach(doc => {
         const d = doc.data();
-        if (!d.hidden) _matches.push({ id: doc.id, ...d });
+        if (!d.hidden && d.published !== false) _matches.push({ id: doc.id, ...d });
+      else if (!d.hidden && d.published === undefined) _matches.push({ id: doc.id, ...d });
       });
       _matches.filter(m => m.status === 'live').forEach(m => { if (!prev.includes(m.id)) sendLiveNotification(m); });
       renderAll(); updateFeatured(); updateLiveCount(); updateLiveScores(); updateTicker();
