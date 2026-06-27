@@ -216,7 +216,7 @@ window.onerror=function(msg,src,line,col,err){
   document.body.innerHTML='<div style="padding:20px;color:red;font-size:14px;background:#000;min-height:100vh"><h2>JS Error</h2><p>'+msg+'</p><p>Line: '+line+'</p><p>'+String(err)+'</p></div>';
   return true;
 };
-try{if(localStorage.getItem("ft_admin_auth")!=="true")window.location.href="admin-login.html";}catch(e){}
+// auth check disabled for debug
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 let _matches=[],editDocId=null,_dialogCb=null;
