@@ -1112,6 +1112,26 @@ window.addEventListener('DOMContentLoaded',()=>{
   initTheme();initNotifications();checkSubscription();
   loadMatches();
   setInterval(loadMatches,60000);
+  setInterval(autoUpdateStatus, 30000);
+
+async function autoUpdateStatus() {
+  const now = new Date();
+  _matches.forEach(async m => {
+    if(!m.date || !m.time) return;
+    const kickoff = new Date(m.date + 'T' + m.time);
+    const diffMin = (now - kickoff) / 60000;
+    let newStatus = m.status;
+    if(diffMin >= 0 && diffMin < 95 && m.status === 'upcoming') newStatus = 'live';
+    if(diffMin >= 95 && m.status === 'live') newStatus = 'finished';
+    if(newStatus !== m.status) {
+      try {
+        await db.collection('matches').doc(m.id).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        m.status = newStatus;
+        renderAll(); updateLiveCount(); updateTicker();
+      } catch(e) { console.log('Auto status update failed', e); }
+    }
+  });
+}
 });
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
