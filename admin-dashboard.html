@@ -562,10 +562,10 @@ async function autoFetchLogo(side) {
         headers: {'X-Auth-Token': 'ae94b936902e463b9cd2ca4963dfdb09'}
       });
       const data = await res.json();
-      const team = data.teams && data.teams[0];
-      if(team && team.crest) {
-        document.getElementById(hiddenId).value = team.crest;
-        document.getElementById(imgId).src = team.crest;
+      const team = data.response const team = data.teams && data.teams[0];const team = data.teams && data.teams[0]; data.response[0] const team = data.teams && data.teams[0];const team = data.teams && data.teams[0]; data.response[0].team;
+      if(team if(team && team.crest)if(team && team.crest) team.logo) {
+        document.getElementById(hiddenId).value = team.logo;
+        document.getElementById(imgId).src = team.logo;
         document.getElementById(nameId).textContent = team.name;
         document.getElementById(previewId).style.display = 'block';
       }
