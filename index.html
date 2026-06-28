@@ -835,7 +835,13 @@ function renderAll() {
   if (!filtered.length) { list.innerHTML = '<div class="empty-state"><p>No matches found</p></div>'; return; }
 
   const order = { live:0, upcoming:1, finished:2 };
-  filtered.sort((a,b) => (order[a.status]??1) - (order[b.status]??1));
+  filtered.sort((a,b) => {
+    const so=(order[a.status]??1)-(order[b.status]??1);
+    if(so!==0) return so;
+    const adt=new Date((a.date||'2099-01-01')+'T'+(a.time||'23:59'));
+    const bdt=new Date((b.date||'2099-01-01')+'T'+(b.time||'23:59'));
+    return adt-bdt;
+  });
   list.innerHTML = filtered.map((m,i) => buildCard(m,i)).join('');
 }
 
