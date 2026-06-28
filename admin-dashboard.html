@@ -235,6 +235,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Match Details</div>
 <div class="form-grid">
 <div class="field-group"><label>Home Team</label><input type="text" id="f-home" placeholder="e.g. Arsenal"></div>
+<div class="field-group"><label>Home Logo URL</label><input type="text" id="f-hlogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Away Logo URL</label><input type="text" id="f-alogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Home Logo URL</label><input type="text" id="f-hlogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Away Logo URL</label><input type="text" id="f-alogo" placeholder="https://...logo.png"></div>
 <div class="field-group"><label>Away Team</label><input type="text" id="f-away" placeholder="e.g. Chelsea"></div>
 <div class="field-group">
 <label>Competition / League</label>
@@ -545,6 +549,8 @@ function loadMatches(){
 async function saveMatch(){
   const home=document.getElementById('f-home').value.trim();
   const away=document.getElementById('f-away').value.trim();
+  const hlogo=document.getElementById('f-hlogo').value.trim();
+  const alogo=document.getElementById('f-alogo').value.trim();
   if(!home||!away){showAlert('upload-alert','Please enter both team names.','error');return;}
 
   const stream1 = document.getElementById('f-stream1').value.trim();
@@ -576,6 +582,7 @@ async function saveMatch(){
       {url:stream2, label:stream2label},
       {url:stream3, label:stream3label},
     ].filter(s=>s.url), // only save non-empty
+    hlogo, alogo,
     desc:document.getElementById('f-desc').value.trim()||'',
     homeLineup, awayLineup,
     events:[], stats:[],
@@ -796,7 +803,7 @@ function onStreamTypeChange(){
 }
 
 function clearForm(){
-  ['f-home','f-away','f-round','f-minute','f-stream1','f-stream2','f-stream3','f-desc','f-home-lineup','f-away-lineup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-home','f-away','f-hlogo','f-alogo','f-round','f-minute','f-stream1','f-stream2','f-stream3','f-desc','f-home-lineup','f-away-lineup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const s1l=document.getElementById('f-stream1-label');if(s1l)s1l.value='Server 1';
   const s2l=document.getElementById('f-stream2-label');if(s2l)s2l.value='Server 2';
   const s3l=document.getElementById('f-stream3-label');if(s3l)s3l.value='Server 3';
