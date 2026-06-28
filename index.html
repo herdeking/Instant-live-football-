@@ -1057,11 +1057,11 @@ window.addEventListener('appinstalled',dismissInstall);
 
 // ===== STANDINGS =====
 const LEAGUES = {
-  pl:{'id':'4328','name':'Premier League'},
-  ucl:{'id':'4480','name':'Champions League'},
-  laliga:{'id':'4335','name':'La Liga'},
-  seriea:{'id':'4332','name':'Serie A'},
-  bundesliga:{'id':'4331','name':'Bundesliga'}
+  pl:{'id':'PL','name':'Premier League'},
+  ucl:{'id':'CL','name':'Champions League'},
+  laliga:{'id':'PD','name':'La Liga'},
+  seriea:{'id':'SA','name':'Serie A'},
+  bundesliga:{'id':'BL1','name':'Bundesliga'}
 };
 
 async function loadStandings(league, btn) {
@@ -1072,25 +1072,25 @@ async function loadStandings(league, btn) {
   const container = document.getElementById('standings-table');
   container.innerHTML = '<div class="ls-loading"><div class="ls-spinner"></div><span>Loading standings…</span></div>';
   try {
-    const url = `https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=${LEAGUES[league].id}&s=2025-2026`;
-    const res = await fetch(url);
+    const url = `https://api.football-data.org/v4/competitions/${LEAGUES[league].id}/standings`;
+    const res = await fetch(url, {headers:{'X-Auth-Token':'ae94b936902e463b9cd2ca4963dfdb09'}});
     const data = await res.json();
-    const rows = data.table || [];
+    const rows = (data.standings && data.standings[0] && data.standings[0].table) || [];
     if(!rows.length){container.innerHTML='<div class="empty-state"><p>No data available</p></div>';return;}
     const html = `<div class="standings-wrap"><table class="standings-table">
       <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
       <tbody>${rows.map(r=>{
-        const pos = parseInt(r.intRank);
+        const pos = parseInt(r.position);
         const zone = pos<=4?'cl-zone':pos<=6?'europa-zone':pos>=18?'rel-zone':'';
         return `<tr class="${zone}">
-          <td class="st-pos">${r.intRank}</td>
-          <td><div class="st-club"><img class="st-logo" src="${r.strTeamBadge}" onerror="this.style.display='none'" alt="">${r.strTeam}</div></td>
-          <td>${r.intPlayed}</td>
-          <td>${r.intWin}</td>
-          <td>${r.intDraw}</td>
-          <td>${r.intLoss}</td>
-          <td>${r.intGoalDifference}</td>
-          <td class="st-pts">${r.intPoints}</td>
+          <td class="st-pos">${r.position}</td>
+          <td><div class="st-club"><img class="st-logo" src="${r.team.crest}" onerror="this.style.display='none'" alt="">${r.team.shortName||r.team.name}</div></td>
+          <td>${r.playedGames}</td>
+          <td>${r.won}</td>
+          <td>${r.draw}</td>
+          <td>${r.lost}</td>
+          <td>${r.goalDifference}</td>
+          <td class="st-pts">${r.points}</td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
