@@ -558,7 +558,7 @@ async function autoFetchLogo(side) {
   clearTimeout(logoTimer[side]);
   logoTimer[side] = setTimeout(async () => {
     try {
-      const res = await fetch(`https://api.football-data.org/v4/teams?search=${encodeURIComponent(name)}`, {
+      const res = await fetch(`/api/teams?search=${encodeURIComponent(name)}`, {
         headers: {'X-Auth-Token': 'ae94b936902e463b9cd2ca4963dfdb09'}
       });
       const data = await res.json();
