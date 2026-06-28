@@ -234,10 +234,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <div class="form-card">
 <div class="form-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Match Details</div>
 <div class="form-grid">
-<div class="field-group"><label>Home Team</label><input type="text" id="f-home" placeholder="e.g. Arsenal" oninput="autoFetchLogo('home')"><div id="f-hlogo-preview" style="margin-top:5px;display:none"><img id="f-hlogo-img" style="width:30px;height:30px;object-fit:contain"> <span id="f-hlogo-name" style="font-size:.75rem;color:var(--t2)"></span></div></div>
-<div class="field-group"><label>Away Team</label><input type="text" id="f-away" placeholder="e.g. Chelsea" oninput="autoFetchLogo('away')"><div id="f-alogo-preview" style="margin-top:5px;display:none"><img id="f-alogo-img" style="width:30px;height:30px;object-fit:contain"> <span id="f-alogo-name" style="font-size:.75rem;color:var(--t2)"></span></div></div>
-<input type="hidden" id="f-hlogo">
-<input type="hidden" id="f-alogo">
+<div class="field-group"><label>Home Team</label><input type="text" id="f-home" placeholder="e.g. Arsenal"></div>
+<div class="field-group"><label>Home Logo URL</label><input type="text" id="f-hlogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Away Logo URL</label><input type="text" id="f-alogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Home Logo URL</label><input type="text" id="f-hlogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Away Logo URL</label><input type="text" id="f-alogo" placeholder="https://...logo.png"></div>
+<div class="field-group"><label>Away Team</label><input type="text" id="f-away" placeholder="e.g. Chelsea"></div>
 <div class="field-group">
 <label>Competition / League</label>
 <select id="f-comp">
@@ -539,38 +541,6 @@ function loadMatches(){
       updateStats();
     });
   });
-}
-
-// =====================================================
-// AUTO FETCH TEAM LOGO
-// =====================================================
-let logoTimer = {};
-async function autoFetchLogo(side) {
-  const inputId = side === 'home' ? 'f-home' : 'f-away';
-  const hiddenId = side === 'home' ? 'f-hlogo' : 'f-alogo';
-  const previewId = side === 'home' ? 'f-hlogo-preview' : 'f-alogo-preview';
-  const imgId = side === 'home' ? 'f-hlogo-img' : 'f-alogo-img';
-  const nameId = side === 'home' ? 'f-hlogo-name' : 'f-alogo-name';
-
-  const name = document.getElementById(inputId).value.trim();
-  if(name.length < 3) return;
-
-  clearTimeout(logoTimer[side]);
-  logoTimer[side] = setTimeout(async () => {
-    try {
-      const res = await fetch(`/api/teams?search=${encodeURIComponent(name)}`, {
-        headers: {'X-Auth-Token': 'ae94b936902e463b9cd2ca4963dfdb09'}
-      });
-      const data = await res.json();
-      const team = data.response const team = data.teams && data.teams[0];const team = data.teams && data.teams[0]; data.response[0] const team = data.teams && data.teams[0];const team = data.teams && data.teams[0]; data.response[0].team;
-      if(team if(team && team.crest)if(team && team.crest) team.logo) {
-        document.getElementById(hiddenId).value = team.logo;
-        document.getElementById(imgId).src = team.logo;
-        document.getElementById(nameId).textContent = team.name;
-        document.getElementById(previewId).style.display = 'block';
-      }
-    } catch(e) { console.log('Logo fetch failed', e); }
-  }, 800);
 }
 
 // =====================================================
