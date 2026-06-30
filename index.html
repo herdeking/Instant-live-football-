@@ -505,6 +505,8 @@ window.onerror=function(msg,src,line){
       <button class="f-btn" onclick="filterMatches('live',this)">🔴 Live</button>
       <button class="f-btn" onclick="filterMatches('upcoming',this)">Upcoming</button>
       <button class="f-btn" onclick="filterMatches('finished',this)">Finished</button>
+      <button class="f-btn" onclick="filterMatches('today',this)">📅 Today</button>
+      <button class="f-btn" onclick="filterMatches('tomorrow',this)">Tomorrow</button>
       <button class="f-btn" onclick="filterMatches('pl',this)">Premier League</button>
       <button class="f-btn" onclick="filterMatches('ucl',this)">UCL</button>
       <button class="f-btn" onclick="filterMatches('laliga',this)">La Liga</button>
@@ -830,6 +832,15 @@ function renderAll() {
   else if (activeFilter === 'pl')  filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('premier'));
   else if (activeFilter === 'ucl') filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('champion'));
   else if (activeFilter === 'laliga') filtered = _matches.filter(m => (m.comp||'').toLowerCase().includes('liga'));
+  else if (activeFilter === 'today') {
+    const today = new Date().toISOString().split('T')[0];
+    filtered = _matches.filter(m => m.date === today);
+  }
+  else if (activeFilter === 'tomorrow') {
+    const tom = new Date(); tom.setDate(tom.getDate()+1);
+    const tomStr = tom.toISOString().split('T')[0];
+    filtered = _matches.filter(m => m.date === tomStr);
+  }
 
   document.getElementById('mc').textContent = filtered.length + ' match' + (filtered.length !== 1 ? 'es' : '');
   if (!filtered.length) { list.innerHTML = '<div class="empty-state"><p>No matches found</p></div>'; return; }
@@ -1136,5 +1147,17 @@ async function autoUpdateStatus() {
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 <script src="https://pl29412078.effectivecpmnetwork.com/c4/6d/fb/c46dfb62d6adef9d206e11c6833bea63.js"></script>
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:2px solid #FFD700;padding:12px 16px;z-index:99999;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+  <p style="font-size:.78rem;color:#ccc;margin:0">We use cookies to improve your experience. <a href="/privacy.html" style="color:#FFD700">Privacy Policy</a></p>
+  <div style="display:flex;gap:8px">
+    <button onclick="acceptCookies()" style="background:#FFD700;color:#111;border:none;padding:6px 14px;border-radius:4px;font-weight:700;font-size:.78rem;cursor:pointer">Accept</button>
+    <button onclick="declineCookies()" style="background:transparent;color:#aaa;border:1px solid #444;padding:6px 14px;border-radius:4px;font-size:.78rem;cursor:pointer">Decline</button>
+  </div>
+</div>
+<script>
+function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookie-banner').style.display='none';}
+function declineCookies(){localStorage.setItem('cookie_consent','declined');document.getElementById('cookie-banner').style.display='none';}
+window.addEventListener('load',function(){if(!localStorage.getItem('cookie_consent')){document.getElementById('cookie-banner').style.display='flex';}});
+</script>
 </body>
 </html>
