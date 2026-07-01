@@ -475,7 +475,8 @@ window.onerror=function(msg,src,line){
     <a href="#" onclick="showSection('livescores',this)">Live Scores</a>
   </div>
   <div class="nav-r">
-    <div class="live-pill"><div class="ldot"></div><span id="live-count">0 Live</span></div>
+    <button onclick="requestNotifications()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px 8px" title="Enable notifications">🔔</button>
+<div class="live-pill"><div class="ldot"></div><span id="live-count">0 Live</span></div>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
     <button class="sub-btn" onclick="openSub()">PRO</button>
   </div>
@@ -528,6 +529,15 @@ window.onerror=function(msg,src,line){
   <div class="section-label-bar">
     <h2>Matches</h2>
     <span class="slb-count" id="mc">0 matches</span>
+  </div>
+  <div style="padding:8px 12px 0">
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--border);border-radius:6px;padding:6px 10px">
+      <span style="font-size:.9rem">🔍</span>
+      <input id="match-search" type="text" placeholder="Search teams..." oninput="searchMatches(this.value)"
+        style="background:none;border:none;outline:none;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:var(--text);width:100%">
+      <button onclick="document.getElementById('match-search').value='';searchMatches('')" 
+        style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">✕</button>
+    </div>
   </div>
   <div class="filters-wrap">
     <div class="filters">
@@ -873,6 +883,11 @@ function renderAll() {
   }
 
   document.getElementById('mc').textContent = filtered.length + ' match' + (filtered.length !== 1 ? 'es' : '');
+  if(_searchQuery) filtered = filtered.filter(m =>
+    (m.home||'').toLowerCase().includes(_searchQuery) ||
+    (m.away||'').toLowerCase().includes(_searchQuery) ||
+    (m.comp||'').toLowerCase().includes(_searchQuery)
+  );
   if (!filtered.length) { list.innerHTML = '<div class="empty-state"><p>No matches found</p></div>'; return; }
 
   const order = { live:0, upcoming:1, finished:2 };
@@ -915,7 +930,10 @@ function buildCard(m, i) {
           <div class="mc-team-name">${m.away}</div>
         </div>
       </div>
-      <button class="mc-watch-btn ${btnClass}" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
+      <div style="display:flex;gap:6px">
+        <button class="mc-watch-btn ${btnClass}" style="flex:1" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
+        <button onclick="event.stopPropagation();shareMatch('${m.home}','${m.away}','${m.id}')" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;padding:0 12px;cursor:pointer;font-size:1rem" title="Share">🔗</button>
+      </div>
     </div>
     ${(m.events&&m.events.length)?`<div class="mc-events-strip">
       ${m.events.slice(-5).map(e=>`<span class="mc-ev-tag">
@@ -1152,6 +1170,44 @@ async function loadStandings(league, btn) {
   } catch(e) {
     container.innerHTML = '<div class="empty-state"><p>Failed to load. Tap to retry.</p></div>';
     container.onclick = () => loadStandings(league, null);
+  }
+}
+
+// ===== SEARCH =====
+let _searchQuery = '';
+function searchMatches(q) {
+  _searchQuery = q.toLowerCase().trim();
+  renderAll();
+}
+
+// ===== SHARE =====
+function shareMatch(home, away, id) {
+  const url = `${window.location.origin}?match=${id}`;
+  const text = `Watch ${home} vs ${away} live on FullTime!`;
+  if(navigator.share) {
+    navigator.share({ title: `${home} vs ${away}`, text, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('🔗 Link copied!'));
+  }
+}
+
+// ===== PUSH NOTIFICATIONS =====
+async function requestNotifications() {
+  if(!('Notification' in window)) { showToast('Notifications not supported'); return; }
+  const perm = await Notification.requestPermission();
+  if(perm === 'granted') {
+    showToast('✓ Notifications enabled!');
+    localStorage.setItem('notif_enabled','1');
+  } else {
+    showToast('Notifications blocked');
+  }
+}
+function sendLiveNotification(m) {
+  if(Notification.permission==='granted' && localStorage.getItem('notif_enabled')) {
+    new Notification(`🔴 LIVE: ${m.home} vs ${m.away}`, {
+      body: `${m.comp||'Football'} is now LIVE! Tap to watch.`,
+      icon: '/icon-192.png'
+    });
   }
 }
 
