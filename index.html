@@ -157,6 +157,8 @@ nav{
 .mc-teams-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .mc-team{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:0}
 .mc-crest-wrap{width:42px;height:42px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.mc-events-strip{padding:6px 12px 8px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px}
+.mc-ev-tag{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 6px;color:var(--text);white-space:nowrap}
 .mc-crest-wrap img{width:28px;height:28px;object-fit:contain}
 .mc-team-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.3px;text-align:center;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;width:100%}
 .mc-center{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;min-width:64px}
@@ -915,6 +917,13 @@ function buildCard(m, i) {
       </div>
       <button class="mc-watch-btn ${btnClass}" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
     </div>
+    ${(m.events&&m.events.length)?`<div class="mc-events-strip">
+      ${m.events.slice(-5).map(e=>`<span class="mc-ev-tag">
+        ${e.type==='goal'?'⚽':e.type==='yellow'?'🟨':e.type==='red'?'🟥':e.type==='sub'?'🔄':'❌'}
+        ${e.player||''} ${e.min?e.min+"'":""}
+        <span style="opacity:.5;font-size:.65em">${e.team==='home'?m.home:m.away}</span>
+      </span>`).join('')}
+    </div>`:''}
   </div>`;
 }
 
