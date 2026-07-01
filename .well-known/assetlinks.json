@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "ng.com.instantlivefootball.www.twa",
+    "sha256_cert_fingerprints": ["3B:0C:A0:AD:04:09:93:AD:17:5C:BE:3E:43:E8:C7:18:F7:27:44:46:56:36:3F:D1:04:D5:DD:EA:EC:BC:8C:0A"]
+  }
+}]
