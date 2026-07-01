@@ -1031,6 +1031,10 @@ function updateLiveScores() {
 // ===== WATCH MODAL =====
 function openWatch(m) {
   currentMatch = m;
+  // Track view count
+  db.collection('matches').doc(m.id).update({
+    views: firebase.firestore.FieldValue.increment(1)
+  }).catch(()=>{});
   document.getElementById('w-teams').textContent = m.home + ' vs ' + m.away;
   document.getElementById('w-meta').textContent = (m.comp||'') + (m.status==='live'?' · LIVE'+(m.minute?' '+m.minute+"'":''):m.status==='finished'?' · Full Time':' · '+(m.time||'Upcoming'));
   const iframe = document.getElementById('stream-iframe');

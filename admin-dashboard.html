@@ -208,6 +208,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <div class="stat-card"><div class="stat-label">Upcoming</div><div class="stat-val" style="color:var(--gold)" id="stat-up">0</div><div class="stat-sub">Scheduled</div></div>
 <div class="stat-card"><div class="stat-label">Finished</div><div class="stat-val" style="color:var(--blue)" id="stat-ft">0</div><div class="stat-sub">Completed</div></div>
 </div>
+<div class="stats-strip" style="margin-top:8px">
+<div class="stat-card"><div class="stat-label">Total Views</div><div class="stat-val" style="color:#a78bfa" id="stat-views">0</div><div class="stat-sub">All matches</div></div>
+<div class="stat-card"><div class="stat-label">Total Comments</div><div class="stat-val" style="color:#34d399" id="stat-comments">0</div><div class="stat-sub">From users</div></div>
+<div class="stat-card"><div class="stat-label">PRO Users</div><div class="stat-val" style="color:#fbbf24" id="stat-pro">-</div><div class="stat-sub">Subscribed</div></div>
+<div class="stat-card"><div class="stat-label">Avg Rating</div><div class="stat-val" style="color:#f87171" id="stat-rating">-</div><div class="stat-sub">Stream quality</div></div>
+</div>
 <div class="section-hdr">
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
   <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" style="width:16px;height:16px;cursor:pointer">
@@ -613,6 +619,40 @@ async function saveMatch(){
 }
 
 // =====================================================
+// ACTIVITY STATS
+async function loadActivityStats() {
+  try {
+    const snap = await db.collection('matches').get();
+    let totalViews = 0;
+    let totalComments = 0;
+    let totalRating = 0;
+    let ratingCount = 0;
+    
+    for(const doc of snap.docs) {
+      const d = doc.data();
+      totalViews += d.views || 0;
+      
+      // Get comments count
+      const comments = await db.collection('matches').doc(doc.id).collection('comments').get();
+      totalComments += comments.size;
+      
+      // Get ratings
+      const rating = await db.collection('matches').doc(doc.id).collection('ratings').doc('avg').get();
+      if(rating.exists) {
+        const r = rating.data();
+        if(r.count) { totalRating += r.total/r.count; ratingCount++; }
+      }
+    }
+    
+    const vEl = document.getElementById('stat-views');
+    const cEl = document.getElementById('stat-comments');
+    const rEl = document.getElementById('stat-rating');
+    if(vEl) vEl.textContent = totalViews;
+    if(cEl) cEl.textContent = totalComments;
+    if(rEl) rEl.textContent = ratingCount ? (totalRating/ratingCount).toFixed(1)+'⭐' : '-';
+  } catch(e) { console.log('Activity stats error', e); }
+}
+
 // BULK ACTIONS
 function getSelectedIds(){
   return [...document.querySelectorAll('.match-checkbox:checked')].map(c=>c.value);
@@ -765,6 +805,8 @@ function updateStats(){
   document.getElementById('stat-ft').textContent=ft;
   // Refresh every 30 seconds to keep counts accurate
   if(!window._statsTimer) window._statsTimer=setInterval(updateStats, 30000);
+  // Load activity stats
+  loadActivityStats();
 }
 
 function renderDashboard(){
@@ -791,6 +833,7 @@ function buildMatchCard(m){
 <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${scoreStr}</div><div class="mac-away">${m.away}</div></div>
 <div class="mac-meta">
 <span style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--t3)">${m.date||''} ${m.time||''} WAT</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--t3)">👁 ${m.views||0} views</span>
 <span class="mac-stream-tag ${hasStream?'on':'off'}">${hasStream?'✓ Stream Active':'No Stream'}</span>
 </div>
 <div class="mac-actions">
