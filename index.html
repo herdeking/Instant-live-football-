@@ -427,6 +427,7 @@ window.onerror=function(msg,src,line){
   document.body.insertAdjacentHTML('afterbegin','<div style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:10px;z-index:999999;font-size:12px">JS ERROR: '+msg+' (line '+line+')</div>');
 };
 </script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KN58ZSWK93"></script>
 <script>
@@ -519,14 +520,37 @@ window.onerror=function(msg,src,line){
 <!-- AD TOP -->
 <div class="ad-wrap" id="ad-top">
   <div class="ad-lbl">AD</div>
-  <div class="ad-box">
-    <div class="ad-text">
-      <div class="ad-title">FullTime PRO</div>
-      <div class="ad-sub">Stream HD, no ads, all matches</div>
+  <div id="ad-rotator">
+    <div class="ad-box">
+      <div class="ad-text">
+        <div class="ad-title">FullTime PRO</div>
+        <div class="ad-sub">Stream HD, no ads, all matches</div>
+      </div>
+      <button class="ad-cta" onclick="openSub()">Get PRO</button>
     </div>
-    <button class="ad-cta" onclick="openSub()">Get PRO</button>
   </div>
 </div>
+<script>
+const _ads = [
+  { title:'FullTime PRO', sub:'Stream HD, no ads, all matches', cta:'Get PRO', action:"openSub()", color:'#bb1919' },
+  { title:'Bet9ja', sub:'Best odds on live football matches', cta:'Bet Now →', action:"window.open('https://bet9ja.com','_blank')", color:'#006400' },
+  { title:'Sportybet', sub:'Win big on your favourite matches', cta:'Join Now →', action:"window.open('https://sportybet.com','_blank')", color:'#ff6600' },
+];
+let _adIdx = 0;
+function rotateAd() {
+  const ad = _ads[_adIdx % _ads.length];
+  document.getElementById('ad-rotator').innerHTML = `<div class="ad-box" style="border-left:3px solid ${ad.color}">
+    <div class="ad-text">
+      <div class="ad-title">${ad.title}</div>
+      <div class="ad-sub">${ad.sub}</div>
+    </div>
+    <button class="ad-cta" style="background:${ad.color}" onclick="${ad.action}">${ad.cta}</button>
+  </div>`;
+  _adIdx++;
+}
+rotateAd();
+setInterval(rotateAd, 8000);
+</script>
 
 <!-- MATCHES SECTION -->
 <div id="section-matches">
@@ -688,6 +712,8 @@ window.onerror=function(msg,src,line){
       <button class="w-tab active" onclick="wTab(this,'events')">Events</button>
       <button class="w-tab" onclick="wTab(this,'stats')">Stats</button>
       <button class="w-tab" onclick="wTab(this,'lineup')">Lineup</button>
+      <button class="w-tab" onclick="wTab(this,'comments')">💬</button>
+      <button class="w-tab" onclick="wTab(this,'rating')">⭐</button>
     </div>
 
     <!-- Scrollable content -->
@@ -1088,6 +1114,41 @@ function wTab(el,tab) {
   document.querySelectorAll('.w-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   const content=document.getElementById('w-content'), m=currentMatch;
+  if(tab==='comments'){
+    const m = _matches[currentMatchIdx];
+    content.innerHTML = `<div id="comments-section" style="padding:10px">
+      <div id="comments-list" style="max-height:200px;overflow-y:auto;margin-bottom:10px"></div>
+      <div style="display:flex;gap:6px">
+        <input id="comment-input" type="text" placeholder="Add a comment..." 
+          style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:.9rem">
+        <button onclick="postComment('${m.id}')" 
+          style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Oswald',sans-serif;font-weight:600">Send</button>
+      </div>
+    </div>`;
+    loadComments(m.id);
+    return;
+  }
+  if(tab==='rating'){
+    const m = _matches[currentMatchIdx];
+    const saved = localStorage.getItem('rating_'+m.id)||0;
+    content.innerHTML = `<div style="padding:20px;text-align:center">
+      <div style="font-family:'Oswald',sans-serif;font-size:.9rem;color:var(--text3);margin-bottom:12px">Rate this stream</div>
+      <div id="stars-wrap" style="font-size:2rem;display:flex;justify-content:center;gap:8px">
+        ${[1,2,3,4,5].map(n=>`<span onclick="rateMatch('${m.id}',${n})" style="cursor:pointer;opacity:${n<=saved?1:0.3}">⭐</span>`).join('')}
+      </div>
+      <div id="rating-msg" style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--text3)">
+        ${saved?'You rated this '+saved+'/5':'Tap to rate'}
+      </div>
+      <div style="margin-top:16px">
+        <a href="https://wa.me/?text=${encodeURIComponent('Watch '+m.home+' vs '+m.away+' live on FullTime! '+window.location.origin)}" 
+          target="_blank"
+          style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-family:'Oswald',sans-serif;font-weight:600;font-size:.85rem">
+          📱 Share on WhatsApp
+        </a>
+      </div>
+    </div>`;
+    return;
+  }
   if(tab==='events'){
     content.innerHTML='<div class="ev-list">'+(m&&m.events&&m.events.length
       ?m.events.map(e=>`<div class="ev-item"><span class="ev-min">${e.min}'</span><span class="ev-ico">${e.type==='goal'?'⚽':'🟨'}</span><div class="ev-player">${e.player}</div></div>`).join('')
@@ -1108,10 +1169,24 @@ function openSub(){document.getElementById('sub-overlay').classList.add('open');
 function closeSub(){document.getElementById('sub-overlay').classList.remove('open');document.body.style.overflow='';}
 function selPlan(p){document.querySelectorAll('.plan').forEach(x=>x.classList.remove('sel'));document.getElementById('plan-'+p).classList.add('sel');}
 function doSubscribe(){
-  try{localStorage.setItem('ft_subscribed','true');}catch(e){}
-  closeSub(); isSubscribed=true;
-  document.getElementById('ad-top').style.display='none';
-  showToast('✅ Subscribed! Enjoy ad-free football.');
+  const email = prompt('Enter your email to subscribe:');
+  if(!email || !email.includes('@')) { showToast('Please enter a valid email'); return; }
+  const handler = PaystackPop.setup({
+    key: 'pk_live_aaaeaf797281d244172092d578a085a8ab18ae24',
+    email: email,
+    amount: 500000, // 5000 NGN in kobo
+    currency: 'NGN',
+    ref: 'FT_' + Date.now(),
+    metadata: { custom_fields: [{ display_name: 'Plan', variable_name: 'plan', value: 'FullTime PRO' }] },
+    callback: function(response) {
+      try{localStorage.setItem('ft_subscribed','true');localStorage.setItem('ft_ref',response.reference);}catch(e){}
+      closeSub(); isSubscribed=true;
+      document.getElementById('ad-top').style.display='none';
+      showToast('✅ Payment successful! Enjoy PRO.');
+    },
+    onClose: function() { showToast('Payment cancelled'); }
+  });
+  handler.openIframe();
 }
 function checkSubscription(){
   try{if(localStorage.getItem('ft_subscribed')==='true'){isSubscribed=true;document.getElementById('ad-top').style.display='none';}}catch(e){}
@@ -1175,6 +1250,54 @@ async function loadStandings(league, btn) {
     container.innerHTML = '<div class="empty-state"><p>Failed to load. Tap to retry.</p></div>';
     container.onclick = () => loadStandings(league, null);
   }
+}
+
+// ===== COMMENTS =====
+async function loadComments(matchId) {
+  const list = document.getElementById('comments-list');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:10px;font-size:.8rem;color:var(--text3)">Loading...</div>';
+  try {
+    const snap = await db.collection('matches').doc(matchId).collection('comments').orderBy('time','desc').limit(20).get();
+    if(snap.empty) { list.innerHTML = '<div style="text-align:center;padding:10px;font-size:.8rem;color:var(--text3)">No comments yet. Be first!</div>'; return; }
+    list.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--text)">${c.text}</div>
+        <div style="font-size:.7rem;color:var(--text3)">${c.name||'Anonymous'} · ${c.time?.toDate?c.time.toDate().toLocaleTimeString():''}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = '<div style="text-align:center;padding:10px;font-size:.8rem;color:var(--text3)">Failed to load comments</div>'; }
+}
+
+async function postComment(matchId) {
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const name = localStorage.getItem('ft_username') || prompt('Your name (optional):') || 'Anonymous';
+  localStorage.setItem('ft_username', name);
+  try {
+    await db.collection('matches').doc(matchId).collection('comments').add({
+      text, name, time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    input.value = '';
+    loadComments(matchId);
+    showToast('✓ Comment posted!');
+  } catch(e) { showToast('Failed to post comment'); }
+}
+
+// ===== RATING =====
+async function rateMatch(matchId, stars) {
+  localStorage.setItem('rating_'+matchId, stars);
+  try {
+    await db.collection('matches').doc(matchId).collection('ratings').doc('avg').set({
+      total: firebase.firestore.FieldValue.increment(stars),
+      count: firebase.firestore.FieldValue.increment(1)
+    }, {merge:true});
+    document.getElementById('rating-msg').textContent = 'You rated this '+stars+'/5 ⭐';
+    document.querySelectorAll('#stars-wrap span').forEach((s,i) => s.style.opacity = i<stars?1:0.3);
+    showToast('⭐ Thanks for rating!');
+  } catch(e) { showToast('Rating saved locally'); }
 }
 
 // ===== SEARCH =====
