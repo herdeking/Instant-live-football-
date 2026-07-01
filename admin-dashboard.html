@@ -209,6 +209,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <div class="stat-card"><div class="stat-label">Finished</div><div class="stat-val" style="color:var(--blue)" id="stat-ft">0</div><div class="stat-sub">Completed</div></div>
 </div>
 <div class="section-hdr">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+  <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" style="width:16px;height:16px;cursor:pointer">
+  <label for="select-all" style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--t2);cursor:pointer">Select All</label>
+  <button class="mac-btn del-btn" onclick="bulkDelete()" style="margin-left:8px">🗑 Bulk Delete</button>
+  <button class="mac-btn edit-btn" onclick="bulkHide()" style="margin-left:4px">👁 Bulk Hide</button>
+  <button class="mac-btn" onclick="bulkPublish()" style="margin-left:4px;background:rgba(0,200,100,.1);color:#00c864;border:1px solid rgba(0,200,100,.25)">🔒 Bulk Publish</button>
+  <span id="bulk-count" style="font-size:.75rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif"></span>
+</div>
 <div class="section-title">Recent Matches</div>
 <button class="btn-secondary" onclick="showPanel('matches',document.querySelectorAll('.sb-item')[2])"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View All</button>
 </div>
@@ -605,6 +613,41 @@ async function saveMatch(){
 }
 
 // =====================================================
+// BULK ACTIONS
+function getSelectedIds(){
+  return [...document.querySelectorAll('.match-checkbox:checked')].map(c=>c.value);
+}
+function updateBulkCount(){
+  const n=getSelectedIds().length;
+  document.getElementById('bulk-count').textContent=n?`${n} selected`:'';
+}
+function toggleSelectAll(cb){
+  document.querySelectorAll('.match-checkbox').forEach(c=>c.checked=cb.checked);
+  updateBulkCount();
+}
+async function bulkDelete(){
+  const ids=getSelectedIds();
+  if(!ids.length){showToast('No matches selected');return;}
+  if(!confirm(`Delete ${ids.length} match(es)?`)) return;
+  await Promise.all(ids.map(id=>db.collection('matches').doc(id).delete()));
+  showToast(`✓ ${ids.length} match(es) deleted`);
+  loadData();
+}
+async function bulkHide(){
+  const ids=getSelectedIds();
+  if(!ids.length){showToast('No matches selected');return;}
+  await Promise.all(ids.map(id=>db.collection('matches').doc(id).update({published:false})));
+  showToast(`✓ ${ids.length} match(es) hidden`);
+  loadData();
+}
+async function bulkPublish(){
+  const ids=getSelectedIds();
+  if(!ids.length){showToast('No matches selected');return;}
+  await Promise.all(ids.map(id=>db.collection('matches').doc(id).update({published:true})));
+  showToast(`✓ ${ids.length} match(es) published`);
+  loadData();
+}
+
 // EDIT / DELETE
 // =====================================================
 function openEdit(id){
@@ -742,7 +785,8 @@ function buildMatchCard(m){
   const isUp=status==='upcoming';
   const scoreStr=isUp?'<span style="color:var(--t3);font-size:.9rem">vs</span>':`${m.hscore||0}–${m.ascore||0}`;
   const hasStream=m.stream&&m.stream.trim();
-  return`<div class="m-admin-card ${status}">
+  return`<div class="m-admin-card ${status}" data-id="${m.id}">
+<div style="position:absolute;top:10px;right:10px"><input type="checkbox" class="match-checkbox" value="${m.id}" onchange="updateBulkCount()"></div>
 <div class="mac-top"><div class="mac-comp">${m.comp||'Football'}${m.round?' · '+m.round:''}</div>${statusPill(status,minute)}</div>
 <div class="mac-teams"><div class="mac-home">${m.home}</div><div class="mac-score">${scoreStr}</div><div class="mac-away">${m.away}</div></div>
 <div class="mac-meta">
