@@ -421,6 +421,14 @@ window.onerror=function(msg,src,line){
   document.body.insertAdjacentHTML('afterbegin','<div style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:10px;z-index:999999;font-size:12px">JS ERROR: '+msg+' (line '+line+')</div>');
 };
 </script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KN58ZSWK93"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KN58ZSWK93');
+</script>
 </head>
 <body>
 
