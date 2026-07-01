@@ -573,8 +573,15 @@ setInterval(rotateAd, 8000);
       <button class="f-btn" onclick="filterMatches('live',this)">🔴 Live</button>
       <button class="f-btn" onclick="filterMatches('upcoming',this)">Upcoming</button>
       <button class="f-btn" onclick="filterMatches('finished',this)">Finished</button>
-      <button class="f-btn" onclick="filterMatches('today',this)">📅 Today</button>
-      <button class="f-btn" onclick="filterMatches('tomorrow',this)">Tomorrow</button>
+      <button class="f-btn" id="btn-today" onclick="filterMatches('today',this)">📅 Today</button>
+      <button class="f-btn" id="btn-tomorrow" onclick="filterMatches('tomorrow',this)">Tomorrow</button>
+      <script>
+        const _td = new Date();
+        const _tm = new Date(); _tm.setDate(_tm.getDate()+1);
+        const _fmt = d => d.toLocaleDateString('en-NG',{day:'numeric',month:'short'});
+        document.getElementById('btn-today').textContent = '📅 '+_fmt(_td);
+        document.getElementById('btn-tomorrow').textContent = _fmt(_tm);
+      </script>
       <button class="f-btn" onclick="filterMatches('pl',this)">Premier League</button>
       <button class="f-btn" onclick="filterMatches('ucl',this)">UCL</button>
       <button class="f-btn" onclick="filterMatches('laliga',this)">La Liga</button>
