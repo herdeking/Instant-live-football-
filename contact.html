@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — FullTime</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;padding:20px;max-width:600px;margin:0 auto}
+h1{color:#FFD700;font-size:1.8rem;margin-bottom:5px}
+p{font-size:.9rem;line-height:1.7;color:#ccc;margin-bottom:16px}
+.back{color:#FFD700;text-decoration:none;font-size:.85rem;display:inline-block;margin-bottom:20px}
+.card{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.card-icon{font-size:1.5rem}
+.card-title{font-size:.8rem;color:#888;margin-bottom:3px}
+.card-val{font-size:.95rem;color:#FFD700;text-decoration:none}
+input,textarea{width:100%;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;color:#eee;font-family:'Segoe UI',sans-serif;font-size:.9rem;margin-bottom:10px;outline:none}
+textarea{rows:4;resize:vertical}
+button{background:#bb1919;color:#fff;border:none;border-radius:6px;padding:12px 24px;font-size:.9rem;font-weight:700;cursor:pointer;width:100%}
+.success{display:none;background:#003d1a;border:1px solid #00c864;border-radius:6px;padding:12px;color:#00c864;text-align:center;margin-top:10px}
+</style>
+</head>
+<body>
+<a class="back" href="/">← Back to FullTime</a>
+<h1>Contact Us</h1>
+<p>We'd love to hear from you! Reach us through any of the channels below.</p>
+
+<div class="card">
+  <div class="card-icon">📧</div>
+  <div>
+    <div class="card-title">Email</div>
+    <a class="card-val" href="mailto:support@instantlivefootball.com.ng">support@instantlivefootball.com.ng</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-icon">📱</div>
+  <div>
+    <div class="card-title">WhatsApp</div>
+    <a class="card-val" href="https://wa.me/234XXXXXXXXXX" target="_blank">Chat on WhatsApp</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-icon">🌐</div>
+  <div>
+    <div class="card-title">Website</div>
+    <a class="card-val" href="https://www.instantlivefootball.com.ng">www.instantlivefootball.com.ng</a>
+  </div>
+</div>
+
+<h2 style="color:#FFD700;margin:20px 0 12px">Send a Message</h2>
+<input type="text" id="c-name" placeholder="Your name">
+<input type="email" id="c-email" placeholder="Your email">
+<textarea id="c-msg" rows="4" placeholder="Your message..."></textarea>
+<button onclick="sendContact()">Send Message</button>
+<div class="success" id="c-success">✓ Message sent! We'll reply within 24 hours.</div>
+
+<script>
+function sendContact(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const msg=document.getElementById('c-msg').value.trim();
+  if(!name||!email||!msg){alert('Please fill all fields');return;}
+  const mailto=`mailto:support@instantlivefootball.com.ng?subject=Contact from ${name}&body=${msg}%0A%0AFrom: ${name} (${email})`;
+  window.location.href=mailto;
+  document.getElementById('c-success').style.display='block';
+}
+</script>
+</body>
+</html>

@@ -800,6 +800,18 @@ function toggleTheme() {
   try { localStorage.setItem('ft_theme', next); } catch(e) {}
 }
 
+// Apply saved theme on load
+(function(){
+  try {
+    const saved = localStorage.getItem('ft_theme');
+    const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = saved || preferred;
+    document.documentElement.setAttribute('data-theme', theme);
+    const btn = document.getElementById('theme-btn');
+    if(btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  } catch(e) {}
+})();
+
 // ===== SECTIONS =====
 function showSection(name, el) {
   document.getElementById('section-matches').style.display = name === 'matches' ? '' : 'none';
@@ -1414,5 +1426,13 @@ function acceptCookies(){localStorage.setItem('cookie_consent','accepted');docum
 function declineCookies(){localStorage.setItem('cookie_consent','declined');document.getElementById('cookie-banner').style.display='none';}
 window.addEventListener('load',function(){if(!localStorage.getItem('cookie_consent')){document.getElementById('cookie-banner').style.display='flex';}});
 </script>
+<div style="background:var(--bg2);border-top:1px solid var(--border);padding:16px;text-align:center;margin-bottom:80px">
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+    <a href="/privacy.html" style="color:var(--text3);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.8rem">Privacy Policy</a>
+    <a href="/terms.html" style="color:var(--text3);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.8rem">Terms of Use</a>
+    <a href="/contact.html" style="color:var(--text3);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.8rem">Contact Us</a>
+  </div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:var(--text3)">© 2026 FullTime Live Football · All rights reserved</div>
+</div>
 </body>
 </html>
