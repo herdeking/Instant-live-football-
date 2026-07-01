@@ -904,12 +904,12 @@ function buildCard(m, i) {
     <div class="mc-body">
       <div class="mc-teams-row">
         <div class="mc-team">
-          <div class="mc-crest-wrap"><img src="${m.hlogo||''}" onerror="this.style.display='none'" alt=""></div>
+          <div class="mc-crest-wrap"><img src="${m.hlogo||''}" onerror="fetchLogoFallback('${m.id}','home','${m.home}',this)" alt=""></div>
           <div class="mc-team-name">${m.home}</div>
         </div>
         <div class="mc-center">${center}</div>
         <div class="mc-team">
-          <div class="mc-crest-wrap"><img src="${m.alogo||''}" onerror="this.style.display='none'" alt=""></div>
+          <div class="mc-crest-wrap"><img src="${m.alogo||''}" onerror="fetchLogoFallback('${m.id}','away','${m.away}',this)" alt=""></div>
           <div class="mc-team-name">${m.away}</div>
         </div>
       </div>
@@ -1144,6 +1144,31 @@ async function loadStandings(league, btn) {
     container.innerHTML = '<div class="empty-state"><p>Failed to load. Tap to retry.</p></div>';
     container.onclick = () => loadStandings(league, null);
   }
+}
+
+// ===== LOGO FALLBACK =====
+const _logoCache = {};
+async function fetchLogoFallback(matchId, side, teamName, imgEl) {
+  if(!teamName) { imgEl.style.display='none'; return; }
+  const key = teamName.toLowerCase();
+  if(_logoCache[key]) { imgEl.src=_logoCache[key]; return; }
+  try {
+    const res = await fetch(`/api/teams?search=${encodeURIComponent(teamName)}`);
+    const data = await res.json();
+    const team = data.response && data.response[0] && data.response[0].team;
+    if(team && team.logo) {
+      _logoCache[key] = team.logo;
+      imgEl.src = team.logo;
+      // Save to Firebase for future
+      if(matchId) {
+        const update = {};
+        update[side==='home'?'hlogo':'alogo'] = team.logo;
+        db.collection('matches').doc(matchId).update(update).catch(()=>{});
+      }
+    } else {
+      imgEl.style.display='none';
+    }
+  } catch(e) { imgEl.style.display='none'; }
 }
 
 // ===== INIT =====
