@@ -1175,7 +1175,7 @@ async function fetchLogoFallback(matchId, side, teamName, imgEl) {
 window.addEventListener('DOMContentLoaded',()=>{
   initTheme();initNotifications();checkSubscription();
   loadMatches();
-  setInterval(loadMatches,60000);
+  setInterval(loadMatches,30000);
   setInterval(autoUpdateStatus, 30000);
 
 async function autoUpdateStatus() {
