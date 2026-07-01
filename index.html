@@ -351,7 +351,7 @@ nav{
 .vid-wrap{
   position:relative;background:#000;
   /* 16:9 aspect ratio */
-  width:100%;padding-top:56.25%;
+  width:100%;padding-top:65%;
   flex-shrink:0;
 }
 .vid-wrap>*{position:absolute;inset:0}
@@ -681,6 +681,8 @@ setInterval(rotateAd, 8000);
         <button class="play-big-btn" onclick="startStream()">▶ PLAY</button>
       </div>
       <iframe id="stream-iframe" allowfullscreen allow="autoplay; fullscreen; encrypted-media"></iframe>
+      <div id="watermark" style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.5);color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:10">instantlivefootball.com.ng</div>
+      <div id="broadcast-popup" style="display:none;position:absolute;top:8px;left:0;right:0;margin:0 8px;background:rgba(187,25,25,0.95);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;padding:8px 12px;border-radius:6px;z-index:20;text-align:center"></div>
       <div class="vid-loading" id="vid-loading"><div class="vid-spinner"></div></div>
     </div>
 
@@ -1195,10 +1197,11 @@ function selPlan(p){document.querySelectorAll('.plan').forEach(x=>x.classList.re
 function doSubscribe(){
   const email = prompt('Enter your email to subscribe:');
   if(!email || !email.includes('@')) { showToast('Please enter a valid email'); return; }
+  const selectedPlan = document.getElementById('plan-yearly').classList.contains('sel') ? 'yearly' : 'monthly';
   const handler = PaystackPop.setup({
     key: 'pk_live_aaaeaf797281d244172092d578a085a8ab18ae24',
     email: email,
-    amount: 500000, // 5000 NGN in kobo
+    amount: selectedPlan==='yearly' ? 1200000 : 150000, // Monthly 1500, Yearly 12000
     currency: 'NGN',
     ref: 'FT_' + Date.now(),
     metadata: { custom_fields: [{ display_name: 'Plan', variable_name: 'plan', value: 'FullTime PRO' }] },
@@ -1323,6 +1326,23 @@ async function rateMatch(matchId, stars) {
     showToast('⭐ Thanks for rating!');
   } catch(e) { showToast('Rating saved locally'); }
 }
+
+// ===== BROADCAST =====
+function showBroadcast(msg) {
+  const el = document.getElementById('broadcast-popup');
+  if(!el) return;
+  el.textContent = '📢 ' + msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 8000);
+}
+
+// Listen for broadcasts from Firebase
+db.collection('broadcasts').orderBy('time','desc').limit(1).onSnapshot(snap => {
+  if(snap.empty) return;
+  const d = snap.docs[0].data();
+  const age = Date.now() - (d.time?.toDate?.()?.getTime?.() || 0);
+  if(age < 30000) showBroadcast(d.message); // Only show if less than 30 seconds old
+});
 
 // ===== PREDICTIONS =====
 function getPrediction(m) {

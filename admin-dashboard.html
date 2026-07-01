@@ -223,6 +223,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
   <button class="mac-btn" onclick="bulkPublish()" style="margin-left:4px;background:rgba(0,200,100,.1);color:#00c864;border:1px solid rgba(0,200,100,.25)">🔒 Bulk Publish</button>
   <span id="bulk-count" style="font-size:.75rem;color:var(--t3);font-family:'Barlow Condensed',sans-serif"></span>
 </div>
+<div style="background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--red);border-radius:8px;padding:12px;margin-bottom:16px">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--t1);margin-bottom:8px">📢 Send Broadcast to Live Viewers</div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="broadcast-msg" placeholder="e.g. GOAL! Mbappe scores for France!" 
+      style="flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;color:var(--t1);font-family:'Barlow Condensed',sans-serif;font-size:.85rem">
+    <button onclick="sendBroadcast()" class="mac-btn edit-btn" style="white-space:nowrap">📢 Send</button>
+  </div>
+</div>
 <div class="section-title">Recent Matches</div>
 <button class="btn-secondary" onclick="showPanel('matches',document.querySelectorAll('.sb-item')[2])"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View All</button>
 </div>
@@ -651,6 +659,22 @@ async function loadActivityStats() {
     if(cEl) cEl.textContent = totalComments;
     if(rEl) rEl.textContent = ratingCount ? (totalRating/ratingCount).toFixed(1)+'⭐' : '-';
   } catch(e) { console.log('Activity stats error', e); }
+}
+
+// BROADCAST
+async function sendBroadcast() {
+  const msg = document.getElementById('broadcast-msg').value.trim();
+  if(!msg) { showToast('Enter a message first'); return; }
+  try {
+    await db.collection('broadcasts').add({
+      message: msg,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('broadcast-msg').value = '';
+    showToast('📢 Broadcast sent to all live viewers!');
+  } catch(e) {
+    showToast('Failed to send broadcast');
+  }
 }
 
 // BULK ACTIONS
