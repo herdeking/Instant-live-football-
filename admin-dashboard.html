@@ -167,6 +167,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <a class="sb-item" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>View Public Site</span></a>
 <a class="sb-item" onclick="showPanel('liveupdates',this)" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Live Updates</span></a>
 <a class="sb-item" onclick="copyPublicLink()" href="#"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><span>Copy Public Link</span></a>
+<a class="sb-item" onclick="showPanel('broadcast',this)" href="#"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg><span>📢 Broadcast</span></a>
 </nav>
 <div class="sb-footer">
 <div class="sb-admin">
@@ -461,6 +462,31 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 </div><!-- end content -->
 </div><!-- end main -->
 
+<!-- BROADCAST PANEL -->
+<div class="panel" id="panel-broadcast">
+<div class="section-hdr">
+  <div class="section-title">📢 Send Broadcast</div>
+</div>
+<div style="padding:16px">
+  <p style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--t2);margin-bottom:12px">Send a live message to all users watching streams. It will scroll as a ticker on their screen.</p>
+  <div class="field-group full" style="margin-bottom:12px">
+    <label>Broadcast Message</label>
+    <input type="text" id="broadcast-msg2" placeholder="e.g. ⚽ GOAL! Mbappe scores for France 1-0!" style="width:100%">
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn-primary" onclick="sendBroadcast2()">📢 Send to All Viewers</button>
+    <button class="btn-secondary" onclick="sendBroadcast2('⚽ GOAL!')">⚽ Quick Goal</button>
+    <button class="btn-secondary" onclick="sendBroadcast2('🟥 RED CARD!')">🟥 Red Card</button>
+    <button class="btn-secondary" onclick="sendBroadcast2('⏱ HALF TIME')">⏱ Half Time</button>
+    <button class="btn-secondary" onclick="sendBroadcast2('🏁 FULL TIME')">🏁 Full Time</button>
+  </div>
+  <div id="broadcast-history" style="margin-top:16px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;color:var(--t2);margin-bottom:8px">Recent Broadcasts</div>
+    <div id="broadcast-list" style="font-size:.8rem;color:var(--t3)">Loading...</div>
+  </div>
+</div>
+</div>
+
 <!-- EDIT MATCH DIALOG -->
 <div class="overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
 <div class="dialog">
@@ -662,6 +688,37 @@ async function loadActivityStats() {
 }
 
 // BROADCAST
+async function sendBroadcast2(quickMsg) {
+  const msg = quickMsg || document.getElementById('broadcast-msg2').value.trim();
+  if(!msg) { showToast('Enter a message first'); return; }
+  try {
+    await db.collection('broadcasts').add({
+      message: msg,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(!quickMsg) document.getElementById('broadcast-msg2').value = '';
+    showToast('📢 Broadcast sent!');
+    loadBroadcastHistory();
+  } catch(e) { showToast('Failed to send'); }
+}
+
+async function loadBroadcastHistory() {
+  const list = document.getElementById('broadcast-list');
+  if(!list) return;
+  try {
+    const snap = await db.collection('broadcasts').orderBy('time','desc').limit(10).get();
+    if(snap.empty) { list.innerHTML = 'No broadcasts yet'; return; }
+    list.innerHTML = snap.docs.map(d => {
+      const data = d.data();
+      const time = data.time?.toDate?.()?.toLocaleTimeString() || '';
+      return `<div style="padding:6px 0;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between">
+        <span>${data.message}</span>
+        <span style="color:var(--t3);font-size:.7rem;margin-left:8px">${time}</span>
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = 'Failed to load'; }
+}
+
 async function sendBroadcast() {
   const msg = document.getElementById('broadcast-msg').value.trim();
   if(!msg) { showToast('Enter a message first'); return; }
