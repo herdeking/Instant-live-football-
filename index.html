@@ -352,7 +352,7 @@ nav{
 .vid-wrap{
   position:relative;background:#000;
   /* 16:9 aspect ratio */
-  width:100%;padding-top:65%;
+  width:100%;padding-top:85%;
   flex-shrink:0;
 }
 .vid-wrap>*{position:absolute;inset:0}
@@ -980,7 +980,7 @@ function buildCard(m, i) {
         </div>
       </div>
       <div style="display:flex;gap:6px">
-        <button class="mc-watch-btn ${btnClass}" style="flex:1" onclick="event.stopPropagation();openMatchByIndex(${idx})">${btnText}</button>
+        <button class="mc-watch-btn ${btnClass}" style="flex:1" onclick="event.stopPropagation();${m.status==='upcoming'?'setReminder(_matches['+idx+'])':'openMatchByIndex('+idx+')'}">${btnText}</button>
         <button onclick="event.stopPropagation();shareMatch('${m.home}','${m.away}','${m.id}')" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;padding:0 12px;cursor:pointer;font-size:1rem" title="Share">🔗</button>
       </div>
     </div>
@@ -1344,6 +1344,21 @@ db.collection('broadcasts').orderBy('time','desc').limit(1).onSnapshot(snap => {
   const age = Date.now() - (d.time?.toDate?.()?.getTime?.() || 0);
   if(age < 30000) showBroadcast(d.message); // Only show if less than 30 seconds old
 });
+
+// ===== REMINDER =====
+function setReminder(m) {
+  const msg = `${m.home} vs ${m.away} at ${m.time||'TBC'}`;
+  if('Notification' in window) {
+    Notification.requestPermission().then(p => {
+      if(p==='granted') {
+        showToast('⏰ Reminder set for '+msg);
+        localStorage.setItem('reminder_'+m.id, JSON.stringify({home:m.home,away:m.away,time:m.time,date:m.date}));
+      }
+    });
+  } else {
+    showToast('⏰ Reminder set for '+msg);
+  }
+}
 
 // ===== PREDICTIONS =====
 function getPrediction(m) {
