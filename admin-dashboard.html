@@ -167,6 +167,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 <a class="sb-item" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>View Public Site</span></a>
 <a class="sb-item" onclick="showPanel('liveupdates',this)" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Live Updates</span></a>
 <a class="sb-item" onclick="copyPublicLink()" href="#"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><span>Copy Public Link</span></a>
+<a class="sb-item" onclick="showPanel('ads',this)" href="#"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>🖼 Manage Ads</span></a>
 <a class="sb-item" onclick="showPanel('broadcast',this)" href="#"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg><span>📢 Broadcast</span></a>
 </nav>
 <div class="sb-footer">
@@ -462,6 +463,27 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 </div><!-- end content -->
 </div><!-- end main -->
 
+<!-- ADS PANEL -->
+<div class="panel" id="panel-ads">
+<div class="section-hdr"><div class="section-title">🖼 Manage Ads</div></div>
+<div style="padding:16px">
+  <div class="form-card">
+    <div class="form-card-title">Add New Ad Banner</div>
+    <div class="field-group full"><label>Ad Title</label><input type="text" id="ad-title" placeholder="e.g. Bet9ja - Best Odds"></div>
+    <div class="field-group full"><label>Image URL</label><input type="text" id="ad-image" placeholder="https://...image.jpg"></div>
+    <div class="field-group full"><label>Click Link</label><input type="text" id="ad-link" placeholder="https://bet9ja.com/?ref=..."></div>
+    <div class="field-group"><label>Status</label>
+      <select id="ad-active">
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="saveAd()">💾 Save Ad</button>
+  </div>
+  <div id="ads-list" style="margin-top:16px">Loading ads...</div>
+</div>
+</div>
+
 <!-- BROADCAST PANEL -->
 <div class="panel" id="panel-broadcast">
 <div class="section-hdr">
@@ -685,6 +707,50 @@ async function loadActivityStats() {
     if(cEl) cEl.textContent = totalComments;
     if(rEl) rEl.textContent = ratingCount ? (totalRating/ratingCount).toFixed(1)+'⭐' : '-';
   } catch(e) { console.log('Activity stats error', e); }
+}
+
+// ADS MANAGER
+async function saveAd() {
+  const title = document.getElementById('ad-title').value.trim();
+  const imageUrl = document.getElementById('ad-image').value.trim();
+  const link = document.getElementById('ad-link').value.trim();
+  const active = document.getElementById('ad-active').value === 'true';
+  if(!title||!imageUrl) { showToast('Enter title and image URL'); return; }
+  try {
+    await db.collection('ads').add({ title, imageUrl, link, active, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast('✓ Ad saved!');
+    document.getElementById('ad-title').value = '';
+    document.getElementById('ad-image').value = '';
+    document.getElementById('ad-link').value = '';
+    loadAds();
+  } catch(e) { showToast('Failed to save ad'); }
+}
+
+async function loadAds() {
+  const list = document.getElementById('ads-list');
+  if(!list) return;
+  try {
+    const snap = await db.collection('ads').orderBy('createdAt','desc').get();
+    if(snap.empty) { list.innerHTML = '<p style="color:var(--t3);font-size:.8rem">No ads yet</p>'; return; }
+    list.innerHTML = snap.docs.map(d => {
+      const a = d.data();
+      return `<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:center">
+        <img src="${a.imageUrl}" style="width:60px;height:40px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--t1)">${a.title}</div>
+          <div style="font-size:.7rem;color:${a.active?'#00c864':'#ff5555'}">${a.active?'● Active':'● Inactive'}</div>
+        </div>
+        <button onclick="deleteAd('${d.id}')" class="mac-btn del-btn" style="padding:4px 8px;font-size:.7rem">Delete</button>
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = 'Failed to load'; }
+}
+
+async function deleteAd(id) {
+  if(!confirm('Delete this ad?')) return;
+  await db.collection('ads').doc(id).delete();
+  showToast('Ad deleted');
+  loadAds();
 }
 
 // BROADCAST
@@ -1064,6 +1130,7 @@ function showPanel(id,el){
   if(id==='upload') clearForm();
   if(id==='liveupdates') renderLiveSelector();
   if(id==='broadcast') loadBroadcastHistory();
+  if(id==='ads') loadAds();
   document.getElementById('sidebar').classList.remove('open');
 }
 

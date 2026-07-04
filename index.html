@@ -492,6 +492,12 @@ window.onerror=function(msg,src,line){
   <div class="hero-inner">
     <div class="hero-tag">Live Football Streaming</div>
     <div class="hero-title">WATCH<br><em>LIVE</em><br>FOOTBALL</div>
+    <!-- ROTATING IMAGE AD BANNER -->
+    <div id="img-ad-banner" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden;cursor:pointer;position:relative">
+      <img id="img-ad-img" src="" alt="Ad" style="width:100%;height:80px;object-fit:cover;display:block">
+      <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:2px">AD</div>
+    </div>
+
     <div class="feat-card" id="feat-card" style="display:none" onclick="openFeatWatch()">
       <div class="feat-row1">
         <span class="feat-comp" id="feat-comp">Premier League</span>
@@ -1327,6 +1333,33 @@ async function rateMatch(matchId, stars) {
   } catch(e) { showToast('Rating saved locally'); }
 }
 
+// ===== IMAGE ADS =====
+let _imgAds = [];
+let _imgAdIdx = 0;
+
+async function loadImageAds() {
+  try {
+    const snap = await db.collection('ads').where('active','==',true).get();
+    if(snap.empty) return;
+    _imgAds = snap.docs.map(d => ({id:d.id,...d.data()}));
+    showNextImageAd();
+    setInterval(showNextImageAd, 10000);
+  } catch(e) { console.log('Ads error', e); }
+}
+
+function showNextImageAd() {
+  if(!_imgAds.length) return;
+  const ad = _imgAds[_imgAdIdx % _imgAds.length];
+  const banner = document.getElementById('img-ad-banner');
+  const img = document.getElementById('img-ad-img');
+  if(!banner || !img) return;
+  img.src = ad.imageUrl || '';
+  img.alt = ad.title || 'Ad';
+  banner.style.display = 'block';
+  banner.onclick = () => { if(ad.link) window.open(ad.link,'_blank'); };
+  _imgAdIdx++;
+}
+
 // ===== BROADCAST =====
 function showBroadcast(msg) {
   const ticker = document.getElementById('broadcast-ticker');
@@ -1472,6 +1505,7 @@ async function fetchLogoFallback(matchId, side, teamName, imgEl) {
 window.addEventListener('DOMContentLoaded',()=>{
   initTheme();initNotifications();checkSubscription();
   loadMatches();
+  loadImageAds();
   setInterval(loadMatches,30000);
   setInterval(autoUpdateStatus, 30000);
 
