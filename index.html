@@ -548,7 +548,7 @@ const _ads = [
 let _adIdx = 0;
 function rotateAd() {
   // Add manual image ads to rotation
-  if(_imgAds.length && _adIdx % 3 === 2) {
+  if(typeof _imgAds !== 'undefined' && _imgAds.length && _adIdx % 3 === 2) {
     showNextImageAd();
     _adIdx++;
     return;
