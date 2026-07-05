@@ -117,7 +117,7 @@ nav{
 .hero-title em{color:var(--yellow);font-style:normal}
 
 /* Featured match card */
-.feat-card{background:#fff;border-radius:8px;padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.feat-card{background:#fff;border-radius:8px;padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(0,0,0,0.3);position:relative;z-index:10}
 .feat-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .feat-comp{font-family:'Oswald',sans-serif;font-weight:600;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:#555}
 .feat-live-badge{display:flex;align-items:center;gap:5px;background:var(--red);border-radius:3px;padding:3px 8px}
@@ -423,7 +423,8 @@ nav{
 }
 </style>
 <script>
-window.onerror=function(msg,src,line){
+window.onerror=function(msg,src,line,col,err){
+  if(!msg||msg==='Script error.'||line===0) return true;
   document.body.insertAdjacentHTML('afterbegin','<div style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:10px;z-index:999999;font-size:12px">JS ERROR: '+msg+' (line '+line+')</div>');
 };
 </script>
