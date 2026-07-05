@@ -497,7 +497,7 @@ window.onerror=function(msg,src,line,col,err){
     <div class="hero-tag">Live Football Streaming</div>
     <div class="hero-title">WATCH<br><em>LIVE</em><br>FOOTBALL</div>
     <!-- ROTATING IMAGE AD BANNER -->
-    <div id="img-ad-banner" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden;cursor:pointer;position:relative">
+    <div id="img-ad-banner" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden;cursor:pointer;position:relative;background:#1a1a2e;min-height:80px">
       <img id="img-ad-img" src="" alt="Ad" style="width:100%;height:80px;object-fit:cover;display:block">
       <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:2px">AD</div>
     </div>
@@ -546,6 +546,12 @@ const _ads = [
 ];
 let _adIdx = 0;
 function rotateAd() {
+  // Add manual image ads to rotation
+  if(_imgAds.length && _adIdx % 3 === 2) {
+    showNextImageAd();
+    _adIdx++;
+    return;
+  }
   const ad = _ads[_adIdx % _ads.length];
   document.getElementById('ad-rotator').innerHTML = `<div class="ad-box" style="border-left:3px solid ${ad.color}">
     <div class="ad-text">
