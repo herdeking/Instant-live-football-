@@ -470,7 +470,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
   <div class="form-card">
     <div class="form-card-title">Add New Ad Banner</div>
     <div class="field-group full"><label>Ad Title</label><input type="text" id="ad-title" placeholder="e.g. Bet9ja - Best Odds"></div>
-    <div class="field-group full"><label>Image URL</label><input type="text" id="ad-image" placeholder="https://...image.jpg"></div>
+    <div class="field-group full"><label>Image URL or Upload</label>
+      <input type="text" id="ad-image" placeholder="https://...image.jpg">
+      <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+        <input type="file" id="ad-image-file" accept="image/*" onchange="previewAdImage(this)" style="font-size:.75rem;color:var(--t2)">
+      </div>
+      <div id="ad-image-preview" style="display:none;margin-top:6px"><img id="ad-preview-img" style="max-width:100%;height:60px;object-fit:cover;border-radius:4px"></div>
+    </div>
     <div class="field-group full"><label>Click Link</label><input type="text" id="ad-link" placeholder="https://bet9ja.com/?ref=..."></div>
     <div class="field-group"><label>Status</label>
       <select id="ad-active">
@@ -808,6 +814,26 @@ function updateBulkCount(){
   const n=getSelectedIds().length;
   document.getElementById('bulk-count').textContent=n?`${n} selected`:'';
 }
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function previewAdImage(input) {
+  if(input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('ad-image').value = e.target.result;
+      document.getElementById('ad-preview-img').src = e.target.result;
+      document.getElementById('ad-image-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
 function toggleSelectAll(cb){
   document.querySelectorAll('.match-checkbox').forEach(c=>c.checked=cb.checked);
   updateBulkCount();
