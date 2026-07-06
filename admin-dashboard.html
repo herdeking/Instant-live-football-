@@ -252,6 +252,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 
 <!-- ADD MATCH -->
 <div class="panel" id="panel-upload">
+<div style="position:sticky;top:0;z-index:50;background:var(--s1);padding:8px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+  <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--t1)">Add Match</span>
+  <button class="btn-primary" onclick="saveMatch()" style="padding:6px 16px;font-size:.8rem">💾 Save Match</button>
+</div>
 <div class="section-hdr"><div class="section-title" id="upload-panel-title">Add New Match</div></div>
 <div id="upload-alert" class="alert alert-success"></div>
 
