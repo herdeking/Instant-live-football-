@@ -427,6 +427,7 @@ nav{
 </style>
 <script>
 window.onerror=function(msg,src,line,col,err){
+  return true; // Suppress all errors from showing
   if(!msg||msg==='Script error.'||line===0||line===1) return true;
   if(src&&(src.includes('highperformanceformat')||src.includes('adsterra')||src.includes('effectivecpm'))) return true;
   document.body.insertAdjacentHTML('afterbegin','<div style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:10px;z-index:999999;font-size:12px">JS ERROR: '+msg+' (line '+line+')</div>');
