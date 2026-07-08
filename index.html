@@ -866,6 +866,7 @@ function showSection(name, el) {
   document.getElementById('section-matches').style.display = name === 'matches' ? '' : 'none';
   document.getElementById('section-livescores').style.display = name === 'livescores' ? '' : 'none';
   if(name === 'livescores') { fetchRealLiveScores(); setInterval(fetchRealLiveScores, 60000); }
+  if(name === 'livescores') { fetchRealLiveScores(); setInterval(fetchRealLiveScores, 60000); }
   document.getElementById('section-standings').style.display = name === 'standings' ? '' : 'none';
   document.getElementById('section-news').style.display = name === 'news' ? '' : 'none';
   if(name === 'news') loadNews();
