@@ -865,6 +865,7 @@ function toggleTheme() {
 function showSection(name, el) {
   document.getElementById('section-matches').style.display = name === 'matches' ? '' : 'none';
   document.getElementById('section-livescores').style.display = name === 'livescores' ? '' : 'none';
+  if(name === 'livescores') { fetchRealLiveScores(); setInterval(fetchRealLiveScores, 60000); }
   document.getElementById('section-standings').style.display = name === 'standings' ? '' : 'none';
   document.getElementById('section-news').style.display = name === 'news' ? '' : 'none';
   if(name === 'news') loadNews();
@@ -1073,6 +1074,33 @@ function filterMatches(f, btn) {
 }
 
 // ===== LIVE SCORES =====
+async function fetchRealLiveScores() {
+  try {
+    const res = await fetch('/api/livescores');
+    const data = await res.json();
+    const fixtures = data.response || [];
+    if(!fixtures.length) return;
+    const list = document.getElementById('livescores-list');
+    const count = document.getElementById('ls-count');
+    count.textContent = fixtures.length + ' live';
+    list.innerHTML = '<div class="ls-grid">' + fixtures.map(f => {
+      const h = f.teams.home, a = f.teams.away;
+      const g = f.goals;
+      const min = f.fixture.status.elapsed;
+      return `<div class="ls-card">
+        <div class="ls-left">
+          <div class="ls-comp">${f.league.name}</div>
+          <div class="ls-teams">
+            <div class="ls-team-row"><img src="${h.logo}" style="width:16px;height:16px;object-fit:contain;margin-right:4px"><span class="ls-team-name">${h.name}</span><span class="ls-score">${g.home??0}</span></div>
+            <div class="ls-team-row"><img src="${a.logo}" style="width:16px;height:16px;object-fit:contain;margin-right:4px"><span class="ls-team-name">${a.name}</span><span class="ls-score">${g.away??0}</span></div>
+          </div>
+        </div>
+        <div class="ls-right"><span class="ls-min">${min?min+"'":'LIVE'}</span><span class="ls-status">LIVE</span></div>
+      </div>`;
+    }).join('') + '</div>';
+  } catch(e) { console.log('Live scores error', e); }
+}
+
 function updateLiveScores() {
   const list = document.getElementById('livescores-list');
   const count = document.getElementById('ls-count');
@@ -1555,7 +1583,7 @@ async function autoUpdateStatus() {
     const diffMin = (now - kickoff) / 60000;
     let newStatus = m.status;
     if(diffMin >= 0 && diffMin < 95 && m.status === 'upcoming') newStatus = 'live';
-    if(diffMin >= 95 && m.status === 'live') newStatus = 'finished';
+    if(diffMin >= 95 && m.status === 'live' && m.date && m.time) newStatus = 'finished';
     if(newStatus !== m.status) {
       try {
         await db.collection('matches').doc(m.id).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
