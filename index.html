@@ -1011,6 +1011,7 @@ function buildCard(m, i) {
   return `<div class="match-card" style="animation-delay:${i*0.04}s" onclick="openMatchByIndex(${idx})">
     <div class="mc-header">
       <span class="mc-league-name">${m.comp||'Football'}${m.round?' · '+m.round:''}</span>
+      ${m.date?`<span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:#aaa">${new Date(m.date).toLocaleDateString('en-NG',{day:'numeric',month:'short'})}</span>`:''}
       ${badge}
     </div>
     <div class="mc-body">
