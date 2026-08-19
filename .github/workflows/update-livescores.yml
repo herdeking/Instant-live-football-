@@ -1,0 +1,17 @@
+name: Auto-update live scores
+
+on:
+  schedule:
+    - cron: '*/2 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping-livescores:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call livescores endpoint
+        run: |
+          curl -sf "https://instantlivefootball.com.ng/api/livescores" \
+            -o /dev/null \
+            -w "Status: %{http_code}, Time: %{time_total}s\n" \
+          || echo "Request failed"
