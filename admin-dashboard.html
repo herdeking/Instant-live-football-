@@ -648,6 +648,7 @@ async function saveMatch(){
     time:document.getElementById('f-time').value||'',
     hscore:parseInt(document.getElementById('f-hscore').value)||0,
     ascore:parseInt(document.getElementById('f-ascore').value)||0,
+    scoreSource:'manual',
     status:document.getElementById('f-status').value||'upcoming',
     minute:document.getElementById('f-minute').value.trim()||'',
     stream, // primary (Server 1)
@@ -899,6 +900,7 @@ async function saveEdit(){
     away:document.getElementById('e-away').value.trim(),
     hscore:parseInt(document.getElementById('e-hscore').value)||0,
     ascore:parseInt(document.getElementById('e-ascore').value)||0,
+    scoreSource:'manual',
     status:document.getElementById('e-status').value,
     minute:document.getElementById('e-minute').value.trim(),
     stream:document.getElementById('e-stream').value.trim(),
@@ -1246,6 +1248,7 @@ async function pushScoreUpdate(){
   try{
     await db.collection('matches').doc(selectedLiveMatch.id).update({
       hscore, ascore, minute, status,
+      scoreSource:'manual',
       events: pendingEvents,
       scoreUpdatedAt: new Date().toISOString(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
