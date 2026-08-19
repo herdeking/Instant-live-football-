@@ -1053,9 +1053,13 @@ function renderStreams(){
 // FORM HELPERS
 // =====================================================
 function onStreamTypeChange(){
-  const t=document.getElementById('f-stream-type').value;
-  document.getElementById('stream-url-field').style.display=t==='none'||t==='html'?'none':'';
-  document.getElementById('stream-html-field').style.display=t==='html'?'':'none';
+  const typeEl=document.getElementById('f-stream-type');
+  if(!typeEl) return; // form no longer has this field — old code, safe to skip
+  const t=typeEl.value;
+  const urlField=document.getElementById('stream-url-field');
+  if(urlField) urlField.style.display=t==='none'||t==='html'?'none':'';
+  const htmlField=document.getElementById('stream-html-field');
+  if(htmlField) htmlField.style.display=t==='html'?'':'none';
   const labels={iframe:'Stream Embed URL',youtube:'YouTube Embed URL (e.g. youtube.com/embed/ID)',dailymotion:'Dailymotion Embed URL'};
   const lbl=document.getElementById('stream-url-label');
   if(lbl) lbl.textContent=labels[t]||'Stream URL';
