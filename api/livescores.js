@@ -25,9 +25,11 @@ export default async function handler(req, res) {
   try {
     const liveMatches = await fetchAllLiveMatches();
 
-    syncToFirestore(liveMatches).catch((e) => {
+    try {
+      await syncToFirestore(liveMatches);
+    } catch (e) {
       console.error('Firestore sync error:', e);
-    });
+    }
 
     const payload = { response: liveMatches };
     cache.data = payload;
