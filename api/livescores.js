@@ -46,7 +46,7 @@ async function fetchAllLiveMatches() {
     COMPETITIONS.map(async (code) => {
       try {
         const r = await fetch(
-          `https://api.football-data.org/v4/competitions/${code}/matches?status=LIVE`,
+          `https://api.football-data.org/v4/competitions/${code}/matches?status=LIVE,PAUSED`,
           { headers: { 'X-Auth-Token': FOOTBALL_DATA_KEY } }
         );
         if (!r.ok) return [];
@@ -95,7 +95,7 @@ async function syncToFirestore(liveMatches) {
 
     const hscore = apiMatch.score?.fullTime?.home ?? apiMatch.score?.halfTime?.home ?? 0;
     const ascore = apiMatch.score?.fullTime?.away ?? apiMatch.score?.halfTime?.away ?? 0;
-    const minute = apiMatch.minute || null;
+    const isPaused = apiMatch.status === 'PAUSED';
     const isFinished = apiMatch.status === 'FINISHED';
 
     const updateFields = {
@@ -103,7 +103,13 @@ async function syncToFirestore(liveMatches) {
       ascore: { integerValue: ascore },
       scoreSource: { stringValue: 'auto' },
     };
-    if (minute) updateFields.minute = { integerValue: minute };
+
+    if (isPaused) {
+      updateFields.minute = { stringValue: 'HT' };
+    } else if (apiMatch.minute) {
+      updateFields.minute = { stringValue: String(apiMatch.minute) };
+    }
+
     if (isFinished) updateFields.status = { stringValue: 'finished' };
 
     await updateFirestoreDoc(ourMatch.id, updateFields);
