@@ -113,7 +113,7 @@ nav{
 /* ===== HERO ===== */
 .hero{background:var(--darker);border-bottom:4px solid var(--red)}
 .hero-inner{background:linear-gradient(135deg,#1a0000 0%,#2d0000 40%,#1a0a00 100%);padding:16px 14px 16px;position:relative;overflow:hidden}
-.hero-inner::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.hero-inner::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
 .hero-tag{font-family:'Oswald',sans-serif;font-weight:600;font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--yellow);margin-bottom:5px;display:flex;align-items:center;gap:6px}
 .hero-tag::before{content:'';width:16px;height:2px;background:var(--yellow)}
 .hero-title{font-family:'Oswald',sans-serif;font-size:clamp(1.6rem,6vw,3rem);font-weight:700;letter-spacing:2px;line-height:.95;margin-bottom:12px;color:#fff}
@@ -1870,6 +1870,9 @@ function declineCookies(){localStorage.setItem('cookie_consent','declined');docu
 window.addEventListener('load',function(){if(!localStorage.getItem('cookie_consent')){document.getElementById('cookie-banner').style.display='flex';}});
 </script>
 <div style="background:var(--bg2);border-top:1px solid var(--border);padding:16px;text-align:center;margin-bottom:80px">
+  <a href="https://play.google.com/store/apps/details?id=com.instantlivefootball.fulltime" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:14px">
+    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:56px;width:auto">
+  </a>
   <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">
     <a href="/privacy.html" style="color:var(--text3);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.8rem">Privacy Policy</a>
     <a href="/terms.html" style="color:var(--text3);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.8rem">Terms of Use</a>
