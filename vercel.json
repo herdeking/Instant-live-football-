@@ -5,5 +5,28 @@
       "memory": 128,
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/fixtures", "destination": "/fixtures.html" },
+    { "source": "/standings", "destination": "/standings.html" },
+    { "source": "/livescores", "destination": "/livescores.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/admin-dashboard", "destination": "/admin-dashboard.html" },
+    { "source": "/admin-login", "destination": "/admin-login.html" },
+    { "source": "/app", "destination": "/App.html" },
+    { "source": "/open-app", "destination": "/Open app.html" },
+    { "source": "/upload-articles", "destination": "/upload-articles.html" }
+  ],
+  "redirects": [
+    { "source": "/fixtures.html", "destination": "/fixtures", "permanent": true },
+    { "source": "/standings.html", "destination": "/standings", "permanent": true },
+    { "source": "/livescores.html", "destination": "/livescores", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/terms.html", "destination": "/terms", "permanent": true },
+    { "source": "/contact.html", "destination": "/contact", "permanent": true },
+    { "source": "/admin-dashboard.html", "destination": "/admin-dashboard", "permanent": true },
+    { "source": "/admin-login.html", "destination": "/admin-login", "permanent": true }
+  ]
 }
