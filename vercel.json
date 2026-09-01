@@ -5,17 +5,5 @@
       "memory": 128,
       "maxDuration": 10
     }
-  },
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "admin.instantlivefootball.com.ng"
-        }
-      ],
-      "destination": "/admin-dashboard.html"
-    }
-  ]
+  }
 }
