@@ -100,12 +100,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
 @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
 .overlay.open{opacity:1;pointer-events:all}
-.dialog{background:var(--s1);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:520px;overflow:hidden;transform:scale(.95);transition:transform .25s}
+.dialog{background:var(--s1);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow:hidden;transform:scale(.95);transition:transform .25s;display:flex;flex-direction:column}
 .overlay.open .dialog{transform:scale(1)}
 .dialog-hdr{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
 .dialog-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px}
 .dialog-close{background:none;border:none;color:var(--t2);font-size:1rem;cursor:pointer}
-.dialog-body{padding:18px}
+.dialog-body{padding:18px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
 .dialog-footer{padding:12px 18px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
 .m-admin-card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
 .m-admin-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
