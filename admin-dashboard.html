@@ -488,7 +488,18 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);min-he
         <option value="false">Inactive</option>
       </select>
     </div>
-    <button class="btn-primary" onclick="saveAd()">💾 Save Ad</button>
+    <div class="field-group"><label>Duration</label>
+      <select id="ad-duration">
+        <option value="0">No expiry</option>
+        <option value="3">3 days</option>
+        <option value="7" selected>7 days</option>
+        <option value="14">14 days</option>
+        <option value="30">30 days</option>
+      </select>
+    </div>
+    <input type="hidden" id="ad-edit-id" value="">
+    <button class="btn-primary" id="ad-save-btn" onclick="saveAd()">💾 Save Ad</button>
+    <button class="btn-secondary" id="ad-cancel-btn" onclick="cancelEditAd()" style="display:none;margin-top:6px">Cancel Edit</button>
   </div>
   <div id="ads-list" style="margin-top:16px">Loading ads...</div>
 </div>
@@ -727,15 +738,64 @@ async function saveAd() {
   let link = document.getElementById('ad-link').value.trim();
   if (link && link.indexOf('http') !== 0) { link = 'https://' + link; }
   const active = document.getElementById('ad-active').value === 'true';
+  const durationDays = parseInt(document.getElementById('ad-duration').value, 10) || 0;
+  const editId = document.getElementById('ad-edit-id').value;
   if(!title||!imageUrl) { showToast('Enter title and image URL'); return; }
+
+  let expiresAt = null;
+  if (durationDays > 0) {
+    const ms = durationDays * 24 * 60 * 60 * 1000;
+    expiresAt = firebase.firestore.Timestamp.fromMillis(Date.now() + ms);
+  }
+
   try {
-    await db.collection('ads').add({ title, imageUrl, link, active, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    showToast('✓ Ad saved!');
-    document.getElementById('ad-title').value = '';
-    document.getElementById('ad-image').value = '';
-    document.getElementById('ad-link').value = '';
+    if (editId) {
+      await db.collection('ads').doc(editId).update({ title, imageUrl, link, active, durationDays, expiresAt });
+      showToast('✓ Ad updated!');
+    } else {
+      await db.collection('ads').add({ title, imageUrl, link, active, durationDays, expiresAt, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      showToast('✓ Ad saved!');
+    }
+    cancelEditAd();
     loadAds();
   } catch(e) { showToast('Failed to save ad'); }
+}
+
+function cancelEditAd() {
+  document.getElementById('ad-edit-id').value = '';
+  document.getElementById('ad-title').value = '';
+  document.getElementById('ad-image').value = '';
+  document.getElementById('ad-link').value = '';
+  document.getElementById('ad-active').value = 'true';
+  document.getElementById('ad-duration').value = '7';
+  document.getElementById('ad-save-btn').textContent = '💾 Save Ad';
+  document.getElementById('ad-cancel-btn').style.display = 'none';
+}
+
+function expiryLabel(a) {
+  if (!a.expiresAt) return '';
+  const ms = a.expiresAt.toMillis ? a.expiresAt.toMillis() : new Date(a.expiresAt).getTime();
+  const diff = ms - Date.now();
+  if (diff <= 0) return '<span style="color:#ff5555">● Expired</span>';
+  const days = Math.ceil(diff / (24*60*60*1000));
+  return `<span style="color:#ffcc00">Expires in ${days} day${days===1?'':'s'}</span>`;
+}
+
+async function editAd(id) {
+  try {
+    const doc = await db.collection('ads').doc(id).get();
+    if (!doc.exists) return;
+    const a = doc.data();
+    document.getElementById('ad-edit-id').value = id;
+    document.getElementById('ad-title').value = a.title || '';
+    document.getElementById('ad-image').value = a.imageUrl || '';
+    document.getElementById('ad-link').value = a.link || '';
+    document.getElementById('ad-active').value = a.active ? 'true' : 'false';
+    document.getElementById('ad-duration').value = String(a.durationDays || 0);
+    document.getElementById('ad-save-btn').textContent = '💾 Update Ad';
+    document.getElementById('ad-cancel-btn').style.display = 'block';
+    document.getElementById('ad-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch(e) { showToast('Failed to load ad for editing'); }
 }
 
 async function loadAds() {
@@ -746,12 +806,16 @@ async function loadAds() {
     if(snap.empty) { list.innerHTML = '<p style="color:var(--t3);font-size:.8rem">No ads yet</p>'; return; }
     list.innerHTML = snap.docs.map(d => {
       const a = d.data();
+      const expired = a.expiresAt && (a.expiresAt.toMillis ? a.expiresAt.toMillis() : new Date(a.expiresAt).getTime()) <= Date.now();
+      const statusLabel = expired ? '<span style="color:#ff5555">● Expired</span>' : (a.active ? '<span style="color:#00c864">● Active</span>' : '<span style="color:#ff5555">● Inactive</span>');
       return `<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:center">
         <img src="${a.imageUrl}" style="width:60px;height:40px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">
         <div style="flex:1;min-width:0">
           <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--t1)">${a.title}</div>
-          <div style="font-size:.7rem;color:${a.active?'#00c864':'#ff5555'}">${a.active?'● Active':'● Inactive'}</div>
+          <div style="font-size:.7rem">${statusLabel}</div>
+          <div style="font-size:.65rem;color:var(--t3);margin-top:2px">${a.expiresAt ? expiryLabel(a) : 'No expiry'}</div>
         </div>
+        <button onclick="editAd('${d.id}')" class="mac-btn" style="padding:4px 8px;font-size:.7rem">Edit</button>
         <button onclick="deleteAd('${d.id}')" class="mac-btn del-btn" style="padding:4px 8px;font-size:.7rem">Delete</button>
       </div>`;
     }).join('');

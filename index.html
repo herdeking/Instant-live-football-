@@ -1414,7 +1414,15 @@ async function loadImageAds() {
   try {
     const snap = await db.collection('ads').where('active','==',true).get();
     if(snap.empty) return;
-    _imgAds = snap.docs.map(d => ({id:d.id,...d.data()}));
+    const now = Date.now();
+    _imgAds = snap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(a => {
+        if (!a.expiresAt) return true;
+        const ms = a.expiresAt.toMillis ? a.expiresAt.toMillis() : new Date(a.expiresAt).getTime();
+        return ms > now;
+      });
+    if(!_imgAds.length) return;
     showNextImageAd();
     setInterval(showNextImageAd, 10000);
   } catch(e) { console.log('Ads error', e); }
