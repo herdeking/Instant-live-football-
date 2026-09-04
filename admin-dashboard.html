@@ -724,7 +724,8 @@ async function loadActivityStats() {
 async function saveAd() {
   const title = document.getElementById('ad-title').value.trim();
   const imageUrl = document.getElementById('ad-image').value.trim();
-  const link = document.getElementById('ad-link').value.trim();
+  let link = document.getElementById('ad-link').value.trim();
+  if (link && link.indexOf('http') !== 0) { link = 'https://' + link; }
   const active = document.getElementById('ad-active').value === 'true';
   if(!title||!imageUrl) { showToast('Enter title and image URL'); return; }
   try {

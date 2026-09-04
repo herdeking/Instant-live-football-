@@ -1429,7 +1429,7 @@ function showNextImageAd() {
   img.src = ad.imageUrl || '';
   img.alt = ad.title || 'Ad';
   banner.style.display = 'block';
-  banner.onclick = () => { if(ad.link) window.open(ad.link,'_blank'); };
+  banner.onclick = () => { if(ad.link){ const u = /^https?:\/\//i.test(ad.link) ? ad.link : 'https://' + ad.link; window.open(u,'_blank'); } };
   _imgAdIdx++;
 }
 
