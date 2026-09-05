@@ -1,5 +1,5 @@
 // FullTime PWA Service Worker v2.0
-const CACHE_NAME = 'fulltime-v2';
+const CACHE_NAME = 'fulltime-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -32,6 +32,20 @@ self.addEventListener('fetch', event => {
   if(url.pathname.startsWith('/api/') || url.hostname.includes('firebase') || url.hostname.includes('firestore')) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Network first for page navigations (HTML) so users always get fresh pages
+  if(event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if(response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request).then(cached => cached || caches.match('/index.html')))
     );
     return;
   }
